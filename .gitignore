@@ -1,0 +1,10 @@
+.DS_Store
+results/
+output/
+*.log
+*.jl.cov
+*.jl.mem
+.julia/
+.env
+.env.*
+gurobi.lic
