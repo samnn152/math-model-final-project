@@ -1,0 +1,65 @@
+{
+  "status": "PLAN_ONLY_DO_NOT_PROVISION",
+  "verified_date": "2026-10-21",
+  "dataset": "all original SetA-01 through SetA-20",
+  "runs_per_instance_per_experiment": 10,
+  "step6_optimize_seconds": 1800,
+  "step9_optimize_seconds": 3600,
+  "combined_native_worker_hours": 300,
+  "overhead_assumption": 0.1,
+  "region": "us-central1",
+  "solver": "highs",
+  "solver_threads_per_process": 1,
+  "worker_filesystems": "private checkout per process; shared read-only input allowed",
+  "trial_step6_candidate": {
+    "machines": 1,
+    "machine_type": "e2-highmem-8",
+    "workers": 4,
+    "conditional_hours": 27.75,
+    "combined_steps6_9_hours_at_4_workers": 82.75
+  },
+  "combined_28h_candidate": {
+    "machines": 2,
+    "machine_type": "e2-highmem-16",
+    "vcpus_total": 32,
+    "memory_gib_total": 256,
+    "workers_per_vm": 8,
+    "workers_total": 16,
+    "conditional_hours": 22.25,
+    "assumed_memory_budget_gib_per_job": 12,
+    "usd_hour_per_vm": 0.72319728,
+    "compute_disk_ipv4_usd_estimate": 32.71,
+    "vnd_estimate_excluding_tax": 852739,
+    "reserve_vnd": 1200000,
+    "requires_paid_account_and_verified_quota": true
+  },
+  "deployment_gates": [
+    "User explicitly authorizes provisioning; no VM created now",
+    "Original-machine correctness and bounded resource tests pass",
+    "Representative medium/large two-period peak memory measured; current small pilot insufficient",
+    "Linux supervisor and checkpoints verified",
+    "Actual regional CPU/family quotas sufficient",
+    "Cloud pilot validates CPU throughput and concurrent memory before full batch"
+  ],
+  "limitations": [
+    "Scheduling estimate assumes 10% overhead, no retries and no memory contention",
+    "Time budgets do not guarantee lexicographic optimality",
+    "Current Free Trial CPU cap cannot support the combined 16-worker plan"
+  ],
+  "local_smoke_tests": {
+    "instances": [
+      1,
+      9,
+      20
+    ],
+    "official_checker_valid": true,
+    "largest_short_run_rss_gib": 1.521270751953125,
+    "largest_mlu_gap": 1.0,
+    "largest_certified_stages": 0,
+    "largest_total_stages": 4000,
+    "long_run_capacity_verified": false,
+    "ready_to_provision": false
+  },
+  "implementation_change": "paired_demand_master_pricing",
+  "requires_remeasurement_after_paired_decomposition": true
+}

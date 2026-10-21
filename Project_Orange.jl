@@ -536,7 +536,7 @@ computed shortest-path information, without running Dijkstra again.
 **Input:** the graph, weights, JSON-ordered arc endpoints, distances, and counts.
 **Output:** a sparse-backed `RoutingRatios` array with time axis `0:0`.
 
-With the default `splitting=:uniform_paths`, each arc `(u,v)` is checked against
+With the optional handout convention `splitting=:uniform_paths`, each arc `(u,v)` is checked against
 the shortest-distance equality. Eligible arcs receive
 `counts[i,u] * counts[v,j] / counts[i,j]`; all others remain zero. Diagonal and
 unreachable pairs are zero. The optional `:ecmp` branch instead propagates unit
@@ -545,7 +545,7 @@ hops. The numbered Data calculation uses the default handout formula.
 """
 
 # ╔═╡ 292a9848-3359-4acc-998c-f9323ee75cde
-function ratios_from_shortest_data(g, weights, arcs, distances, counts; splitting=:uniform_paths)
+function ratios_from_shortest_data(g, weights, arcs, distances, counts; splitting=:ecmp)
     splitting in (:uniform_paths, :ecmp) || error("Unknown splitting convention: $splitting")
     n = nv(g)
     r = RoutingRatios(spzeros(n*n, length(arcs)), n)
@@ -594,7 +594,7 @@ the main Data section calls the two operations separately to display each stage.
 """
 
 # ╔═╡ 14fc12c7-d155-4fdd-92b8-c4727f993b3a
-function routing_ratios(g, weights, arcs; splitting=:uniform_paths)
+function routing_ratios(g, weights, arcs; splitting=:ecmp)
     distances, counts = all_pairs_shortest_data(g, weights)
     r = ratios_from_shortest_data(g, weights, arcs, distances, counts; splitting)
     return (; r, distances, counts)
@@ -616,7 +616,7 @@ md"""
 **Purpose:** prepare one complete instance in a single call for batch experiments.
 
 **Input:** a prefix such as `joinpath(@__DIR__, "setA", "setA-01")`; optional
-`splitting` defaults to `:uniform_paths`. It reads the corresponding `-net.json`,
+`splitting` defaults to `:ecmp`, the original challenge convention. It reads the corresponding `-net.json`,
 `-tm.json`, and `-scenario.json` files, validates the graph and demands, calculates
 routing fractions, and identifies reachable candidate segments.
 
@@ -634,7 +634,7 @@ Vertices, arcs, and demands use Julia indices 1:n in JSON list order.
 `node_ids`, `arc_ids`, and `demand_ids` retain their external identifiers.
 `v[d]` is JSON v[0] (Julia v[1]); `c[a]` is capacity, not metric.
 """
-function load_data(prefix::AbstractString; splitting=:uniform_paths)
+function load_data(prefix::AbstractString; splitting=:ecmp)
     net = JSON3.read(read(prefix * "-net.json", String))
     tm = JSON3.read(read(prefix * "-tm.json", String))
     scenario = JSON3.read(read(prefix * "-scenario.json", String))
@@ -832,21 +832,28 @@ prefix or suffix in the numerator.
 In the code, `distances` stores scaled distances and `counts` stores the path
 counts. The common positive weight scale preserves the distance equality.
 
-`:uniform_paths` selects this formula and is the default. The optional `:ecmp`
-mode instead divides incoming flow equally among shortest-path next hops at each
-router; that is a separate convention and can give different coefficients.
+This displayed path-count formula is retained to explain the lecturer's handout and is selected only by `:uniform_paths`.
+
+The active Data calculation uses the original subject's `:ecmp` convention. For target j, let N_j(u) contain the outgoing shortest-path arcs from u. Starting with one unit at i, process vertices in decreasing distance to j and distribute the incoming flow f_u equally:
+
+```math
+r(i,j,(u,v),0)=f_u/|N_j(u)|,\quad (u,v)\in N_j(u),
+\qquad f_v\leftarrow f_v+r(i,j,(u,v),0).
+```
+
+ECMP and uniform complete-path splitting can differ. Every result records the selected convention; older uniform-path pilots must not be mixed with the ECMP results.
 
 """
 
 # ╔═╡ c11a6811-2307-4114-959f-33e003248779
-r = ratios_from_shortest_data(g, routing_weights, arcs, scaled_distances, sigma)
+r = ratios_from_shortest_data(g, routing_weights, arcs, scaled_distances, sigma; splitting=:ecmp)
 
 # ╔═╡ 2abd4a34-78d3-41b8-af9a-4eb8de6f436b
 (
     dimensions = size(r),
     time_indices = axes(r, 4),
     nonzero_coefficients = nnz(r.values),
-    convention = :uniform_paths,
+    convention = :ecmp,
 )
 
 # ╔═╡ 42025609-6da1-4f30-b179-2834cfda5f84
@@ -979,7 +986,7 @@ model_data = (
     sources=demand_sources, targets=demand_targets, v=v0, MaxSeg=MaxSeg,
     r=r, distances=shortest_distances, counts=sigma,
     segments=[(i,j) for i in vertices(g) for j in vertices(g) if i != j && sigma[i,j] > 0],
-    splitting=:uniform_paths, time=0,
+    splitting=:ecmp, time=0,
 )
 
 # ╔═╡ 7e724cb5-ebfd-46eb-96db-c3338fd9682c
@@ -1075,7 +1082,7 @@ The procedure stops at the first stage that is not certified optimal.
 md"""
 ### Function: `build_time0_model` — Build the time-0 routing model
 
-Receives prepared Data, solver settings, and a model-size limit. Returns the JuMP model, segment-choice variables, load expressions, and waypoint positions. It adds the constraints written above and supplies direct routing as a feasible initial solution. Only reachable segments are created. The size check runs before allocating the binary variables.
+Receives prepared Data, solver settings, and a model-size limit. Returns the JuMP model, segment-choice variables, load expressions, and waypoint positions. It adds the constraints written above and supplies direct routing as a feasible initial solution. Only reachable segments are created. The size check runs before allocating the binary variables. Segment incidence lists are built in one pass, and sparse routing rows use an integer lookup array. Automatic JuMP string names are disabled to avoid allocating a name for every variable and constraint; Julia references such as `x[d,s]` remain available. These changes preserve variable order, coefficients, constraints, warm starts, solver settings, and lexicographic stages. They do not reduce the number of mathematical variables.
 """
 
 # ╔═╡ 3a0b9ef2-b4da-4d67-9774-a7f6dd0be497
@@ -1092,16 +1099,79 @@ function orange_solver_version(solver::Symbol)
     error("Unknown solver $solver; choose :scip or :highs")
 end
 
+# ╔═╡ 883a391a-2e6e-4b9f-b03c-3416b8e13482
+md"""
+### HiGHS search profiles and deadline monitoring
+
+`highs_search_options(profile)` returns native parameter changes only. `:default` keeps HiGHS defaults; `:devex` changes dual-simplex edge weights; `:incumbent` increases primal heuristic effort; `:lean` reduces cut-pool retention and turns off symmetry detection and non-root separation. None removes an original model constraint or changes the objective. Profiles require empirical comparison; a smaller cut pool is a soft target, not a RAM cap.
+
+`HighsDeadlineMonitor` is a read-only native callback. It requests interruption at the remaining optimize! wall-time budget. Callback polling is cooperative and cannot guarantee an external hard deadline. Relative MIP gap remains zero: a requested approximate-quality threshold is reported separately and never used to lock an uncertified lexicographic stage.
+"""
+
+# ╔═╡ 1c1bff3e-050a-40b7-8799-9fe482e0dc5a
+function highs_search_options(profile::Symbol)
+    profile == :default && return Dict{String,Any}()
+    profile == :devex && return Dict{String,Any}("simplex_dual_edge_weight_strategy"=>1)
+    profile == :incumbent && return Dict{String,Any}(
+        "mip_heuristic_effort"=>0.2, "mip_heuristic_run_shifting"=>true)
+    profile == :lean && return Dict{String,Any}(
+        "mip_pool_soft_limit"=>1000, "mip_pool_age_limit"=>10,
+        "mip_detect_symmetry"=>false, "mip_allow_cut_separation_at_nodes"=>false)
+    error("Unknown HiGHS profile $profile")
+end
+
+# ╔═╡ 19285b33-616b-409e-8481-1306f86498a8
+begin
+mutable struct HighsDeadlineMonitor <: Function
+    deadline_ns::UInt64
+    calls::Int
+    interrupt_requested::Bool
+end
+
+function (monitor::HighsDeadlineMonitor)(callback_type::Cint, message::Ptr{Cchar},
+        data::HiGHS.HighsCallbackDataOut)::Cint
+    monitor.calls += 1
+    if time_ns() >= monitor.deadline_ns
+        monitor.interrupt_requested = true
+        return Cint(1)
+    end
+    return Cint(0)
+end
+end
+
+# ╔═╡ fa63c98d-74b0-477c-ab15-261bb423b147
+function install_highs_deadline!(model, remaining; enabled=true)
+    enabled || return nothing
+    monitor = HighsDeadlineMonitor(time_ns() + UInt64(round(remaining * 1e9)), 0, false)
+    callback_types = Cint[HiGHS.kHighsCallbackSimplexInterrupt,
+        HiGHS.kHighsCallbackIpmInterrupt, HiGHS.kHighsCallbackMipInterrupt]
+    ORANGE_MOI.set(model, HiGHS.CallbackFunction(callback_types), monitor)
+    return monitor
+end
+
+# ╔═╡ 3c6a6416-d8c3-4169-b572-a8ffbd82eed5
+function approximation_quality(feasible, mlu_gap, stage_gap, completed, total, target)
+    0 <= target < 1 || error("Target gap must be in [0,1)")
+    mlu_met = feasible && !ismissing(mlu_gap) && mlu_gap <= target
+    stage_met = feasible && !ismissing(stage_gap) && stage_gap <= target
+    label = !feasible ? "NO_FEASIBLE_SOLUTION" : completed == total ? "LEX_OPTIMAL" :
+        mlu_met ? "MLU_TARGET_MET_LEX_INCOMPLETE" : "TARGET_NOT_MET"
+    return (; target_gap=Float64(target), mlu_target_met=mlu_met,
+        active_stage_target_met=stage_met, quality_status=label)
+end
+
 # ╔═╡ ad946052-f7b2-4283-af1e-6c1a5e9adc76
 md"""
 ### Function: `create_time0_optimizer`
 
-Creates the selected direct JuMP backend, SCIP by default. Applies the requested seed, thread limits, zero relative objective gap, absolute gap 1e-8 and feasibility tolerance 1e-7 with solver-specific parameter names. SCIP uses randomization/randomseedshift, limits/gap and limits/absgap; HiGHS uses random_seed, mip_rel_gap and mip_abs_gap. The model equations are unchanged. Ordinary SCIP.jl optimize! uses SCIPsolve, not concurrent SCIPsolveConcurrent: thread options are caps on available SCIP/LP threading, not a promise of parallel branch-and-bound. Default single-thread runs make the initial comparison reproducible.
+Creates the selected direct JuMP backend. HiGHS is the public solve default; SCIP remains selectable. Applies the requested seed, thread limits, zero relative objective gap, absolute gap 1e-8 and feasibility tolerance 1e-7 with solver-specific parameter names. SCIP uses randomization/randomseedshift, limits/gap and limits/absgap; HiGHS uses random_seed, mip_rel_gap and mip_abs_gap. The model equations are unchanged. Ordinary SCIP.jl optimize! uses SCIPsolve, not concurrent SCIPsolveConcurrent: thread options are caps on available SCIP/LP threading, not a promise of parallel branch-and-bound. Default single-thread runs make the initial comparison reproducible.
 """
 
 # ╔═╡ 62e7cb29-8eb2-4f7e-80e2-e3a5e4c59685
-function create_time0_optimizer(solver::Symbol; time_limit, seed, threads, console=false)
+function create_time0_optimizer(solver::Symbol; time_limit, seed, threads, console=false, highs_profile=:default)
     solver in (:scip,:highs) || error("Unknown solver $solver; choose :scip or :highs")
+    highs_search_options(highs_profile)
+    solver == :scip && highs_profile != :default && error("HiGHS profiles apply only to HiGHS")
     if solver == :scip
         1 <= threads <= 64 || error("SCIP thread limit must be between 1 and 64")
         model = direct_model(SCIP.Optimizer())
@@ -1121,6 +1191,9 @@ function create_time0_optimizer(solver::Symbol; time_limit, seed, threads, conso
         set_optimizer_attribute(model,"mip_abs_gap",1e-8)
         set_optimizer_attribute(model,"mip_feasibility_tolerance",1e-7)
         set_optimizer_attribute(model,"log_to_console",console)
+        for (name,value) in highs_search_options(highs_profile)
+            set_optimizer_attribute(model,name,value)
+        end
     end
     set_time_limit_sec(model,Float64(time_limit))
     return model
@@ -1185,8 +1258,8 @@ function set_stage_time_limit!(model, solver::Symbol, remaining)
 end
 
 # ╔═╡ 72e9296a-3367-402d-9c66-88bf4026d4fa
-function build_time0_model(data; solver=:scip, time_limit=1800.0, seed=1, threads=1,
-        max_binary_variables=2_000_000, log_file="", console=false)
+function build_time0_model(data; solver=:highs, time_limit=1800.0, seed=1, threads=1,
+        max_binary_variables=2_000_000, log_file="", console=false, highs_profile=:default)
     isfinite(time_limit) && time_limit > 0 || error("time_limit must be positive and finite")
     threads >= 1 || error("threads must be positive")
     0 <= seed <= typemax(Int32) || error("Invalid solver random seed")
@@ -1197,13 +1270,18 @@ function build_time0_model(data; solver=:scip, time_limit=1800.0, seed=1, thread
     binary_variables = k * p
     binary_variables <= max_binary_variables || error(
         "MODEL_SIZE_LIMIT: $binary_variables binary variables exceed limit $max_binary_variables")
-    model = create_time0_optimizer(solver; time_limit, seed, threads, console)
+    model = create_time0_optimizer(solver; time_limit, seed, threads, console, highs_profile)
     isempty(log_file) || set_stage_log!(model,solver,log_file; console)
+    set_string_names_on_creation(model, false)
     @variable(model, x[1:k, 1:p], Bin)
     @variable(model, z >= 0)
     @variable(model, 0 <= position[1:k, 1:n] <= data.MaxSeg)
-    outgoing = [[s for (s,(i,j)) in enumerate(segments) if i == u] for u in 1:n]
-    incoming = [[s for (s,(i,j)) in enumerate(segments) if j == u] for u in 1:n]
+    outgoing = [Int[] for u in 1:n]
+    incoming = [Int[] for u in 1:n]
+    for (s,(i,j)) in enumerate(segments)
+        push!(outgoing[i], s)
+        push!(incoming[j], s)
+    end
     for d in 1:k
         source, target = data.sources[d], data.targets[d]
         source != target || error("Demand $d has identical source and destination")
@@ -1222,13 +1300,16 @@ function build_time0_model(data; solver=:scip, time_limit=1800.0, seed=1, thread
         end
     end
     segment_index = Dict(pair => s for (s,pair) in enumerate(segments))
-    segment_row = Dict(i + (j-1)*n => s for (s,(i,j)) in enumerate(segments))
+    segment_row = zeros(Int, n*n)
+    for (s,(i,j)) in enumerate(segments)
+        segment_row[i + (j-1)*n] = s
+    end
     loads = [AffExpr(0.0) for a in 1:m]
     ratio_rows = rowvals(data.r.values)
     ratio_values = nonzeros(data.r.values)
     for a in 1:m
         for entry in nzrange(data.r.values, a)
-            s = get(segment_row, ratio_rows[entry], 0)
+            s = segment_row[ratio_rows[entry]]
             s == 0 && continue
             for d in 1:k
                 coefficient = ratio_values[entry] * data.v[d] / data.c[a]
@@ -1264,9 +1345,9 @@ Receives Data and a solved formulation. Reads selected segment variables, recons
 """
 
 # ╔═╡ 0371b231-be81-4b68-b3cc-a59153b78de6
-function validate_time0_solution(data, formulation; tolerance=1e-5)
+function validate_time0_solution(data, formulation; tolerance=1e-5, candidate_x=nothing, candidate_z=nothing)
     model, x, segments = formulation.model, formulation.x, formulation.segments
-    primal_status(model) == ORANGE_MOI.FEASIBLE_POINT || error("No feasible incumbent to validate")
+    isnothing(candidate_x) && primal_status(model) != ORANGE_MOI.FEASIBLE_POINT && error("No feasible incumbent to validate")
     n, m, k = nv(data.graph), length(data.arcs), length(data.v)
     arc_loads = zeros(m)
     routes = NamedTuple[]
@@ -1274,7 +1355,8 @@ function validate_time0_solution(data, formulation; tolerance=1e-5)
     for d in 1:k
         selected = Int[]
         for s in eachindex(segments)
-            value_x = value(x[d,s])
+            value_x = isnothing(candidate_x) ? value(x[d,s]) : candidate_x[d,s]
+            isfinite(value_x) && -tolerance <= value_x <= 1+tolerance || error("Invalid binary route value")
             abs(value_x - round(value_x)) <= tolerance || error("Nonintegral route variable")
             value_x > 0.5 && push!(selected,s)
         end
@@ -1303,7 +1385,7 @@ function validate_time0_solution(data, formulation; tolerance=1e-5)
         push!(selected_segments,selected)
     end
     maximum_load = maximum(arc_loads; init=0.0)
-    z_value = value(formulation.z)
+    z_value = isnothing(candidate_z) ? value(formulation.z) : candidate_z
     maximum_load <= z_value + tolerance * max(1.0, abs(z_value)) || error("Arc load exceeds objective")
     return (; valid=true, maximum_load, arc_loads, routes, selected_segments)
 end
@@ -1399,6 +1481,8 @@ md"""
 ### Function: `solve_time0_serial` — Solve the complete lexicographic problem
 
 Receives one instance and run settings. Solves stages in order, locks each certified stage optimum, and stops at the first unfinished stage or when the shared optimize! budget is exhausted. Each call to optimize! is timed separately; reading, construction, and validation are excluded. Validates every available incumbent and preserves the latest validated route if a later solve finds none. Returns one result row and writes stage logs and the solution when paths are supplied. Optimal means all stages finished, within the recorded solver and lock tolerances.
+
+An optional `stage_observer(model, solver, stage, log_path)` may read native statistics after each solve. It runs outside the optimize! timer and must not modify the model. The benchmark uses it only for diagnostics.
 """
 
 # ╔═╡ 4ad642fe-2c86-4d74-979a-b48d657f2917
@@ -1432,7 +1516,7 @@ function time0_demo_data()
     segments = [(i,j) for i in 1:5 for j in 1:5 if i != j && routing.counts[i,j] > 0]
     return (graph=graph,node_ids=collect(0:4),arc_ids=collect(0:3),
         arcs=arcs,c=[1.0,1.25,2.0,2.0],v=[1.0,1.0],sources=[1,3],targets=[2,5],
-        demand_ids=[0,1],MaxSeg=2,r=routing.r,segments=segments,time=0,splitting=:uniform_paths)
+        demand_ids=[0,1],MaxSeg=2,r=routing.r,counts=routing.counts,segments=segments,time=0,splitting=:ecmp)
 end
 
 # ╔═╡ 43a769d5-c2db-451a-a2b1-dc3852794675
@@ -1519,19 +1603,67 @@ function append_result_csv(path, row)
     return abspath(path)
 end
 
+# ╔═╡ 0f630d76-c12e-4d83-a7a8-95a2eace1262
+md"""
+### Atomic checkpoints and solve events
+
+`write_solution_checkpoint` persists an already validated feasible routing and its global bounds. `write_solve_event` marks the beginning/end of an optimize! call for an external process supervisor. These writes are outside measured solve time. A supervisor may kill an overdue process, but a saved incumbent remains a partial result, never an optimality certificate.
+"""
+
+# ╔═╡ ff5ffe39-dfc4-4ccf-9c44-f9d16548f205
+function write_solve_event(log_file, event, remaining, stage)
+    isempty(log_file) && return nothing
+    path = log_file * ".event.json"
+    mkpath(dirname(abspath(path)))
+    temporary = path * ".tmp"
+    write(temporary,JSON3.write((event=event,remaining_seconds=remaining,stage=stage,token=string(time_ns()))))
+    mv(temporary,path;force=true)
+    return nothing
+end
+
+# ╔═╡ 18d27926-6238-4933-a5f1-63b02bc39d1b
+function write_solution_checkpoint(path,data,validation;solver,instance,run,completed,
+        active_stage,lower_bound,stage_lower_bound,lock_tolerance,formulation,target_gap,
+        proof_tolerance=0.0,termination="RUNNING",status="Not Optimal")
+    isempty(path) && return nothing
+    sorted_loads=sort(validation.arc_loads;rev=true)
+    active_value=sum(sorted_loads[1:active_stage])
+    gap=experiment_gap(validation.maximum_load,lower_bound)
+    stage_gap=experiment_gap(active_value,stage_lower_bound)
+    quality=approximation_quality(true,gap,stage_gap,completed,length(data.arcs),target_gap)
+    row=(instance=instance,run=run,solver=String(solver),formulation=formulation,
+        objective_mode="lexicographic_sorted_loads",splitting=String(data.splitting),
+        validated=true,termination=termination,status=status,bound_scope="global",
+        solver_version=orange_solver_version(solver),
+        mlu=validation.maximum_load,lower_bound=lower_bound,gap=gap,
+        active_stage=active_stage,stage_objective=active_value,stage_lower_bound=stage_lower_bound,stage_gap=stage_gap,
+        lex_completed_stages=completed,lex_total_stages=length(data.arcs),
+        target_gap=target_gap,quality_status=quality.quality_status,mlu_target_met=quality.mlu_target_met,
+        active_stage_target_met=quality.active_stage_target_met,
+        lock_tolerance=lock_tolerance,proof_tolerance=proof_tolerance,sorted_loads=sorted_loads,
+        srpaths=validation.routes,arc_ids=data.arc_ids,arc_loads=validation.arc_loads)
+    mkpath(dirname(abspath(path)))
+    temporary=path*".tmp"
+    write(temporary,JSON3.write(row))
+    mv(temporary,path;force=true)
+    return nothing
+end
+
 # ╔═╡ 79524299-953d-4ea5-99ea-c5f555c2c73f
-function solve_time0_serial(data; solver=:scip, instance="instance", run=1, time_limit=1800.0,
+function solve_time0_serial(data; solver=:highs, instance="instance", run=1, time_limit=1800.0,
         seed=1, threads=1, max_binary_variables=2_000_000,
-        log_file="", solution_file="", console=false, lock_tolerance=1e-7)
+        log_file="", solution_file="", console=false, lock_tolerance=1e-7, stage_observer=nothing,
+        highs_profile=:default, target_gap=0.10, deadline_callback=true)
     isfinite(lock_tolerance) && lock_tolerance >= 0 || error("Invalid lock tolerance")
+    0 <= target_gap < 1 || error("Target gap must be in [0,1)")
     formulation = build_time0_model(data; solver, time_limit, seed, threads,
-        max_binary_variables, log_file="", console)
+        max_binary_variables, log_file="", console, highs_profile)
     model = formulation.model
     total_arcs = length(data.arcs)
     total_arcs > 0 || error("A network must contain at least one arc")
     stages = NamedTuple[]
     stage_rows = NamedTuple[]
-    validation = nothing
+    validation = validate_time0_solution(data,formulation;candidate_x=start_value.(formulation.x),candidate_z=start_value(formulation.z))
     first_stage_bound = missing
     active_stage_bound = missing
     completed_stages = 0
@@ -1552,19 +1684,30 @@ function solve_time0_serial(data; solver=:scip, instance="instance", run=1, time
         stage_log = isempty(log_file) ? "" : replace(log_file,r"\.log$" => "") *
             "_stage-" * lpad(k,3,'0') * ".log"
         set_stage_log!(model,solver,stage_log; console)
+        write_solution_checkpoint(solution_file,data,validation;solver,instance,run,
+            completed=completed_stages,active_stage=k,lower_bound=first_stage_bound,
+            stage_lower_bound=active_stage_bound,lock_tolerance,formulation="compact",target_gap)
+        write_solve_event(log_file,"start",remaining,k)
+        deadline_monitor = solver == :highs ?
+            install_highs_deadline!(model, remaining; enabled=deadline_callback) : nothing
         # Only optimize! is measured; every stage shares the same solve-time budget.
         seconds = try
             @elapsed optimize!(model)
         finally
             close_stage_log!(model,solver)
         end
+        write_solve_event(log_file,"end",max(0.0,time_limit-elapsed_optimize-seconds),k)
         elapsed_optimize += seconds
+        isnothing(stage_observer) || stage_observer(model, solver, k, stage_log)
         term = termination_status(model)
         termination = string(term)
         last_primal_status = string(primal_status(model))
         bound = try
             candidate_bound = objective_bound(model)
-            isfinite(candidate_bound) ? candidate_bound : missing
+            # SCIP uses finite +/-1e20 sentinels when no finite dual bound exists.
+            finite_bound = isfinite(candidate_bound) && (solver != :scip ||
+                SCIP.SCIPisInfinity(unsafe_backend(model), abs(candidate_bound)) == 0)
+            finite_bound ? candidate_bound : missing
         catch
             missing
         end
@@ -1594,6 +1737,8 @@ function solve_time0_serial(data; solver=:scip, instance="instance", run=1, time
             solver_incumbent=solver_incumbent, route_incumbent=route_incumbent,
             lower_bound=bound, gap=experiment_gap(route_incumbent,bound),
             termination=string(term), primal_status=last_primal_status,
+            deadline_interrupt_requested=!isnothing(deadline_monitor) && deadline_monitor.interrupt_requested,
+            deadline_callback_calls=isnothing(deadline_monitor) ? 0 : deadline_monitor.calls,
             nodes=nodes, log_file=isempty(stage_log) ? "" : abspath(stage_log))
         push!(stage_rows,row)
         isempty(stage_csv) || append_result_csv(stage_csv,row)
@@ -1618,16 +1763,15 @@ function solve_time0_serial(data; solver=:scip, instance="instance", run=1, time
     status = completed_stages == total_arcs ? "Optimal" :
         (termination == "INFEASIBLE" && !feasible ? "Infeasible" : "Not Optimal")
     gap = experiment_gap(objective,first_stage_bound)
-    if feasible && !isempty(solution_file)
-        mkpath(dirname(abspath(solution_file)))
-        solution = (instance=instance,run=run,solver=String(solver),
-            solver_version=orange_solver_version(solver),objective_mode="lexicographic_sorted_loads",
-            splitting=String(data.splitting),sorted_loads=sorted_loads,mlu=objective,
-            lex_completed_stages=completed_stages,lex_total_stages=total_arcs,
-            lock_tolerance=lock_tolerance,srpaths=validation.routes,
-            arc_ids=data.arc_ids,arc_loads=validation.arc_loads)
-        write(solution_file,JSON3.write(solution))
+    active_gap = experiment_gap(active_objective,active_stage_bound)
+    quality = approximation_quality(feasible,gap,active_gap,completed_stages,total_arcs,target_gap)
+    if feasible
+        write_solution_checkpoint(solution_file,data,validation;solver,instance,run,
+            completed=completed_stages,active_stage=max(1,active_stage),lower_bound=first_stage_bound,
+            stage_lower_bound=active_stage_bound,lock_tolerance,formulation="compact",target_gap,
+            termination,status)
     end
+
     return (
         instance=String(instance), run=run, time=0,
         solver=String(solver),solver_version=orange_solver_version(solver),
@@ -1639,7 +1783,10 @@ function solve_time0_serial(data; solver=:scip, instance="instance", run=1, time
         checked_mlu=objective, lex_completed_stages=completed_stages,
         lex_total_stages=total_arcs, active_stage=active_stage,
         stage_objective=active_objective, stage_lower_bound=active_stage_bound,
-        stage_gap=experiment_gap(active_objective,active_stage_bound),
+        stage_gap=active_gap,
+        highs_profile=String(highs_profile), target_gap=quality.target_gap,
+        mlu_target_met=quality.mlu_target_met, active_stage_target_met=quality.active_stage_target_met,
+        quality_status=quality.quality_status, deadline_callback=deadline_callback,
         sorted_loads_json=JSON3.write(sorted_loads),
         time_limit=Float64(time_limit), seed=seed, threads=threads,
         objective_mode="lexicographic_sorted_loads", splitting=String(data.splitting),
@@ -1709,7 +1856,8 @@ Receives instance dimensions, settings, and an error message. Returns a result r
 """
 
 # ╔═╡ 557949d4-6725-42ac-a286-14bb31703e54
-function experiment_error_row(data, instance, run, time_limit, seed, threads, log_file, error_message, lock_tolerance, solver)
+function experiment_error_row(data, instance, run, time_limit, seed, threads, log_file, error_message, lock_tolerance, solver;
+        highs_profile=:default, target_gap=0.10, deadline_callback=true)
     size_limited = occursin("MODEL_SIZE_LIMIT:",error_message)
     return (
         instance=String(instance), run=run, time=0,
@@ -1720,7 +1868,9 @@ function experiment_error_row(data, instance, run, time_limit, seed, threads, lo
         primal_status="NO_SOLUTION", gap=missing, nodes=missing, feasible=false, validated=false,
         checked_mlu=missing, lex_completed_stages=0, lex_total_stages=length(data.arcs),
         active_stage=0, stage_objective=missing, stage_lower_bound=missing, stage_gap=missing,
-        sorted_loads_json="[]", time_limit=Float64(time_limit), seed=seed, threads=threads,
+        highs_profile=String(highs_profile), target_gap=Float64(target_gap),
+        mlu_target_met=false, active_stage_target_met=false, quality_status="NO_FEASIBLE_SOLUTION",
+        deadline_callback=deadline_callback, sorted_loads_json="[]", time_limit=Float64(time_limit), seed=seed, threads=threads,
         objective_mode="lexicographic_sorted_loads", splitting=String(data.splitting),
         lock_tolerance=lock_tolerance, binary_variables=length(data.v)*length(data.segments), log_file=abspath(log_file),
         solution_file="", error=error_message,
@@ -1731,7 +1881,7 @@ end
 md"""
 ### Function: `run_seta_experiments` — Run and checkpoint the SetA experiment batch
 
-Receives the solver (`:scip` by default), instance IDs, repeat count, time budget, output directory, seeds, threads, routing convention, and size limit. Loads Data once per instance and solves each requested repetition. Saves every run immediately, rebuilds summary tables, and records software/hardware information. Reusing the same directory with identical settings resumes checkpointed runs; different settings require a new directory. Interruptions propagate so Ctrl+C stops the batch without deleting completed runs.
+Receives the solver (`:highs` by default), instance IDs, repeat count, time budget, output directory, seeds, threads, routing convention, and size limit. Loads Data once per instance and solves each requested repetition. Saves every run immediately, rebuilds summary tables, and records software/hardware information. Reusing the same directory with identical settings resumes checkpointed runs; different settings require a new directory. Interruptions propagate so Ctrl+C stops the batch without deleting completed runs.
 """
 
 # ╔═╡ 470d4950-7398-46a8-998e-c8ca22eeca08
@@ -1758,8 +1908,8 @@ Use repeated SetA experiments for a performance comparison.
 md"""
 ## Configure and run in Pluto
 
-SCIP is the default backend. Keep `solver=:scip` in `experiment_settings`, or
-select `solver=:highs` and a different output directory for comparison. Solver
+HiGHS is the default backend. Keep `solver=:highs` in `experiment_settings`, or
+select `solver=:scip` and a different output directory for comparison. Solver
 name and native version are saved in every run, stage, solution, and summary.
 The same mathematical model, lock tolerances, seeds, time budget, and routing
 convention are used for both engines. Their search strategies can still differ.
@@ -1779,20 +1929,21 @@ The direct MILP has `length(data.v) * length(data.segments)` binary variables.
 SetA-20 alone has 957,600,000 of them. A configurable two-million-variable guard
 rejects oversized models before allocation and records MODEL_SIZE_LIMIT. Such a
 row is unexecuted, not an infeasibility result. Increasing the guard does not
-remove the memory cost. The current mathematical model still requires a different
-formulation or decomposition to solve the largest instances practically.
+remove the memory cost. The automatic route formulation avoids allocating those compact variables.
 
-The routing convention remains `:uniform_paths`, matching the supplied
-calculation handout. Choose `:ecmp` explicitly only if that convention is intended,
-and use a separate results directory. This choice is recorded in every run.
+The default is now `:ecmp`, matching the original subject. The older handout convention remains available explicitly as `:uniform_paths`. Never mix their result directories.
+
+`formulation=:auto` uses the original compact MILP for at most 100,000 potential segment binaries and route columns otherwise. The displayed original constraints remain the reference; route-column equivalence, pricing bounds and limitations are explained below. The size guard applies to the selected formulation, not automatically to the potential compact size.
+
+The requested quality target is `target_gap=0.10` for MLU only. A result must have `mlu_target_met=true` to meet it. No approximate stage is locked as optimal.
 
 """
 
 # ╔═╡ 93368143-57e3-49f6-b335-bd7ed2def16c
 experiment_settings = (
-    solver=:scip, instances=1:20, runs=10, time_limit=1800.0,
-    output_dir=joinpath(@__DIR__,"results","time0_lex_scip"),
-    seed_base=1000, threads=1, splitting=:uniform_paths,
+    solver=:highs, instances=1:20, runs=10, time_limit=1800.0,
+    output_dir=joinpath(@__DIR__,"results","time0_lex_highs_ecmp"),
+    seed_base=1000, threads=1, splitting=:ecmp,
     max_binary_variables=2_000_000, lock_tolerance=1e-7,
 )
 
@@ -1812,13 +1963,13 @@ julia --project=. -e 'using Pkg; Pkg.instantiate()'
 Then a short trial is:
 
 ```sh
-julia --project=. scripts/run_experiments.jl --instances 1 --runs 1 --time-limit 30 --solver scip --output results/trial_lex_scip
+julia --project=. scripts/run_experiments.jl --instances 1 --runs 1 --time-limit 30 --solver highs --output results/trial_highs_ecmp
 ```
 
 The assignment configuration is:
 
 ```sh
-julia --project=. scripts/run_experiments.jl --instances 1:20 --runs 10 --time-limit 1800 --solver scip --output results/time0_lex_scip
+julia --project=. scripts/run_experiments.jl --instances 1:20 --runs 10 --time-limit 1800 --solver highs --output results/time0_lex_highs_ecmp
 ```
 
 To run the same configuration with HiGHS:
@@ -1885,7 +2036,7 @@ end
 md"""
 ### Function: `solve_time0(data; settings...)`
 
-This public entry point defaults to `solver=:scip`; pass `solver=:highs` for
+This public entry point defaults to `solver=:highs`; pass `solver=:scip` for
 comparison. It serializes the notebook's solver calls with a lock and calls
 `solve_time0_serial`. Only the HiGHS branch resets its global worker scheduler.
 The lock is released even on error or Ctrl+C. Backend setup is outside the
@@ -1894,20 +2045,857 @@ Julia process. The mathematical constraints and lexicographic objectives are
 identical for both backends.
 """
 
+# ╔═╡ 469bf80a-c389-4ea0-8187-1a8fc6e8037a
+md"""
+# Memory-efficient time-0 formulation: route columns
+
+The original segment equations above remain the reference. For demand d, let P_d contain every valid source-to-target segment path with at most K segments. A column p is a complete path, not a physical shortest path. Its physical flows still follow the same r[i,j,a,0] and ECMP convention.
+
+```math
+\sum_{p\in P_d}y_{dp}=1,\quad y_{dp}\in\{0,1\},\qquad
+L_{adp}=\frac{\nu(d,0)}{c(a)}\sum_{(i,j)\in p}r(i,j,a,0),\quad
+\lambda_a=\sum_d\sum_{p\in P_d}L_{adp}y_{dp}.
+```
+
+A chosen column already satisfies source/target flow conservation and MaxSeg. Conversely, every valid simple segment route is a column. In time 0, deleting a waypoint cycle removes nonnegative physical load and consumes fewer segments; with no inter-period budget, a lexicographic optimum therefore exists among simple routes. This argument is specific to time 0 and does not justify the same deletion under time-coupled budgets.
+
+The master keeps the same sequential top-k load objectives and earlier locks. A small column pool alone is a restricted model: its integer bound is **not** a global bound for Orange.
+
+### Pricing and a global lower bound
+
+Let alpha_d be the dual multiplier of a demand selection equality, and beta_a=-dual(load_row_a) >= 0. The minimum reduced cost over all routes of d is
+
+```math
+\rho_d=\min_{p\in P_d}\left(\nu(d,0)\sum_{(i,j)\in p}\sum_a
+\frac{\beta_a r(i,j,a,0)}{c(a)}-\alpha_d\right).
+```
+
+A nonnegative weighted segment cost permits dynamic programming with at most K segments. All targets are covered; only a completed pricing sweep supplies a bound. If D_R is the restricted LP dual value, lowering each alpha_d by max(0,-rho_d) makes its missing-column inequalities feasible, giving
+
+```math
+LB=D_R+\sum_d\min(0,\rho_d)\le z^*_{LP}\le z^*_{IP}.
+```
+
+A numerical safety buffer is subtracted. Duals are taken from the entire master, including all previous lexicographic locks. Restricting the stored columns does not invalidate this corrected bound. A node source/sink cut supplies an additional MLU lower bound.
+
+Only equality of a validated incumbent and this **global** bound within the recorded absolute proof tolerance certifies a stage. Otherwise, the solver expands the route pool and retries the same unfinished stage while budget remains; it never promotes a restricted-master OPTIMAL status to global OPTIMAL. This is not full Branch-and-Price, and a remaining integrality gap may prevent certification.
+
+### Continued search at an unfinished stage
+
+A completed restricted MIP does not end the run merely because its global gap remains positive. The solver retains the incumbent and strongest global bound, expands the route pool with additional valid simple waypoint sequences, reruns LP pricing and solves the restricted MIP in slices of at most 60 seconds. The initial per-demand pool cap grows on retries; the global variable guard remains active. Cycles are logged separately. Only global certification advances k. A solve budget, an explicit wall safeguard or the route allocation guard can stop an incomplete run; reaching the 10% MLU reporting threshold cannot.
+
+Enumeration can require exponentially many candidates and this is still not full branch-and-price. The model is unchanged. Pure route work is outside optimize! timing; a wall safeguard bounds the overall search routine by the solve budget plus max(30 seconds, 10% of that budget), checked between cycles. The external supervisor may stop sooner according to its own allowances.
+
+### Feasible initialization and quality
+
+A bounded greedy search considers two-segment waypoint alternatives, accepting improvements of the sorted physical-load vector. It supplies columns and a feasible warm start only; all valid routes remain eligible for pricing. Every final route is independently reconstructed and its loads recomputed from r.
+
+The requested MLU target is gap <= 10%. It is a reported quality target, not a relaxed lexicographic lock. TARGET_NOT_MET means the request has not been achieved for that instance. Small compact models remain available for differential verification.
+"""
+
+# ╔═╡ c3ed0cf3-8514-47da-9930-6c719844eb6a
+md"""
+### `OrangeRouteColumn`
+
+Stores one demand, its complete waypoint path and sparse normalized physical-load contributions.
+"""
+
+# ╔═╡ 426ef93a-1177-4113-85be-a2013131b5e4
+struct OrangeRouteColumn
+    demand::Int
+    path::Vector{Int}
+    coefficients::SparseVector{Float64,Int}
+end
+
+# ╔═╡ b9b4c5be-a1f0-4a58-b88f-b6ca02da8616
+md"""
+### `OrangeRoutePool`
+
+Stores generated columns, per-demand lookup and transposed sparse routing ratios; does not allocate all compact segment variables.
+"""
+
+# ╔═╡ 0e5bf6a1-e6d9-4517-bce7-eab1bccefe90
+mutable struct OrangeRoutePool
+    columns::Vector{OrangeRouteColumn}
+    by_demand::Vector{Vector{Int}}
+    keys::Vector{Set{Tuple}}
+    ratios_by_pair::SparseMatrixCSC{Float64,Int}
+end
+
+# ╔═╡ f72de83e-7527-456c-a302-cfa339323893
+md"""
+### `add_route_column!`
+
+Checks route endpoints, reachability, simplicity and MaxSeg before adding a nonduplicate sparse column within the pool limit.
+"""
+
+# ╔═╡ 04cf4dfd-193b-4737-b8d8-d040611338e7
+function add_route_column!(pool, data, d, path; max_routes=16)
+    key = Tuple(path)
+    key in pool.keys[d] && return 0
+    length(pool.by_demand[d]) >= max_routes && return 0
+    first(path) == data.sources[d] && last(path) == data.targets[d] || error("Wrong route endpoints")
+    length(path)-1 <= data.MaxSeg || error("Too many route segments")
+    length(unique(path)) == length(path) || error("Repeated waypoint")
+    n = nv(data.graph)
+    coefficients = Dict{Int,Float64}()
+    values = nonzeros(pool.ratios_by_pair)
+    rows = rowvals(pool.ratios_by_pair)
+    for h in 1:length(path)-1
+        i,j = path[h],path[h+1]
+        data.counts[i,j] > 0 || error("Unreachable segment")
+        pair = i+(j-1)*n
+        for entry in nzrange(pool.ratios_by_pair,pair)
+            a = rows[entry]
+            coefficients[a] = get(coefficients,a,0.0) + data.v[d]*values[entry]/data.c[a]
+        end
+    end
+    indices = sort(collect(keys(coefficients)))
+    vector = sparsevec(indices,[coefficients[a] for a in indices],length(data.arcs))
+    push!(pool.columns,OrangeRouteColumn(d,copy(path),vector))
+    push!(pool.by_demand[d],length(pool.columns))
+    push!(pool.keys[d],key)
+    return length(pool.columns)
+end
+
+# ╔═╡ 2e4328cc-785e-44ed-b548-4f4b920e7f7b
+md"""
+### `initial_route_pool`
+
+Initializes one direct source-to-target segment per demand.
+"""
+
+# ╔═╡ fe4bdc91-0eb6-40bc-8cba-7ebfaa7334a3
+function initial_route_pool(data)
+    k = length(data.v)
+    pool = OrangeRoutePool(OrangeRouteColumn[],[Int[] for d in 1:k],
+        [Set{Tuple}() for d in 1:k],sparse(transpose(data.r.values)))
+    for d in 1:k
+        add_route_column!(pool,data,d,[data.sources[d],data.targets[d]])
+    end
+    return pool
+end
+
+# ╔═╡ 478f3c47-d0a9-4075-935f-0d122c393cb5
+md"""
+### `minimum_segment_routes`
+
+Prices every demand using nonnegative weighted segment costs and hop-bounded dynamic programming. Returns complete=false if interrupted before all targets finish.
+"""
+
+# ╔═╡ 49fcd1cc-3ad0-4588-bc31-5a12f9c31ca6
+function minimum_segment_routes(data, weights; deadline=Inf)
+    n = nv(data.graph)
+    costs = reshape(data.r.values * (weights ./ data.c),n,n)
+    for j in 1:n, i in 1:n
+        (i == j || data.counts[i,j] == 0) && (costs[i,j]=Inf)
+    end
+    route_costs = fill(Inf,length(data.v))
+    paths = [Int[] for d in eachindex(data.v)]
+    for target in sort(unique(data.targets))
+        time() > deadline && return (; complete=false,route_costs,paths)
+        previous = fill(Inf,n)
+        previous[target] = 0.0
+        successors = zeros(Int,n,data.MaxSeg)
+        for h in 1:data.MaxSeg
+            time() > deadline && return (; complete=false,route_costs,paths)
+            current = copy(previous)
+            # Column-major traversal reuses each costs[:,j] and previous[j].
+            for j in 1:n
+                isfinite(previous[j]) || continue
+                for i in 1:n
+                    candidate = costs[i,j] + previous[j]
+                    if candidate < current[i]
+                        current[i] = candidate
+                        successors[i,h] = j
+                    end
+                end
+            end
+            previous = current
+        end
+        for d in eachindex(data.v)
+            data.targets[d] == target || continue
+            route_costs[d] = previous[data.sources[d]]
+            path = [data.sources[d]]
+            current = data.sources[d]
+            for h in data.MaxSeg:-1:1
+                current == target && break
+                next_vertex = successors[current,h]
+                iszero(next_vertex) && continue
+                current = next_vertex
+                push!(path,current)
+            end
+            last(path) == target || error("Pricing reconstruction failed")
+            length(unique(path)) == length(path) || error("Pricing produced a cycle")
+            paths[d] = path
+        end
+    end
+    return (; complete=true,route_costs,paths)
+end
+
+# ╔═╡ 48e92439-c8b4-4dc7-bc07-588959337922
+md"""
+### `build_route_master`
+
+Builds an LP or restricted binary route master with convexity, physical loads, top-k objectives and certified prior locks.
+"""
+
+# ╔═╡ b54c1180-cf5e-405a-9b4d-7e6905b570de
+function build_route_master(data, pool, k, locks; solver=:highs, integer=true,
+        time_limit=1800.0, seed=1, threads=1, max_binary_variables=2_000_000,console=false,highs_profile=:default)
+    length(pool.columns) <= max_binary_variables || error("MODEL_SIZE_LIMIT: route pool exceeds variable guard")
+    model = create_time0_optimizer(integer ? solver : :highs;
+        time_limit,seed,threads=integer ? threads : 1,console,
+        highs_profile=integer ? highs_profile : :default)
+    set_string_names_on_creation(model,false)
+    variables = VariableRef[]
+    for p in eachindex(pool.columns)
+        y = @variable(model,lower_bound=0.0,base_name="route_$p")
+        integer && set_binary(y)
+        push!(variables,y)
+    end
+    @variable(model,loads[1:length(data.arcs)] >= 0)
+    @variable(model,z >= 0)
+    convexity = [@constraint(model,sum(variables[p] for p in pool.by_demand[d]) == 1)
+        for d in eachindex(data.v)]
+    expressions = [AffExpr(0.0) for a in eachindex(data.arcs)]
+    for (p,column) in enumerate(pool.columns)
+        indices,coefficients = findnz(column.coefficients)
+        for h in eachindex(indices)
+            add_to_expression!(expressions[indices[h]],coefficients[h],variables[p])
+        end
+    end
+    load_rows = [@constraint(model,expressions[a] <= loads[a]) for a in eachindex(data.arcs)]
+    for a in eachindex(data.arcs)
+        @constraint(model,loads[a] <= z)
+    end
+    master = (;model,y=variables,loads,z,convexity,load_rows)
+    stages = NamedTuple[]
+    for h in 1:k
+        stage = add_lexicographic_stage!(master,h,length(data.arcs))
+        push!(stages,stage)
+        h < k && @constraint(model,stage.expression <= locks[h])
+    end
+    return (;master...,stages)
+end
+
+# ╔═╡ 74d13c6e-0d13-4c34-868f-b9a485687a80
+md"""
+### `append_priced_variable!`
+
+Adds one continuous route variable and its coefficients to the existing restricted LP.
+"""
+
+# ╔═╡ 31a7b7be-dc05-4f55-887c-82a71cb6abae
+function append_priced_variable!(master,pool,p)
+    column = pool.columns[p]
+    y = @variable(master.model,lower_bound=0.0,base_name="route_$p")
+    push!(master.y,y)
+    set_normalized_coefficient(master.convexity[column.demand],y,1.0)
+    indices,coefficients = findnz(column.coefficients)
+    for h in eachindex(indices)
+        set_normalized_coefficient(master.load_rows[indices[h]],y,coefficients[h])
+    end
+    return nothing
+end
+
+# ╔═╡ 68d3cd68-1300-4f1f-ae75-a6d82dab0e58
+md"""
+### `validate_route_selection`
+
+Independently checks each selected route and recomputes every physical arc load directly from r.
+"""
+
+# ╔═╡ 7d35907e-afc6-4cac-bee4-d3885f4f2459
+function validate_route_selection(data,pool,selection)
+    length(selection) == length(data.v) || error("Missing demand route")
+    loads = zeros(length(data.arcs))
+    routes = NamedTuple[]
+    for d in eachindex(data.v)
+        p = selection[d]
+        column = pool.columns[p]
+        column.demand == d || error("Route assigned to wrong demand")
+        path = column.path
+        first(path) == data.sources[d] && last(path) == data.targets[d] || error("Invalid endpoints")
+        length(unique(path)) == length(path) || error("Route has a repeated waypoint")
+        length(path)-1 <= data.MaxSeg || error("Segment limit exceeded")
+        # Recompute from r rather than trusting stored master coefficients.
+        for h in 1:length(path)-1
+            i,j = path[h],path[h+1]
+            data.counts[i,j] > 0 || error("Unreachable segment")
+            for a in eachindex(data.arcs)
+                loads[a] += data.v[d]*data.r[i,j,a,0]/data.c[a]
+            end
+        end
+        push!(routes,(d=data.demand_ids[d],t=0,w=data.node_ids[path[2:end-1]]))
+    end
+    return (valid=true,maximum_load=maximum(loads;init=0.0),arc_loads=loads,
+        routes=routes,selection=copy(selection))
+end
+
+# ╔═╡ a5aab9a2-4359-40a7-85f4-22a4f4715d11
+md"""
+### `start_route_master!`
+
+Sets a complete feasible incumbent for route choices, loads and top-k epigraph variables.
+"""
+
+# ╔═╡ 92a75acf-fcb1-4e18-99da-4c62568c8af8
+function start_route_master!(master,validation)
+    for y in master.y
+        set_start_value(y,0.0)
+    end
+    for p in validation.selection
+        set_start_value(master.y[p],1.0)
+    end
+    for a in eachindex(master.loads)
+        set_start_value(master.loads[a],validation.arc_loads[a])
+    end
+    set_start_value(master.z,validation.maximum_load)
+    sorted_loads = sort(validation.arc_loads;rev=true)
+    for stage in master.stages
+        isnothing(stage.threshold) && continue
+        threshold = sorted_loads[stage.k]
+        set_start_value(stage.threshold,threshold)
+        for a in eachindex(master.loads)
+            set_start_value(stage.excess[a],max(0.0,validation.arc_loads[a]-threshold))
+        end
+    end
+    return nothing
+end
+
+# ╔═╡ ecb8cc09-f4f3-40c9-a104-fcb8760fadf1
+md"""
+### `sparse_route_loads`
+
+Computes one route contribution from sparse routing columns without expanding demand-by-segment tensors.
+"""
+
+# ╔═╡ da4dedcf-d034-4ad3-8b32-eac230815a68
+function sparse_route_loads(data,pool,d,path)
+    loads = zeros(length(data.arcs))
+    n = nv(data.graph)
+    rows,values = rowvals(pool.ratios_by_pair),nonzeros(pool.ratios_by_pair)
+    for h in 1:length(path)-1
+        pair = path[h]+(path[h+1]-1)*n
+        for entry in nzrange(pool.ratios_by_pair,pair)
+            a=rows[entry]
+            loads[a] += data.v[d]*values[entry]/data.c[a]
+        end
+    end
+    return loads
+end
+
+# ╔═╡ 536bfb31-5629-4273-b0ec-0adf06d8bb62
+md"""
+### `lex_loads_improve`
+
+Compares sorted load vectors in lexicographic order with a small heuristic comparison tolerance.
+"""
+
+# ╔═╡ 3186551c-93ef-4462-803f-1c1b0f061c8f
+function lex_loads_improve(candidate, incumbent; tolerance=1e-10)
+    for h in eachindex(candidate)
+        candidate[h] < incumbent[h]-tolerance && return true
+        candidate[h] > incumbent[h]+tolerance && return false
+    end
+    return false
+end
+
+# ╔═╡ 5e8da978-1cd6-4f7f-b72c-3df3ed413c2f
+md"""
+### `improve_route_pool!`
+
+Uses a time-bounded greedy waypoint search to seed better feasible columns; does not certify optimality or prune the original domain.
+"""
+
+# ╔═╡ f137ffe6-5823-486f-bbed-f328dab305a8
+function improve_route_pool!(data,pool;seconds=3.0,max_routes=16)
+    selection = [only(ids) for ids in pool.by_demand]
+    validation = validate_route_selection(data,pool,selection)
+    seconds <= 0 && return (;validation,improvements=0)
+    deadline = time_ns()+UInt64(round(seconds*1e9))
+    loads = copy(validation.arc_loads)
+    order = sortperm(data.v;rev=true)
+    improvements = 0
+    for pass in 1:4
+        changed = false
+        for d in order
+            time_ns() >= deadline && return (;validation=validate_route_selection(data,pool,selection),improvements)
+            old = sparse_route_loads(data,pool,d,pool.columns[selection[d]].path)
+            base = loads-old
+            best_sorted = sort(loads;rev=true)
+            best_path = Int[]
+            best_loads = loads
+            source,target = data.sources[d],data.targets[d]
+            for waypoint in vertices(data.graph)
+                time_ns() >= deadline && break
+                waypoint in (source,target) && continue
+                data.counts[source,waypoint] > 0 && data.counts[waypoint,target] > 0 || continue
+                path = [source,waypoint,target]
+                candidate = base+sparse_route_loads(data,pool,d,path)
+                candidate_sorted = sort(candidate;rev=true)
+                if lex_loads_improve(candidate_sorted,best_sorted)
+                    best_path,best_loads,best_sorted = path,candidate,candidate_sorted
+                end
+            end
+            isempty(best_path) && continue
+            column = add_route_column!(pool,data,d,best_path;max_routes)
+            column == 0 && continue
+            selection[d]=column
+            loads=best_loads
+            improvements+=1
+            changed=true
+        end
+        changed || break
+    end
+    return (;validation=validate_route_selection(data,pool,selection),improvements)
+end
+
+# ╔═╡ 16cb313f-d096-4c3f-a798-3a3974b914a1
+md"""
+### `solve_route_lp!`
+
+Solves restricted LPs, prices omitted routes, adds improving columns and records corrected global lower bounds. LP optimize! calls count toward the shared solve budget.
+"""
+
+# ╔═╡ af329d02-2385-412a-9f94-779afa8bae64
+function solve_route_lp!(data,pool,k,locks; remaining,seed=1,rounds=40,max_routes=16,
+        pricing_wall_limit=30.0,log_prefix="",max_binary_variables=2_000_000)
+    HiGHS.Highs_resetGlobalScheduler(1)
+    master = build_route_master(data,pool,k,locks;integer=false,time_limit=remaining,
+        seed,max_binary_variables)
+    elapsed = 0.0
+    pricing_wall = 0.0
+    bound = missing
+    complete = false
+    pricing_rows = NamedTuple[]
+    converged = false
+    for round in 1:rounds
+        remaining-elapsed <= 1e-3 && break
+        set_stage_time_limit!(master.model,:highs,remaining-elapsed)
+        path = isempty(log_prefix) ? "" : log_prefix * "_pricing-" * lpad(round,2,'0') * ".log"
+        set_stage_log!(master.model,:highs,path)
+        write_solve_event(path,"start",remaining-elapsed,k)
+        install_highs_deadline!(master.model,remaining-elapsed)
+        seconds = try
+            @elapsed optimize!(master.model)
+        finally
+            close_stage_log!(master.model,:highs)
+        end
+        write_solve_event(path,"end",max(0.0,remaining-elapsed-seconds),k)
+        elapsed += seconds
+        termination_status(master.model) == ORANGE_MOI.OPTIMAL || break
+        dual_status(master.model) == ORANGE_MOI.FEASIBLE_POINT || break
+        alpha = dual.(master.convexity)
+        weights = -dual.(master.load_rows)
+        minimum(weights;init=0.0) >= -1e-7 || error("Invalid pricing dual signs")
+        projection_error = sum(data.v)*data.MaxSeg*sum(max.(-weights,0.0)./data.c)
+        weights = max.(weights,0.0)
+        dual_value = dual_objective_value(master.model)
+        started = time()
+        priced = minimum_segment_routes(data,weights;
+            deadline=started+max(0.0,pricing_wall_limit-pricing_wall))
+        pricing_wall += time()-started
+        priced.complete || break
+        complete = true
+        reduced_costs = data.v .* priced.route_costs .- alpha
+        candidate_bound = dual_value + sum(min(0.0,rc) for rc in reduced_costs)
+        # Conservative numerical buffer for floating-point LP duals.
+        candidate_bound -= projection_error + 1e-8 * (1+abs(dual_value)+sum(abs,weights)+sum(abs,alpha))
+        bound = ismissing(bound) ? max(0.0,candidate_bound) : max(bound,candidate_bound)
+        added = 0
+        minimum_rc = minimum(reduced_costs;init=0.0)
+        for d in eachindex(data.v)
+            reduced_costs[d] < -1e-8 || continue
+            length(pool.columns) >= max_binary_variables && break
+            p = add_route_column!(pool,data,d,priced.paths[d];max_routes)
+            if p > 0
+                append_priced_variable!(master,pool,p)
+                added += 1
+            end
+        end
+        row = (stage=k,round=round,lp_solver="highs",optimize_seconds=seconds,
+            global_bound=bound,min_reduced_cost=minimum_rc,added_routes=added,
+            route_columns=length(pool.columns),pricing_wall_seconds=pricing_wall,
+            log_file=isempty(path) ? "" : abspath(path))
+        push!(pricing_rows,row)
+        isempty(log_prefix) || append_result_csv(log_prefix * "_pricing.csv",row)
+        converged = minimum_rc >= -1e-8
+        (added == 0 || converged) && break
+    end
+    empty!(master.model)
+    return (;bound,optimize_seconds=elapsed,pricing_wall_seconds=pricing_wall,complete,converged,pricing_rows)
+end
+
+# ╔═╡ 8e4569ee-47a2-4cbf-83b2-25cfa73bb5c8
+md"""
+### `route_cut_lower_bound`
+
+Bounds MLU using total source/sink traffic divided by their outgoing/incoming physical capacity.
+"""
+
+# ╔═╡ 91f7c7d3-c219-40e3-bb4c-7517478f94b8
+function route_cut_lower_bound(data)
+    outgoing_capacity = zeros(nv(data.graph))
+    incoming_capacity = zeros(nv(data.graph))
+    outgoing_traffic = zeros(nv(data.graph))
+    incoming_traffic = zeros(nv(data.graph))
+    for (a,(i,j)) in enumerate(data.arcs)
+        outgoing_capacity[i] += data.c[a]
+        incoming_capacity[j] += data.c[a]
+    end
+    for d in eachindex(data.v)
+        outgoing_traffic[data.sources[d]] += data.v[d]
+        incoming_traffic[data.targets[d]] += data.v[d]
+    end
+    ratios = [0.0]
+    for i in vertices(data.graph)
+        outgoing_capacity[i] > 0 && push!(ratios,outgoing_traffic[i]/outgoing_capacity[i])
+        incoming_capacity[i] > 0 && push!(ratios,incoming_traffic[i]/incoming_capacity[i])
+    end
+    return maximum(ratios)
+end
+
+# ╔═╡ 82029e20-1987-451e-a27f-bd24c61809c0
+md"""
+### `solve_time0_routes`
+
+Coordinates warm start, pricing and restricted integer solves, retaining global bounds and certifying only justified lexicographic stages.
+"""
+
+# ╔═╡ 1c462a22-e6f0-4ef7-8c8b-560780682355
+md"""
+### `route_pool_complete`
+
+Checks whether every valid simple route is already stored, returning false immediately on the first omitted route. Only a complete pool makes its restricted MIP bound a global bound. It is mainly useful for tiny verification examples.
+"""
+
+# ╔═╡ e80fae9f-d0c0-4be7-b391-dd8327236ced
+function route_pool_complete(data,pool)
+    for d in eachindex(data.v)
+        target=data.targets[d]
+        stack=[[data.sources[d]]]
+        while !isempty(stack)
+            path=pop!(stack)
+            last(path)==target && (Tuple(path) in pool.keys[d] || return false; continue)
+            length(path)-1 >= data.MaxSeg && continue
+            current=last(path)
+            for next_vertex in vertices(data.graph)
+                next_vertex in path && continue
+                data.counts[current,next_vertex] > 0 && data.counts[next_vertex,target] > 0 || continue
+                push!(stack,[path;next_vertex])
+            end
+        end
+    end
+    return true
+end
+
+# ╔═╡ cf434e7f-4d91-4dc1-8442-fe30f9e6af52
+md"""
+### `expand_route_pool!` — Continue searching beyond an LP-optimal route pool
+
+A persistent enumeration cursor visits simple waypoint sequences in increasing segment count. Each call adds a bounded batch per demand, including routes with nonnegative LP reduced cost that may help an integer solution. Cyclic vertex ordering spreads early alternatives across demands reproducibly. All endpoint, reachability and MaxSeg checks remain active. No route is excluded from the original domain; no upper bound or optimality claim comes from enumeration alone. The cursor uses constant storage per demand rather than storing the exponential path tree.
+"""
+
+# ╔═╡ ef4be839-72c5-46f0-a574-c18135b6eb47
+function expand_route_pool!(data,pool,ranks,hops;max_routes,seed=1,per_demand=2,
+        deadline=Inf,max_binary_variables=2_000_000)
+    added=0
+    for d in eachindex(data.v)
+        time() >= deadline && break
+        length(pool.columns) >= max_binary_variables && break
+        length(pool.by_demand[d]) >= max_routes && continue
+        source,target=data.sources[d],data.targets[d]
+        nodes=[i for i in vertices(data.graph) if i != source && i != target]
+        isempty(nodes) && (hops[d]=data.MaxSeg;continue)
+        offset=mod(seed+d-1,length(nodes))
+        nodes=circshift(nodes,offset)
+        accepted=0
+        attempts=0
+        while hops[d] < data.MaxSeg && accepted < per_demand && attempts < 256
+            time() >= deadline && break
+            length(pool.columns) >= max_binary_variables && break
+            length(pool.by_demand[d]) >= max_routes && break
+            count=big(length(nodes))^hops[d]
+            if ranks[d] >= count
+                ranks[d]=0
+                hops[d]+=1
+                continue
+            end
+            rank=ranks[d]
+            ranks[d]+=1
+            attempts+=1
+            path=Int[source]
+            for h in 1:hops[d]
+                digit=Int(mod(rank,length(nodes)))+1
+                push!(path,nodes[digit])
+                rank=div(rank,length(nodes))
+            end
+            push!(path,target)
+            length(unique(path)) == length(path) || continue
+            all(data.counts[path[h],path[h+1]] > 0 for h in 1:length(path)-1) || continue
+            column=add_route_column!(pool,data,d,path;max_routes)
+            if column > 0
+                added+=1
+                accepted+=1
+            end
+        end
+    end
+    return (;added,exhausted=all(hops .>= data.MaxSeg))
+end
+
+# ╔═╡ de3e2d40-0941-490c-983b-d614c4090f41
+function solve_time0_routes(data; solver=:highs,instance="instance",run=1,time_limit=1800.0,
+        seed=1,threads=1,max_binary_variables=2_000_000,log_file="",solution_file="",
+        console=false,lock_tolerance=1e-7,max_routes_per_demand=16,pricing_rounds=40,
+        pricing_time_limit=30.0,proof_tolerance=1e-7,
+        highs_profile=:default,target_gap=0.10,deadline_callback=true,warm_start_seconds=3.0,
+        stage_observer=nothing)
+    isfinite(time_limit) && time_limit > 0 || error("Invalid time limit")
+    max_routes_per_demand >= 1 && pricing_rounds >= 1 || error("Invalid route settings")
+    pricing_time_limit >= 0 && proof_tolerance >= 0 || error("Invalid pricing or proof tolerance")
+    started_wall = time()
+    pool = initial_route_pool(data)
+    heuristic_started = time_ns()
+    warm = improve_route_pool!(data,pool;seconds=warm_start_seconds,max_routes=max_routes_per_demand)
+    heuristic_seconds = (time_ns()-heuristic_started)/1e9
+    validation = warm.validation
+    first_bound = route_cut_lower_bound(data)
+    active_bound = first_bound
+    completed = 0
+    active_stage = 1
+    total_nodes = 0
+    elapsed = 0.0
+    lp_seconds = 0.0
+    pricing_wall = 0.0
+    locks = Float64[]
+    certified_bounds = Float64[]
+    termination = "NOT_RUN"
+    primal = "FEASIBLE_POINT"
+    root = isempty(log_file) ? "" : replace(log_file,r"\.log$" => "")
+    stage_csv = isempty(root) ? "" : root * "_stages.csv"
+    !isempty(stage_csv) && isfile(stage_csv) && rm(stage_csv)
+    write_solution_checkpoint(solution_file,data,validation;solver,instance,run,completed,
+        active_stage,lower_bound=first_bound,stage_lower_bound=active_bound,lock_tolerance,
+        formulation="routes",target_gap,proof_tolerance)
+    k=1
+    stage_cycle=0
+    stage_bound=0.0
+    pool_limit=max_routes_per_demand
+    ranks=fill(big(0),length(data.v))
+    hops=ones(Int,length(data.v))
+    search_deadline=started_wall+time_limit+max(30.0,0.1*time_limit)
+    while k <= length(data.arcs)
+        active_stage = k
+        remaining = time_limit-elapsed
+        remaining <= 1e-3 && (termination="TIME_LIMIT";break)
+        time() >= search_deadline && (termination="SEARCH_WALL_LIMIT";break)
+        stage_cycle+=1
+        added_routes=0
+        if stage_cycle > 1
+            pool_limit=min(max_binary_variables,max(pool_limit+2,2*pool_limit))
+            expansion=expand_route_pool!(data,pool,ranks,hops;max_routes=pool_limit,seed,
+                deadline=min(search_deadline,time()+5.0),max_binary_variables)
+            added_routes=expansion.added
+            if added_routes == 0 && length(pool.columns) >= max_binary_variables
+                termination="ROUTE_POOL_LIMIT"
+                break
+            end
+        end
+        prefix = isempty(root) ? "" : root * "_stage-" * lpad(k,3,'0') * "_cycle-" * lpad(stage_cycle,3,'0')
+        lp = solve_route_lp!(data,pool,k,locks;remaining=min(remaining*0.35,60.0),seed,
+            rounds=pricing_rounds,max_routes=pool_limit,
+            pricing_wall_limit=min(pricing_time_limit,max(0.0,search_deadline-time())),log_prefix=prefix,
+            max_binary_variables)
+        elapsed += lp.optimize_seconds
+        lp_seconds += lp.optimize_seconds
+        pricing_wall += lp.pricing_wall_seconds
+        active_bound = max(stage_bound,k == 1 ? first_bound : certified_bounds[end],
+            ismissing(lp.bound) ? 0.0 : lp.bound)
+        k == 1 && (first_bound=max(first_bound,active_bound))
+        current_value = sum(sort(validation.arc_loads;rev=true)[1:k])
+        write_solution_checkpoint(solution_file,data,validation;solver,instance,run,completed,
+            active_stage,lower_bound=first_bound,stage_lower_bound=active_bound,lock_tolerance,
+            formulation="routes",target_gap,proof_tolerance)
+        nodes = 0
+        restricted_bound = missing
+        mip_seconds = 0.0
+        mip_status = "NOT_NEEDED"
+        remaining = time_limit-elapsed
+        if current_value-active_bound > proof_tolerance && remaining > 1e-3
+            slice=min(remaining,60.0)
+            master = build_route_master(data,pool,k,locks;solver,time_limit=slice,
+                seed,threads,max_binary_variables,console,highs_profile)
+            start_route_master!(master,validation)
+            path = isempty(prefix) ? "" : prefix * ".log"
+            set_stage_time_limit!(master.model,solver,slice)
+            set_stage_log!(master.model,solver,path;console)
+            write_solve_event(path,"start",remaining,k)
+            solver == :highs && install_highs_deadline!(master.model,slice;enabled=deadline_callback)
+            mip_seconds = try
+                @elapsed optimize!(master.model)
+            finally
+                close_stage_log!(master.model,solver)
+            end
+            write_solve_event(path,"end",max(0.0,time_limit-elapsed-mip_seconds),k)
+            isnothing(stage_observer) || stage_observer(master.model,solver,k,path)
+            elapsed += mip_seconds
+            mip_status = string(termination_status(master.model))
+            nodes = node_count(master.model)
+            total_nodes += nodes
+            candidate_bound = objective_bound(master.model)
+            restricted_bound = isfinite(candidate_bound) ? candidate_bound : missing
+            if !ismissing(restricted_bound) && route_pool_complete(data,pool)
+                active_bound=max(active_bound,restricted_bound)
+                k==1 && (first_bound=max(first_bound,active_bound))
+            end
+            if primal_status(master.model) == ORANGE_MOI.FEASIBLE_POINT
+                selection = Int[]
+                for d in eachindex(data.v)
+                    chosen = [p for p in pool.by_demand[d] if value(master.y[p]) > 0.5]
+                    length(chosen) == 1 || error("Invalid integer route selection")
+                    push!(selection,only(chosen))
+                end
+                all(abs(value(y)-round(value(y))) <= 1e-5 for y in master.y) || error("Nonintegral route incumbent")
+                candidate = validate_route_selection(data,pool,selection)
+                candidate_loads = sort(candidate.arc_loads;rev=true)
+                all(sum(candidate_loads[1:h]) <= locks[h]+1e-5 for h in eachindex(locks)) ||
+                    error("Incumbent violates an earlier lexicographic lock")
+                candidate_value = sum(sort(candidate.arc_loads;rev=true)[1:k])
+                if candidate_value <= current_value + 1e-7
+                    validation = candidate
+                    current_value = candidate_value
+                end
+            end
+            empty!(master.model)
+        end
+        active_bound <= current_value + proof_tolerance || error("Computed global bound exceeds validated incumbent")
+        certified = current_value-active_bound <= proof_tolerance
+        row = (solver=String(solver),solver_version=orange_solver_version(solver),stage=k,cycle=stage_cycle,
+            added_enumerated_routes=added_routes,pool_limit=pool_limit,
+            objective="sum_of_largest_$(k)_loads",formulation="routes",route_incumbent=current_value,
+            lower_bound=active_bound,gap=experiment_gap(current_value,active_bound),
+            restricted_mip_bound=restricted_bound,restricted_mip_termination=mip_status,
+            globally_certified=certified,route_columns=length(pool.columns),
+            lp_optimize_seconds=lp.optimize_seconds,mip_optimize_seconds=mip_seconds,
+            cumulative_optimize_seconds=elapsed,pricing_wall_seconds=lp.pricing_wall_seconds,
+            pricing_oracle_complete=lp.complete,column_generation_converged=lp.converged,nodes=nodes,
+            log_file=isempty(prefix) || !isfile(prefix * ".log") ? "" : abspath(prefix * ".log"))
+        isempty(stage_csv) || append_result_csv(stage_csv,row)
+        if !isempty(stage_csv)
+            println(instance," | stage=",k," cycle=",stage_cycle," routes=",length(pool.columns),
+                " value=",current_value," global_bound=",active_bound,
+                " certified=",certified," optimize_seconds=",elapsed)
+            flush(stdout)
+        end
+        if certified
+            completed = k
+            push!(locks,current_value+lock_tolerance)
+            push!(certified_bounds,active_bound)
+            termination = "OPTIMAL"
+            k+=1
+            stage_cycle=0
+            stage_bound=0.0
+        else
+            stage_bound=active_bound
+            termination="TIME_LIMIT"
+        end
+        write_solution_checkpoint(solution_file,data,validation;solver,instance,run,completed,
+            active_stage,lower_bound=first_bound,stage_lower_bound=active_bound,lock_tolerance,
+            formulation="routes",target_gap,proof_tolerance)
+    end
+    sorted_loads = sort(validation.arc_loads;rev=true)
+    status = completed == length(data.arcs) ? "Optimal" : "Not Optimal"
+    mlu_gap = experiment_gap(validation.maximum_load,first_bound)
+    active_gap = experiment_gap(sum(sorted_loads[1:active_stage]),active_bound)
+    quality = approximation_quality(true,mlu_gap,active_gap,completed,length(data.arcs),target_gap)
+    write_solution_checkpoint(solution_file,data,validation;solver,instance,run,completed,
+        active_stage,lower_bound=first_bound,stage_lower_bound=active_bound,lock_tolerance,
+        formulation="routes",target_gap,proof_tolerance,termination,status)
+
+    return (instance=String(instance),run=run,time=0,solver=String(solver),
+        solver_version=orange_solver_version(solver),vertices=nv(data.graph),links=length(data.arcs),
+        demands=length(data.v),objective=validation.maximum_load,lower_bound=first_bound,
+        cpu_time_seconds=elapsed,status=status,termination=termination,primal_status=primal,
+        gap=mlu_gap,nodes=total_nodes,
+        feasible=true,validated=true,checked_mlu=validation.maximum_load,
+        lex_completed_stages=completed,lex_total_stages=length(data.arcs),active_stage=active_stage,
+        stage_objective=sum(sorted_loads[1:active_stage]),stage_lower_bound=active_bound,
+        stage_gap=active_gap,highs_profile=String(highs_profile),target_gap=quality.target_gap,
+        mlu_target_met=quality.mlu_target_met,active_stage_target_met=quality.active_stage_target_met,
+        quality_status=quality.quality_status,deadline_callback=deadline_callback,
+        sorted_loads_json=JSON3.write(sorted_loads),time_limit=Float64(time_limit),seed=seed,threads=threads,
+        objective_mode="lexicographic_sorted_loads",splitting=String(data.splitting),
+        lock_tolerance=lock_tolerance,binary_variables=length(pool.columns),
+        log_file=isempty(stage_csv) ? "" : abspath(stage_csv),
+        solution_file=isempty(solution_file) ? "" : abspath(solution_file),error="",
+        formulation="routes",potential_compact_variables=length(data.v)*length(data.segments),
+        candidate_routes=length(pool.columns),pricing_lp_solver="highs",
+        pricing_optimize_seconds=lp_seconds,mip_optimize_seconds=elapsed-lp_seconds,
+        pricing_wall_seconds=pricing_wall,wall_time_seconds=time()-started_wall,
+        bound_scope="global",proof_tolerance=proof_tolerance,
+        heuristic_seconds=heuristic_seconds,heuristic_improvements=warm.improvements)
+end
+
+# ╔═╡ 79b800a9-48e4-45a8-b597-9b8076728465
+md"""
+### `normalize_time0_result`
+
+Uses the same CSV column order for compact, route-based and failed runs. Missing diagnostics remain missing rather than shifting columns.
+"""
+
+# ╔═╡ b3659101-8e23-406c-96ca-a80b36579c7c
+function normalize_time0_result(row)
+    fields = (:instance,:run,:time,:solver,:solver_version,:vertices,:links,:demands,:objective,:lower_bound,:cpu_time_seconds,:status,:termination,:primal_status,:gap,:nodes,:feasible,:validated,:checked_mlu,:lex_completed_stages,:lex_total_stages,:active_stage,:stage_objective,:stage_lower_bound,:stage_gap,:highs_profile,:target_gap,:mlu_target_met,:active_stage_target_met,:quality_status,:deadline_callback,:sorted_loads_json,:time_limit,:seed,:threads,:objective_mode,:splitting,:lock_tolerance,:binary_variables,:log_file,:solution_file,:error,:formulation,:bound_scope,:potential_compact_variables,:candidate_routes,:pricing_lp_solver,:pricing_optimize_seconds,:mip_optimize_seconds,:pricing_wall_seconds,:wall_time_seconds,:proof_tolerance,:heuristic_seconds,:heuristic_improvements)
+    return (; (name => (hasproperty(row,name) ? getproperty(row,name) : missing) for name in fields)...)
+end
+
 # ╔═╡ f1b17671-4b54-4b2b-9231-20300509c373
-function solve_time0(data; solver=:scip, settings...)
+function solve_time0(data; solver=:highs, formulation=:auto, compact_threshold=100_000,
+        max_routes_per_demand=16,pricing_rounds=40,pricing_time_limit=30.0,
+        proof_tolerance=1e-7,warm_start_seconds=3.0,highs_profile=:auto,settings...)
     lock(ORANGE_SOLVER_LOCK)
     try
         solver in (:scip,:highs) || error("Unknown solver $solver; choose :scip or :highs")
         solver == :highs && HiGHS.Highs_resetGlobalScheduler(1)
-        return solve_time0_serial(data; solver, settings...)
+        formulation in (:auto,:compact,:routes) || error("Unknown formulation $formulation")
+        chosen = formulation == :auto ?
+            (length(data.v)*length(data.segments) > compact_threshold ? :routes : :compact) : formulation
+        selected_profile = highs_profile == :auto ?
+            (solver == :highs && chosen == :compact ? :incumbent : :default) : highs_profile
+        if chosen == :routes
+            result = solve_time0_routes(data;solver,max_routes_per_demand,pricing_rounds,
+                pricing_time_limit,proof_tolerance,warm_start_seconds,highs_profile=selected_profile,settings...)
+            return normalize_time0_result(result)
+        end
+        result = solve_time0_serial(data;solver,highs_profile=selected_profile,settings...)
+        return normalize_time0_result(merge(result,(formulation="compact",bound_scope="global")))
     finally
         unlock(ORANGE_SOLVER_LOCK)
     end
 end
 
+# ╔═╡ c77ef705-5cf7-4fda-ac94-508bf8193134
+md"""
+## Display the route formulation on the verification example
+
+The route and compact formulations must produce the same sorted vector. This tiny instance has a complete generated pool, so all four stages can be certified. Real instances may stop at a remaining global LP/integer gap.
+"""
+
+# ╔═╡ 534fb5b2-9055-42ea-ac95-68d7919bd7fc
+route_demo_result = solve_time0(lex_demo_data;solver=:highs,formulation=:routes,time_limit=5.0)
+
+# ╔═╡ 8b667b30-fffd-4231-97c4-a300612c4ffd
+(solver=route_demo_result.solver, formulation=route_demo_result.formulation,
+    sorted_loads=JSON3.read(route_demo_result.sorted_loads_json),
+    status=route_demo_result.status, certified_stages=route_demo_result.lex_completed_stages,
+    mlu_gap=route_demo_result.gap,quality=route_demo_result.quality_status,
+    route_variables=route_demo_result.candidate_routes,
+    original_potential_binaries=route_demo_result.potential_compact_variables)
+
 # ╔═╡ 1cbf9a85-1cb6-4d46-80cc-fecdd47e0ddf
-lex_demo_result = solve_time0(lex_demo_data; instance="lex-demo", time_limit=5.0,
+lex_demo_result = solve_time0(lex_demo_data; solver=:scip, instance="lex-demo", time_limit=5.0,
     log_file=joinpath(@__DIR__,"results","demo_scip","lex-demo.log"),
     solution_file=joinpath(@__DIR__,"results","demo_scip","lex-demo_solution.json"))
 
@@ -1953,9 +2941,12 @@ let
 end
 
 # ╔═╡ d4e261ad-a0f6-4cd4-9c30-d351c3bdcf93
-function run_seta_experiments(; solver=:scip, instances=1:20, runs=10, time_limit=1800.0,
+function run_seta_experiments(; solver=:highs, instances=1:20, runs=10, time_limit=1800.0,
         output_dir=nothing, seed_base=1000, threads=1,
-        splitting=:uniform_paths, max_binary_variables=2_000_000, console=false, lock_tolerance=1e-7)
+        splitting=:ecmp, max_binary_variables=2_000_000, console=false, lock_tolerance=1e-7,
+        highs_profile=:auto, target_gap=0.10, deadline_callback=true,
+        formulation=:auto,compact_threshold=100_000,max_routes_per_demand=16,
+        pricing_rounds=40,pricing_time_limit=30.0,proof_tolerance=1e-7,warm_start_seconds=3.0)
     solver in (:scip,:highs) || error("Unknown solver $solver; choose :scip or :highs")
     output_dir = isnothing(output_dir) ? joinpath(@__DIR__,"results","time0_lex_$(solver)") : abspath(output_dir)
     runs >= 1 || error("runs must be positive")
@@ -1963,7 +2954,10 @@ function run_seta_experiments(; solver=:scip, instances=1:20, runs=10, time_limi
     ids = collect(Int, instances)
     !isempty(ids) && all(i -> 1 <= i <= 20, ids) && length(unique(ids)) == length(ids) || error("Invalid instance IDs")
     mkpath(output_dir)
-    config = (schema_version=2, solver=String(solver),solver_version=orange_solver_version(solver),
+    config = (schema_version=5, route_search_policy="expand_until_budget", route_mip_slice_seconds=60.0, formulation=String(formulation),compact_threshold=compact_threshold,
+        max_routes_per_demand=max_routes_per_demand,pricing_rounds=pricing_rounds,
+        pricing_time_limit=pricing_time_limit,proof_tolerance=proof_tolerance,warm_start_seconds=warm_start_seconds, highs_profile=String(highs_profile), target_gap=Float64(target_gap),
+        deadline_callback=deadline_callback, solver=String(solver),solver_version=orange_solver_version(solver),
         instances=ids, runs=runs, time_limit=Float64(time_limit), seed_base=seed_base,
         threads=threads, splitting=String(splitting), objective_mode="lexicographic_sorted_loads",
         max_binary_variables=max_binary_variables,lock_tolerance=lock_tolerance,
@@ -2002,11 +2996,13 @@ function run_seta_experiments(; solver=:scip, instances=1:20, runs=10, time_limi
             else
                 try
                     row = solve_time0(data; solver, instance, run, time_limit, seed, threads,
-                        max_binary_variables, log_file, solution_file, console, lock_tolerance)
+                        max_binary_variables, log_file, solution_file, console, lock_tolerance,
+                        highs_profile, target_gap, deadline_callback, formulation,compact_threshold,
+                        max_routes_per_demand,pricing_rounds,pricing_time_limit,proof_tolerance,warm_start_seconds)
                 catch exception
                     exception isa InterruptException && rethrow()
                     message = sprint(showerror,exception)
-                    row = experiment_error_row(data,instance,run,time_limit,seed,threads,log_file,message,lock_tolerance,solver)
+                    row = normalize_time0_result(experiment_error_row(data,instance,run,time_limit,seed,threads,log_file,message,lock_tolerance,solver;highs_profile,target_gap,deadline_callback))
                     write(log_file,message * "\n")
                 end
                 temporary_checkpoint = checkpoint * ".tmp"
@@ -2038,6 +3034,1167 @@ experiment_table = if run_full_experiments
     experiment_summary_table(experiment_results.summary)
 else
     md"The summary table will appear here after the batch runs."
+end
+
+# ╔═╡ bc2aa034-eec5-4be9-8e67-f42e53274e97
+md"""
+# Data at time 1 and the two-period model
+
+Only directed link IDs listed at time 1 are removed: G(1)=(V,A\q(1)). The reverse link remains available unless its own ID is listed. Original arc IDs and array positions are retained; r[i,j,a,1]=0 on a removed physical arc. Shortest-path distances and ECMP fractions are recomputed, rather than copied from time 0. Traffic uses the second JSON entry v[d,1]; capacities and MaxSeg are unchanged.
+
+### Period-indexed Data equations
+
+Let F_1 contain the directed arc IDs listed in the time-1 intervention. Retaining the nominal arc index set A in all arrays gives
+
+```math
+A_0=A,\qquad A_1=A\setminus F_1,\qquad G_t=(V,A_t),\qquad t\in\{0,1\}.
+```
+
+For a reachable ordered pair i,j with i different from j, define the shortest-path next-hop set using distances computed on G_t:
+
+```math
+N_t(i,j)=\{k:(i,k)\in A_t,\ w_{ik}+\operatorname{dist}_t(k,j)=\operatorname{dist}_t(i,j)\}.
+```
+
+Next-hop ECMP divides equally at each router, so the physical-arc fractions satisfy
+
+```math
+r_{jj a t}=0,\qquad
+r_{ij a t}=\frac{1}{|N_t(i,j)|}\sum_{k\in N_t(i,j)}
+\left(\mathbf1_{a=(i,k)}+r_{kj a t}\right).
+```
+
+This recurrence applies to reachable pairs; unreachable segments are excluded from the model. Positive link metrics make the shortest-path recursion acyclic. For every failed physical arc, r[i,j,a,1] is zero. The stored capacity c[a] remains the original capacity, so no division by a zero failed-arc capacity is introduced.
+
+```math
+v_{d,0}=\text{tm.demands[d].v[1]},\qquad
+v_{d,1}=\text{tm.demands[d].v[2]},\qquad
+K=\text{scenario.max\_segments},\qquad
+\kappa_1=\text{scenario.budget entry at }t=1.
+```
+
+JSON IDs are mapped to Julia indices; the displayed arrays use `r[i,j,a,t]`, `v[d,t]`, and `c[a]`. The following functions are independent notebook-level definitions. The displayed example comes from the official subject, not a generated replacement for SetA.
+"""
+
+# ╔═╡ 0b8dc725-5f9e-4bb8-b28f-39ea4d795bec
+begin
+struct TimeRoutingRatios <: AbstractArray{Float64,4}
+    periods::Vector{RoutingRatios}
+end
+Base.size(r::TimeRoutingRatios)=(r.periods[1].n,r.periods[1].n,size(r.periods[1].values,2),length(r.periods))
+Base.axes(r::TimeRoutingRatios)=(Base.OneTo(size(r,1)),Base.OneTo(size(r,2)),Base.OneTo(size(r,3)),0:length(r.periods)-1)
+function Base.getindex(r::TimeRoutingRatios,i::Int,j::Int,a::Int,t::Int)
+    checkbounds(r,i,j,a,t)
+    return r.periods[t+1][i,j,a,0]
+end
+end
+
+# ╔═╡ 2b4d01b6-060a-4a1f-a746-b11e7600a3c9
+md"""
+### `period_graph_data` — rebuild one period on stable physical-arc indices
+
+Receives nominal Data, failed arc IDs, period traffic and a time label. Calculates routing on the active graph only, then embeds the sparse coefficients back into the original physical-arc columns. It validates that every demand remains reachable. No reverse failure or cumulative failure is inferred.
+"""
+
+# ╔═╡ 32f0ec3c-773f-4935-9c7c-c6efa67af057
+function period_graph_data(base,failed_ids,volumes,time;splitting=:ecmp)
+    unknown=setdiff(Set(failed_ids),Set(base.arc_ids))
+    isempty(unknown) || error("Unknown failed arc IDs: $unknown")
+    active=[a for a in eachindex(base.arcs) if !(base.arc_ids[a] in failed_ids)]
+    graph=SimpleDiGraph(length(base.node_ids))
+    for a in active
+        add_edge!(graph,base.arcs[a]...)
+    end
+    weights,scale=integer_metric_matrix(base.arcs[active],base.metric[active],nv(graph))
+    routing=routing_ratios(graph,weights,base.arcs[active];splitting)
+    values=spzeros(nv(graph)^2,length(base.arcs))
+    values[:,active]=routing.r.values
+    r=RoutingRatios(values,nv(graph))
+    all(routing.counts[s,t]>0 for (s,t) in zip(base.sources,base.targets)) || error("Unreachable demand at time $time")
+    all(x->isfinite(x)&&x>=0,volumes) || error("Invalid traffic at time $time")
+    distances=[routing.counts[i,j]>0 ? Float64(BigFloat(routing.distances[i,j])/BigFloat(scale)) : Inf
+        for i in 1:nv(graph),j in 1:nv(graph)]
+    segments=[(i,j) for i in 1:nv(graph) for j in 1:nv(graph) if i!=j && routing.counts[i,j]>0]
+    return merge(base,(;graph,r,counts=routing.counts,distances,segments,v=Float64.(volumes),time,
+        active_arc_indices=active,failed_arc_ids=sort(collect(failed_ids))))
+end
+
+# ╔═╡ 15eb46ca-9e71-4253-88f5-1a27e44cbf30
+md"""
+### `load_time01_data` — prepare both periods from the three original JSON files
+
+Loads nominal Data, validates the second traffic entry, reads the time-1 intervention and integer Budget, and calls the period builder. Missing Budget is rejected. The result exposes `r[i,j,a,t]` and `v[d,t]` with time axis `0:1`, plus both graphs, original IDs and reachability matrices. This function does not solve an optimization model.
+"""
+
+# ╔═╡ 77d88db4-3a6d-43ec-bd57-89a3ce8a614b
+function load_time01_data(prefix::AbstractString;splitting=:ecmp)
+    base=load_data(prefix;splitting)
+    tm=JSON3.read(read(prefix*"-tm.json",String))
+    scenario=JSON3.read(read(prefix*"-scenario.json",String))
+    tm.num_time_slots>=2 || error("Time 1 is missing")
+    failed=Set{Int}()
+    for event in scenario.interventions
+        Int(event.t)==1 || continue
+        union!(failed,Int.(event.links))
+    end
+    budgets=[Int(b.value) for b in scenario.budget if Int(b.t)==1]
+    length(budgets)==1 && only(budgets)>=0 || error("Expected one nonnegative time-1 Budget")
+    volumes=Float64[d.v[2] for d in tm.demands]
+    nominal=merge(base,(active_arc_indices=collect(eachindex(base.arcs)),failed_arc_ids=Int[]))
+    next=period_graph_data(base,failed,volumes,1;splitting)
+    v=JuMP.Containers.DenseAxisArray(hcat(base.v,volumes),eachindex(base.v),0:1)
+    r=TimeRoutingRatios([nominal.r,next.r])
+    return (;periods=[nominal,next],graphs=[nominal.graph,next.graph],r,v,
+        budget=only(budgets),MaxSeg=base.MaxSeg,node_ids=base.node_ids,arc_ids=base.arc_ids,
+        arcs=base.arcs,c=base.c,sources=base.sources,targets=base.targets,demand_ids=base.demand_ids,
+        splitting,times=0:1,prefix=abspath(prefix))
+end
+
+# ╔═╡ bd9a019c-a5f2-49d6-9866-ffe672b17684
+md"""
+## Budget and original mathematical constraints
+
+For each demand and period, let x[d,i,j,t] indicate whether ordered segment (i,j) is present. The original conservation, segment limit and physical-load equations remain:
+
+```math
+\sum_j x_{ij}^{dt}-\sum_j x_{ji}^{dt}=\mathbf1_{i=s_d}-\mathbf1_{i=t_d},\qquad
+\sum_{i\ne j}x_{ij}^{dt}\le K,\qquad x_{ij}^{dt}\in\{0,1\},
+\quad\lambda_{at}\ge\frac{1}{c_a}\sum_d\sum_{i\ne j}v_{dt}r_{ijat}x_{ij}^{dt}.
+```
+
+Unreachable segments are excluded. Removed physical arcs have load zero. For the single transition, introduce continuous h[d,i,j] in [0,1]:
+
+```math
+h_{dij}\ge x_{ij}^{d1}-x_{ij}^{d0},\quad
+h_{dij}\ge x_{ij}^{d0}-x_{ij}^{d1},\quad
+\sum_d\sum_{i\ne j}h_{dij}\le\kappa(1).
+```
+
+For binary x, this is exactly the original absolute-difference Budget. A direct segment (s,t) replaced by (s,w),(w,t) costs 3. Reordering waypoints can change the segment set even if the waypoint set stays unchanged.
+
+Sort all 2|A| loads across **both** periods together and minimize that vector lexicographically using the existing sequential top-k objectives. It is not two separate period optimizations. The inactive arc/time entries are canonical zeros and remain in the full vector.
+
+### Column representation and scope
+
+One column is a complete connected segment sequence for one demand at one period. It satisfies conservation and MaxSeg by construction. Selecting exactly one column defines the original x as its segment-incidence vector. The Budget is imposed across periods on these incidences, not on column IDs.
+
+For the complete valid route domain P_dt, let delta_ijp be 1 precisely when route p contains ordered segment (i,j). The change of variables is
+
+```math
+\sum_{p\in P_{dt}}y_{dpt}=1,\qquad y_{dpt}\in\{0,1\},\qquad
+x_{ij}^{dt}=\sum_{p\in P_{dt}}\delta_{ijp}y_{dpt}.
+```
+
+The implementation allocates only generated columns. Accordingly, its current feasible domain can be restricted even though each stored column obeys the original routing constraints; global certification needs the pricing bound or full enumeration.
+
+### Joint lexicographic objective and numerical locks
+
+Let M=2|A| and let ell_(1) through ell_(M) denote all physical arc/time loads sorted in nonincreasing order, including failed-arc zeros:
+
+```math
+\operatorname{lexmin}\left(\ell_{(1)},\ldots,\ell_{(M)}\right),\qquad
+F_k(\lambda)=\sum_{q=1}^{k}\ell_{(q)}.
+```
+
+At stage k, minimize F_k while retaining the previously certified F_j values. The epigraph used by `add_lexicographic_stage!` is
+
+```math
+F_k(\lambda)=\min_{\eta\in\mathbb R,\ s\ge0}
+\left\{k\eta+\sum_{a\in A}\sum_{t=0}^{1}s_{at}:
+ s_{at}\ge\lambda_{at}-\eta\right\}.
+```
+
+The stored loads are nonnegative, so restricting eta to be nonnegative is also valid. In exact arithmetic earlier locks are F_j(lambda) <= F_j*. In the implementation they allow `lock_tolerance`, and stage advancement requires the incumbent top-k value minus a valid global lower bound to be at most `proof_tolerance`. Defaults here are 1e-7 and 2e-6 respectively. Therefore “certified” is a numerical statement at the reported tolerances. A 10% MLU gap is only a reporting target and does not certify the remaining vector or release earlier locks.
+
+Unlike the time-0 reduction, repeated waypoints are not automatically deleted here. Columns may revisit a vertex, but cannot repeat the same ordered segment: this retains the original binary-segment load accounting. No MTZ/simple-waypoint restriction is imported from the time-0 model. A generated pool is restricted; its native integer bound is global only when enumeration is complete. This model never labels an incomplete-pool optimal solve globally Optimal.
+"""
+
+# ╔═╡ 91725283-c491-4833-8761-f3392001721e
+md"""
+### `segment_change_count` — compute the original reconfiguration cost
+
+Receives two complete vertex sequences including endpoints. Returns the size of the symmetric difference of their ordered segment sets. It is used for independent validation and for Budget examples.
+"""
+
+# ╔═╡ 5cea359a-93dc-484a-b9fa-7506880410cf
+function segment_change_count(path0,path1)
+    return length(symdiff(Set(zip(path0,path0[2:end])),Set(zip(path1,path1[2:end]))))
+end
+
+# ╔═╡ f21f8c26-ef05-420d-9084-f9e19c57ef81
+md"""
+### `add_time01_column!` — validate and store a segment sequence
+
+Checks endpoints, segment count, reachability, distinct consecutive vertices and absence of repeated ordered segments. Stores its physical-load vector and ordered segment-incidence keys. Vertex revisits are permitted; malformed/disconnected routes are not.
+"""
+
+# ╔═╡ a7f93306-bc7c-45f6-a236-fc02a64a4dcd
+function add_time01_column!(columns,keys,data,q,path;max_routes=typemax(Int))
+    D=length(data.sources);d=mod(q-1,D)+1;t=div(q-1,D)
+    key=Tuple(path)
+    key in keys[q] && return 0
+    length(keys[q])>=max_routes && return 0
+    first(path)==data.sources[d] && last(path)==data.targets[d] || error("Wrong temporal route endpoints")
+    length(path)-1<=data.MaxSeg || error("Too many temporal segments")
+    pairs=collect(zip(path,path[2:end]))
+    all(i!=j for (i,j) in pairs) || error("Zero-length segment")
+    length(unique(pairs))==length(pairs) || error("Repeated ordered segment")
+    period=data.periods[t+1]
+    all(period.counts[i,j]>0 for (i,j) in pairs) || error("Unreachable temporal segment")
+    loads=zeros(length(data.arcs))
+    for (i,j) in pairs,a in eachindex(loads)
+        loads[a]+=data.v[d,t]*data.r[i,j,a,t]/data.c[a]
+    end
+    n=length(data.node_ids)
+    push!(columns,(;q,d,t,path=copy(path),coefficients=sparsevec(loads),segments=[i+(j-1)*n for (i,j) in pairs]))
+    push!(keys[q],key)
+    return length(columns)
+end
+
+# ╔═╡ 58534b35-038a-4589-8911-c9266655d42c
+md"""
+### `expand_time01_columns!` — enumerate further valid columns with a persistent cursor
+
+Visits waypoint sequences in increasing length, including vertex revisits, without storing an exponential search tree. A completed cursor establishes that the whole route domain was enumerated. The small official example is enumerated completely; large instances receive bounded batches and remain uncertified unless a global bound closes.
+"""
+
+# ╔═╡ e72379af-2de9-4b3b-bcc1-35b1cbaf32ee
+function expand_time01_columns!(columns,keys,data,ranks,hops;max_routes=typemax(Int),
+        per_group=2,deadline=Inf,max_columns=100_000)
+    n=length(data.node_ids);D=length(data.sources);added=0
+    for q in eachindex(keys)
+        accepted=0;attempts=0;d=mod(q-1,D)+1;t=div(q-1,D)
+        while hops[q]<data.MaxSeg && accepted<per_group && attempts<100_000
+            time()>=deadline && return (;added,complete=false)
+            length(columns)>=max_columns && return (;added,complete=false)
+            length(keys[q])>=max_routes && break
+            count=big(n)^hops[q]
+            if ranks[q]>=count
+                ranks[q]=0;hops[q]+=1;continue
+            end
+            rank=ranks[q];ranks[q]+=1;attempts+=1
+            path=Int[data.sources[d]]
+            for h in 1:hops[q]
+                push!(path,Int(mod(rank,n))+1);rank=div(rank,n)
+            end
+            push!(path,data.targets[d]);pairs=collect(zip(path,path[2:end]))
+            all(i!=j && data.periods[t+1].counts[i,j]>0 for (i,j) in pairs) || continue
+            length(unique(pairs))==length(pairs) || continue
+            p=add_time01_column!(columns,keys,data,q,path;max_routes)
+            p>0 && (accepted+=1;added+=1)
+        end
+    end
+    return (;added,complete=all(hops.>=data.MaxSeg))
+end
+
+# ╔═╡ 7003ce69-5a05-4db5-b8ca-a71b15ab0061
+md"""
+### `build_time01_master` — select routes with the original cross-period Budget
+
+Builds a fresh LP or binary master. Demand/period equalities select one route; physical rows recompute both-period loads. Sparse change variables and two absolute-value inequalities per used demand/segment enforce Budget. Previously certified global top-k locks are retained. No demand-by-all-segments tensor is allocated.
+"""
+
+# ╔═╡ c86c4c6c-6816-4b47-abe1-9d4f53ee102f
+function build_time01_master(data,columns,k,locks;integer=true,solver=:highs,
+        time_limit=60.,seed=1,threads=1,max_variables=2_000_000)
+    D=length(data.sources);m=length(data.arcs)
+    pair_keys=sort(unique([(c.d,s) for c in columns for s in c.segments]))
+    length(columns)+length(pair_keys)+2m*(length(locks)+2)<=max_variables || error("MODEL_SIZE_LIMIT: temporal master allocation guard")
+    model=create_time0_optimizer(integer ? solver : :highs;time_limit,seed,threads=integer ? threads : 1)
+    set_string_names_on_creation(model,false)
+    y=@variable(model,[1:length(columns)],lower_bound=0.)
+    integer && foreach(set_binary,y)
+    loads=@variable(model,[1:2m],lower_bound=0.)
+    z=@variable(model,lower_bound=0.)
+    bygroup=[Int[] for q in 1:2D]
+    for (p,c) in enumerate(columns)
+        push!(bygroup[c.q],p)
+    end
+    convexity=[@constraint(model,sum(y[p] for p in bygroup[q])==1) for q in 1:2D]
+    expressions=[AffExpr(0.) for a in 1:2m]
+    changes=Dict(key=>AffExpr(0.) for key in pair_keys)
+    for (p,c) in enumerate(columns)
+        indices,values=findnz(c.coefficients)
+        for h in eachindex(indices)
+            add_to_expression!(expressions[c.t*m+indices[h]],values[h],y[p])
+        end
+        for s in c.segments
+            add_to_expression!(changes[c.d,s],c.t==1 ? 1. : -1.,y[p])
+        end
+    end
+    load_rows=[@constraint(model,expressions[a]<=loads[a]) for a in 1:2m]
+    for a in 1:2m
+        @constraint(model,loads[a]<=z)
+    end
+    h=@variable(model,[1:length(pair_keys)],lower_bound=0.,upper_bound=1.)
+    plus=[@constraint(model,changes[key]<=h[i]) for (i,key) in enumerate(pair_keys)]
+    minus=[@constraint(model,-changes[key]<=h[i]) for (i,key) in enumerate(pair_keys)]
+    budget_row=@constraint(model,sum(h)<=data.budget)
+    master=(;model,y,loads,z,convexity,load_rows,plus,minus,pair_keys,h,budget_row,bygroup)
+    for j in eachindex(locks)
+        previous=add_lexicographic_stage!(master,j,2m)
+        @constraint(model,previous.expression<=locks[j])
+    end
+    stage=add_lexicographic_stage!(master,k,2m)
+    return merge(master,(;stage))
+end
+
+# ╔═╡ 728107f3-38e8-49eb-82cd-ac3556a23c02
+md"""
+### `validate_time01_selection` — independently check routes, loads and Budget
+
+Recomputes each physical load directly from r, reconstructs original-ID waypoint output for both periods and computes the actual symmetric-difference transition cost. Saved pool coefficients and solver change-variable values are not trusted. A feasible incumbent must satisfy the original Budget exactly as an integer count.
+"""
+
+# ╔═╡ 266dfd3f-b287-49d7-9a3a-65892b36c770
+function validate_time01_selection(data,columns,selection)
+    D=length(data.sources);m=length(data.arcs)
+    length(selection)==2D || error("Missing temporal routes")
+    loads=zeros(2m);paths=Vector{Int}[];srpaths=NamedTuple[]
+    for q in 1:2D
+        c=columns[selection[q]];c.q==q || error("Wrong demand/period selection")
+        path=c.path;pairs=collect(zip(path,path[2:end]))
+        first(path)==data.sources[c.d] && last(path)==data.targets[c.d] || error("Invalid temporal endpoints")
+        length(pairs)<=data.MaxSeg && length(unique(pairs))==length(pairs) || error("Invalid temporal segments")
+        for (i,j) in pairs
+            i!=j && data.periods[c.t+1].counts[i,j]>0 || error("Unreachable temporal segment")
+            for a in eachindex(data.arcs)
+                loads[c.t*m+a]+=data.v[c.d,c.t]*data.r[i,j,a,c.t]/data.c[a]
+            end
+        end
+        push!(paths,copy(path))
+        push!(srpaths,(d=data.demand_ids[c.d],t=c.t,w=data.node_ids[path[2:end-1]]))
+    end
+    cost=sum(segment_change_count(paths[d],paths[D+d]) for d in 1:D)
+    cost<=data.budget || error("Temporal Budget violated: $cost > $(data.budget)")
+    return (;valid=true,loads,paths,srpaths,cost,selection=copy(selection),mlu=maximum(loads;init=0.))
+end
+
+# ╔═╡ 824855af-6248-4b15-9578-ba9b06881abe
+md"""
+### `start_time01_master!` — submit a validated feasible warm start
+
+Sets selected route binaries, exact physical loads and MLU. Epigraph starts may be completed by the solver. Change-variable starts equal the selected segment-set differences. Each master is fresh, avoiding repeated partial-start accumulation in incremental SCIP solves.
+"""
+
+# ╔═╡ 1958d2c4-f17f-4dfc-8905-a4ea32570430
+function start_time01_master!(master,columns,validation,data,k,locks)
+    for p in eachindex(master.y)
+        set_start_value(master.y[p],p in validation.selection ? 1. : 0.)
+    end
+    for a in eachindex(master.loads)
+        set_start_value(master.loads[a],validation.loads[a])
+    end
+    set_start_value(master.z,validation.mlu)
+    for (i,(d,s)) in enumerate(master.pair_keys)
+        present0=s in columns[validation.selection[d]].segments
+        present1=s in columns[validation.selection[length(data.sources)+d]].segments
+        set_start_value(master.h[i],present0!=present1 ? 1. : 0.)
+    end
+    # Fresh epigraph variables need not have explicit starts; the solver may complete them.
+    return nothing
+end
+
+# ╔═╡ 77eb45a4-a033-4906-afac-c5eedf0618bf
+md"""
+### `temporal_pricing_bound` — certify a global LP bound, not a pool bound
+
+Uses the restricted LP's demand/period and physical-load duals. Signed dual prices from the absolute-value Budget rows contribute to segment costs. Hop-bounded dynamic programming prices a relaxation allowing repeated ordered segments; its minimum is no larger than the minimum over valid binary-segment columns, so it yields a conservative missing-column correction even if its minimizing walk is inadmissible. Only a full completed sweep supplies a bound. A valid priced sequence can be added to the pool; an invalid walk is never installed as a route.
+
+```math
+\rho_{dt}^{LB}\le\min_{p\in P_{dt}}(c_{dtp}^{dual}-\alpha_{dt}),\qquad
+LB=D_R+\sum_{d,t}\min(0,\rho_{dt}^{LB}).
+```
+
+Missing Budget incidence rows are extended with zero duals; their new change variables have nonnegative reduced cost under the nonpositive Budget dual. A numerical safety buffer is subtracted. If interrupted before every demand/period has been priced, this function returns no new global bound.
+"""
+
+# ╔═╡ 8c2c269f-ae46-4281-a5de-7aacde226a8e
+function temporal_pricing_bound(data,master;deadline=Inf)
+    D=length(data.sources);n=length(data.node_ids);m=length(data.arcs)
+    alpha=dual.(master.convexity);weights=-dual.(master.load_rows)
+    minimum(weights;init=0.)>=-1e-7 || error("Invalid temporal load dual")
+    plus=dual.(master.plus);minus=dual.(master.minus)
+    projection_error=sum(sum(data.v[d,t] for d in 1:D)*data.MaxSeg*sum(max.(-weights[t*m+1:(t+1)*m],0.)./data.c) for t in 0:1)
+    weights=max.(weights,0.)
+    physical=[reshape(data.periods[t+1].r.values*(weights[t*m+1:(t+1)*m]./data.c),n,n) for t in 0:1]
+    correction=0.;priced=NamedTuple[]
+    budget_rows_by_demand=[Int[] for d in 1:D]
+    for (h,(d,s)) in enumerate(master.pair_keys)
+        push!(budget_rows_by_demand[d],h)
+    end
+    for q in 1:2D
+        time()>=deadline && return (;complete=false,bound=missing,priced)
+        d=mod(q-1,D)+1;t=div(q-1,D)
+        costs=data.v[d,t].*physical[t+1]
+        for h in budget_rows_by_demand[d]
+            demand,s=master.pair_keys[h]
+            i=mod(s-1,n)+1;j=div(s-1,n)+1
+            costs[i,j]+=(t==0 ? 1. : -1.)*(plus[h]-minus[h])
+        end
+        for j in 1:n,i in 1:n
+            (i==j || data.periods[t+1].counts[i,j]==0) && (costs[i,j]=Inf)
+        end
+        previous=fill(Inf,n);previous[data.targets[d]]=0.
+        successors=zeros(Int,n,data.MaxSeg)
+        for hop in 1:data.MaxSeg
+            current=copy(previous)
+            for j in 1:n,i in 1:n
+                candidate=costs[i,j]+previous[j]
+                if candidate<current[i]
+                    current[i]=candidate;successors[i,hop]=j
+                end
+            end
+            previous=current
+        end
+        rho=previous[data.sources[d]]-alpha[q];correction+=min(0.,rho)
+        path=Int[data.sources[d]];node=data.sources[d]
+        for hop in data.MaxSeg:-1:1
+            next=successors[node,hop]
+            next==0 && continue
+            push!(path,next);node=next
+        end
+        pairs=collect(zip(path,path[2:end]))
+        if rho < -1e-8 && last(path)==data.targets[d] && length(unique(pairs))==length(pairs)
+            push!(priced,(;q,path))
+        end
+    end
+    dual_value=dual_objective_value(master.model)
+    safety=1e-7*(1+abs(dual_value)+sum(abs,alpha)+sum(abs,weights)+sum(abs,plus)+sum(abs,minus))
+    # Compensate for clamping tiny negative load duals before pricing.
+    bound=max(0.,dual_value+correction-safety-projection_error)
+    return (;complete=true,bound,priced)
+end
+
+# ╔═╡ 73bd06cb-46f4-4575-bf95-df966b1249dc
+md"""
+### `solve_time01_separate` — reference formulation with separate period columns
+
+Defaults to HiGHS and rebuilds a sparse route master for each stage/cycle. Small official fixtures enumerate their full connected, no-repeated-segment domain; larger instances use bounded enumeration and valid priced columns. The first LP gives a corrected global bound; native MIP bounds are global only for a complete pool. Only a globally certified stage is locked. A positive gap keeps the current stage active while budget and wall safeguards permit expansion. The 10% reporting target never relaxes Budget, constraints or lexicographic locks. The allocation guard can reject an oversized selected master; this is not a proof of infeasibility.
+"""
+
+# ╔═╡ 24e03d85-549e-4048-a07b-c76c927c239f
+function solve_time01_separate(data;time_limit=3600.,solver=:highs,seed=1,threads=1,
+        target_gap=.10,lock_tolerance=1e-7,proof_tolerance=2e-6,max_variables=2_000_000,
+        max_columns=100_000,log_file="",solution_file="")
+    isfinite(time_limit)&&time_limit>0 || error("Invalid two-period time limit")
+    data.budget>=0 || error("Invalid Budget")
+    isempty(solution_file) || mkpath(dirname(abspath(solution_file)))
+    isempty(log_file) || mkpath(dirname(abspath(log_file)))
+    lock(ORANGE_SOLVER_LOCK)
+    try
+        solver==:highs && HiGHS.Highs_resetGlobalScheduler(1)
+        started=time();elapsed=0.;D=length(data.sources);m=length(data.arcs)
+        columns=NamedTuple[];keys=[Set{Tuple}() for q in 1:2D]
+        for q in 1:2D
+            d=mod(q-1,D)+1
+            add_time01_column!(columns,keys,data,q,[data.sources[d],data.targets[d]])
+        end
+        selection=collect(1:2D);validation=validate_time01_selection(data,columns,selection)
+        ranks=fill(big(0),2D);hops=zeros(Int,2D)
+        tiny=length(data.node_ids)<=8 && data.MaxSeg<=4
+        complete=false;pool_limit=16;locks=Float64[];completed=0;k=1;cycle=0
+        first_bound=0.;active_bound=0.;stage_bound=0.;status="Not Optimal";termination="TIME_LIMIT";nodes=0
+        !isempty(log_file) && isfile(log_file) && rm(log_file)
+        while k<=2m
+            remaining=time_limit-elapsed
+            remaining<=1e-3 && break
+            time()-started>time_limit+max(30.,.1*time_limit) && (termination="SEARCH_WALL_LIMIT";break)
+            cycle+=1
+            expansion=expand_time01_columns!(columns,keys,data,ranks,hops;
+                per_group=tiny ? typemax(Int) : 2,max_routes=tiny ? typemax(Int) : pool_limit,
+                deadline=time()+min(5.,max(.1,remaining)),max_columns)
+            complete=expansion.complete
+            lp=build_time01_master(data,columns,k,locks;integer=false,time_limit=min(remaining*.25,30.),seed,max_variables)
+            install_highs_deadline!(lp.model,min(remaining*.25,30.))
+            seconds=@elapsed optimize!(lp.model);elapsed+=seconds
+            price=(complete=false,bound=missing,priced=NamedTuple[])
+            if termination_status(lp.model)==ORANGE_MOI.OPTIMAL && dual_status(lp.model)==ORANGE_MOI.FEASIBLE_POINT
+                price=temporal_pricing_bound(data,lp;deadline=time()+min(5.,max(.1,time_limit-elapsed)))
+            end
+            empty!(lp.model)
+            active_bound=max(stage_bound,ismissing(price.bound) ? 0. : price.bound)
+            k==1 && (first_bound=max(first_bound,active_bound))
+            for candidate in price.priced
+                length(columns)>=max_columns && break
+                add_time01_column!(columns,keys,data,candidate.q,candidate.path;max_routes=pool_limit)
+            end
+            remaining=time_limit-elapsed
+            value_now=sum(sort(validation.loads;rev=true)[1:k]);native_bound=missing
+            mip_seconds=0.;native_status="NOT_RUN"
+            if remaining>1e-3 && value_now-active_bound>proof_tolerance
+                slice=min(60.,remaining)
+                master=build_time01_master(data,columns,k,locks;solver,time_limit=slice,seed,threads,max_variables)
+                start_time01_master!(master,columns,validation,data,k,locks)
+                solver==:highs && install_highs_deadline!(master.model,slice)
+                mip_seconds=@elapsed optimize!(master.model);elapsed+=mip_seconds
+                native_status=string(termination_status(master.model))
+                nodes+=node_count(master.model)
+                bound=objective_bound(master.model)
+                isfinite(bound) && (native_bound=bound)
+                complete && !ismissing(native_bound) && (active_bound=max(active_bound,native_bound))
+                if primal_status(master.model)==ORANGE_MOI.FEASIBLE_POINT
+                    chosen=[only([p for p in master.bygroup[q] if value(master.y[p])>.5]) for q in 1:2D]
+                    all(abs(value(y)-round(value(y)))<1e-5 for y in master.y) || error("Noninteger temporal selection")
+                    candidate=validate_time01_selection(data,columns,chosen)
+                    vector=sort(candidate.loads;rev=true)
+                    all(sum(vector[1:j])<=locks[j]+1e-5 for j in eachindex(locks)) || error("Earlier temporal lock violated")
+                    if sum(vector[1:k])<=value_now+1e-7
+                        validation=candidate;value_now=sum(vector[1:k])
+                    end
+                end
+                empty!(master.model)
+            end
+            active_bound<=value_now+proof_tolerance || error("Temporal lower bound exceeds incumbent")
+            k==1 && (first_bound=max(first_bound,active_bound))
+            certified=value_now-active_bound<=proof_tolerance
+            row=(stage=k,cycle,objective=value_now,global_bound=active_bound,gap=experiment_gap(value_now,active_bound),
+                globally_certified=certified,pool_complete=complete,columns=length(columns),budget_used=validation.cost,
+                lp_seconds=seconds,mip_seconds,cumulative_optimize_seconds=elapsed,native_status,restricted_bound=native_bound)
+            isempty(log_file) || append_result_csv(log_file,row)
+            if certified
+                completed=k;push!(locks,value_now+lock_tolerance);k+=1;cycle=0;stage_bound=0.
+            else
+                stage_bound=active_bound;pool_limit=min(max_columns,2*pool_limit)
+                length(columns)>=max_columns && (termination="ROUTE_POOL_LIMIT";break)
+            end
+            if !isempty(solution_file)
+                payload=(srpaths=validation.srpaths,validated=true,budget_used=validation.cost,budget=data.budget,
+                    mlu=validation.mlu,global_mlu_bound=first_bound,lex_completed_stages=completed,
+                    lex_total_stages=2m,termination="RUNNING",sorted_loads=sort(validation.loads;rev=true))
+                write(solution_file*".tmp",JSON3.write(payload));mv(solution_file*".tmp",solution_file;force=true)
+            end
+        end
+        completed==2m && (status="Optimal";termination="OPTIMAL")
+        gap=experiment_gap(validation.mlu,first_bound)
+        result=(status,termination,objective=validation.mlu,lower_bound=first_bound,gap,
+            validated=true,budget_used=validation.cost,budget=data.budget,lex_completed_stages=completed,
+            lex_total_stages=2m,active_stage=min(k,2m),stage_lower_bound=active_bound,
+            stage_objective=sum(sort(validation.loads;rev=true)[1:min(k,2m)]),cpu_time_seconds=elapsed,
+            wall_time_seconds=time()-started,columns=length(columns),pool_complete=complete,nodes,
+            mlu_target_met=!ismissing(gap)&&gap<=target_gap,sorted_loads=sort(validation.loads;rev=true),srpaths=validation.srpaths,
+            solver=String(solver),solver_version=orange_solver_version(solver),objective_mode="lexicographic_all_arcs_all_periods",
+            lock_tolerance,proof_tolerance,log_file,solution_file)
+        if !isempty(solution_file)
+            write(solution_file*".tmp",JSON3.write(result));mv(solution_file*".tmp",solution_file;force=true)
+        end
+        return result
+    finally
+        unlock(ORANGE_SOLVER_LOCK)
+    end
+end
+
+# ╔═╡ 12515315-5f71-4eb4-b405-5ca901ebffcb
+md"""
+## Worked Data and solve: the official Orange example
+
+The next cells show both graphs, failed IDs, traffic, recomputed r and Budget. The solve is a short correctness demonstration, not a SetA benchmark or Step 9 batch. Its objective combines all 44 physical arc/time entries.
+"""
+
+# ╔═╡ a1f95b24-c1c5-478c-936a-63b90b602562
+orange_time01_demo_data=load_time01_data(joinpath(@__DIR__,"test","fixtures","orange_subject_toy","toy"))
+
+# ╔═╡ ca0e6c98-d6ee-47a4-b9b6-dbe3caabb914
+(
+    vertices=length(orange_time01_demo_data.node_ids),
+    links_time0=ne(orange_time01_demo_data.graphs[1]),links_time1=ne(orange_time01_demo_data.graphs[2]),
+    failed_link_ids=orange_time01_demo_data.periods[2].failed_arc_ids,
+    time_axis=axes(orange_time01_demo_data.r,4),traffic=orange_time01_demo_data.v,
+    budget=orange_time01_demo_data.budget,
+    r_0_to_5_on_arc_0=([orange_time01_demo_data.r[1,6,1,t] for t in 0:1]),
+    direct_to_waypoint_budget=segment_change_count([1,6],[1,5,6]),
+)
+
+# ╔═╡ 447f38c1-525b-46e8-ac64-d13624aad031
+orange_time01_demo_result=solve_time01_separate(orange_time01_demo_data;time_limit=5.)
+
+# ╔═╡ 35b21d5d-99f6-443f-87f4-2a4a16c8a081
+(
+    status=orange_time01_demo_result.status,termination=orange_time01_demo_result.termination,
+    sorted_loads=orange_time01_demo_result.sorted_loads,
+    certified_stages=orange_time01_demo_result.lex_completed_stages,
+    total_stages=orange_time01_demo_result.lex_total_stages,
+    budget_used=orange_time01_demo_result.budget_used,budget=orange_time01_demo_result.budget,
+    mlu=orange_time01_demo_result.objective,optimize_seconds=orange_time01_demo_result.cpu_time_seconds,
+)
+
+# ╔═╡ a8210754-6806-4466-a97f-c27323f6ac3d
+md"""
+# Demand decomposition: paired-route master and pricing
+
+Each column q=(p0,p1) belongs to one demand d and contains a valid segment sequence in each period. Its coefficients are calculated from the original Data, not new routing assumptions:
+
+```math
+\ell_{dq,a,t}=\frac{v_{d,t}}{c_a}\sum_{(i,j)\in S(p_t)}r[i,j,a,t],\qquad
+b_{dq}=|S(p_0)\triangle S(p_1)|.
+```
+
+The complete integer master is equivalent to selecting one original route per demand/period with the original Budget:
+
+```math
+\sum_{q\in Q_d}y_{dq}=1,\quad y_{dq}\in\{0,1\},\qquad
+\sum_{d,q}b_{dq}y_{dq}\le\kappa_1,\qquad
+\sum_{d,q}\ell_{dq,a,t}y_{dq}\le\lambda_{a,t}.
+```
+
+Unlike separate-period incidence relaxation, the LP pays the expected actual change of each route pair. Jensen's inequality gives |E[x1]-E[x0]| <= E[|x1-x0|]; hence paired columns can tighten the Budget relaxation. The restricted pool still needs pricing. No original capacity, traffic, MaxSeg, ECMP or Budget value is changed.
+
+At stage k, the master minimizes the same top-k function F_k of the joint sorted arc/time vector, retaining all earlier globally certified locks. Pricing reads the physical-load duals w, Budget price mu, and demand equality dual alpha:
+
+```math
+\bar c_d(q)=\sum_{a,t}w_{a,t}\ell_{dq,a,t}+\mu b_{dq}-\alpha_d.
+```
+
+The minimization is over a pair for one demand; other demands do not appear. Independent demand pricing can be parallelized mathematically, but this implementation deliberately runs it serially on local CPU with one shared optimize-call budget.
+
+For the MLU stage, the Lagrangian interpretation is
+
+```math
+\max_{w\ge0,\ \sum_{a,t}w_{a,t}=1,\ \mu\ge0}
+\left[\sum_d\min_{q\in Q_d}\left(\sum_{a,t}w_{a,t}\ell_{dq,a,t}+\mu b_{dq}\right)-\mu\kappa_1\right].
+```
+
+Later stages use the duals of their actual top-k master, including earlier locks; the normalized MLU formula alone must not be reused for those stages.
+
+References: [Dantzig and Wolfe (1960)](https://doi.org/10.1287/opre.8.1.101), [CG4SR, Jadin et al. (2019)](https://inlold.info.ucl.ac.be/system/files/cg4sr.pdf), and [Barnhart et al. (1998)](https://doi.org/10.1287/opre.46.3.316). This is root column generation plus restricted integer masters, not branch-and-price.
+"""
+
+# ╔═╡ bfa1a8c7-e37e-4959-ad89-d12eed9a827b
+md"""
+### `time01_pair_route` and `add_time01_pair!` — store one demand's two routes
+
+The first function validates one sequence and computes its physical coefficients. The second stores a unique pair, its sparse 2|A| load vector and exact segment-set change. A pair costing more than the entire Budget is excluded safely because all other demand costs are nonnegative. Vertex revisits remain allowed; repeated ordered segments remain forbidden by binary segment incidence.
+"""
+
+# ╔═╡ 89e8fe74-8770-4a9f-a26c-abe0f33a940f
+function time01_pair_route(data,d,t,path)
+    n=length(data.node_ids)
+    length(path)>=2 && all(i->1<=i<=n,path) || error("Invalid pair route vertices")
+    first(path)==data.sources[d] && last(path)==data.targets[d] || error("Wrong pair endpoints")
+    pairs=collect(zip(path,path[2:end]))
+    length(pairs)<=data.MaxSeg && length(unique(pairs))==length(pairs) || error("Invalid pair segment count/incidence")
+    all(i!=j && data.periods[t+1].counts[i,j]>0 for (i,j) in pairs) || error("Unreachable pair segment")
+    coefficients=zeros(length(data.arcs))
+    for (i,j) in pairs,a in eachindex(coefficients)
+        coefficients[a]+=data.v[d,t]*data.r[i,j,a,t]/data.c[a]
+    end
+    return (;q=t*length(data.sources)+d,d,t,path=collect(Int,path),coefficients=sparsevec(coefficients),
+        segments=[i+(j-1)*n for (i,j) in pairs])
+end
+
+# ╔═╡ 86d52d2f-1256-46d9-8b22-0ac58e705fd3
+function add_time01_pair!(columns,keys,data,d,path0,path1;max_columns=100_000)
+    key=(Tuple(path0),Tuple(path1))
+    key in keys[d] && return 0
+    length(columns)>=max_columns && return 0
+    c0=time01_pair_route(data,d,0,path0);c1=time01_pair_route(data,d,1,path1)
+    cost=segment_change_count(path0,path1)
+    cost>data.budget && return 0
+    push!(columns,(;d,paths=(c0.path,c1.path),period_columns=(c0,c1),
+        coefficients=vcat(c0.coefficients,c1.coefficients),cost))
+    push!(keys[d],key)
+    return length(columns)
+end
+
+# ╔═╡ ecd1fc1a-8f22-47a7-bd14-f42ac885c3d2
+md"""
+### `build_time01_pair_master` — coordinate demand columns
+
+Creates an LP for pricing or a binary master for feasible solutions. One equality per demand replaces separate period equalities; the single Budget row uses precomputed actual change costs. Physical rows and existing top-k epigraphs/locks retain the original objective. A variable-count guard rejects excessive allocations before construction.
+"""
+
+# ╔═╡ ecb40588-559b-45c1-a321-c17fa002f441
+function build_time01_pair_master(data,columns,k,locks;integer=false,solver=:highs,
+        time_limit=10.,seed=1,threads=1,max_variables=2_000_000)
+    D=length(data.sources);M=2length(data.arcs)
+    length(columns)+M*(length(locks)+2)+1<=max_variables || error("MODEL_SIZE_LIMIT: pair master")
+    model=create_time0_optimizer(integer ? solver : :highs;time_limit,seed,threads=integer ? threads : 1)
+    set_string_names_on_creation(model,false)
+    y=@variable(model,[1:length(columns)],lower_bound=0.)
+    integer && foreach(set_binary,y)
+    loads=@variable(model,[1:M],lower_bound=0.)
+    z=@variable(model,lower_bound=0.)
+    bygroup=[Int[] for d in 1:D];expressions=[AffExpr(0.) for a in 1:M]
+    for (p,c) in enumerate(columns)
+        push!(bygroup[c.d],p)
+        indices,coefficients=findnz(c.coefficients)
+        for h in eachindex(indices)
+            add_to_expression!(expressions[indices[h]],coefficients[h],y[p])
+        end
+    end
+    convexity=[@constraint(model,sum(y[p] for p in bygroup[d])==1) for d in 1:D]
+    load_rows=[@constraint(model,expressions[a]<=loads[a]) for a in 1:M]
+    @constraint(model,[a in 1:M],loads[a]<=z)
+    budget_row=@constraint(model,sum(c.cost*y[p] for (p,c) in enumerate(columns))<=data.budget)
+    master=(;model,y,loads,z,convexity,load_rows,budget_row,bygroup)
+    for j in eachindex(locks)
+        previous=add_lexicographic_stage!(master,j,M)
+        @constraint(model,previous.expression<=locks[j])
+    end
+    stage=add_lexicographic_stage!(master,k,M)
+    return merge(master,(;stage))
+end
+
+# ╔═╡ 078626be-dbe4-46d9-85cc-b3746fdab7bc
+md"""
+### `build_time01_pair_pricer` — one exact, hop-indexed demand subproblem
+
+Binary u[t,h,e] selects a segment transition at layer h. Layer flow carries one unit from the source at layer 0 to the target at layer K. A target-to-itself waiting transition pads shorter routes; it has zero cost, is removed when exporting and is not counted as a segment. Real ordered segments can occur at most once, while revisited vertices are retained.
+
+```math
+x_{ij,t}=\sum_{h=1}^{K}u_{t,h,(i,j)}\le1,\qquad
+h_{ij}\ge\pm(x_{ij,1}-x_{ij,0}),\qquad
+h_{ij}\le x_{ij,0}+x_{ij,1},\quad
+h_{ij}\le2-x_{ij,0}-x_{ij,1}.
+```
+
+The last two inequalities make h the exact XOR even for tiny signed numerical duals. The objective is sum(w*ell)+mu*sum(h); alpha is subtracted afterwards. The per-demand restriction sum(h)<=Budget safely removes globally impossible pairs. No global Budget is allocated permanently to a particular demand. Existing-pair exclusion cuts are used only for diversification, never for claiming the unrestricted pricing bound. Excessive pricing size is guarded explicitly.
+"""
+
+# ╔═╡ 5ad94785-6cdf-47df-aa5c-32f620439eae
+function build_time01_pair_pricer(data,d,physical,mu;solver=:highs,time_limit=1.,seed=1,threads=1,
+        max_variables=200_000,exclude_pairs=NamedTuple[])
+    n=length(data.node_ids);K=data.MaxSeg;s=data.sources[d];target=data.targets[d]
+    edges=[vcat(collect(data.periods[t+1].segments),[(target,target)]) for t in 0:1]
+    union_edges=sort(unique(vcat(edges[1][1:end-1],edges[2][1:end-1])))
+    K*sum(length,edges)+length(union_edges)<=max_variables || error("MODEL_SIZE_LIMIT: demand pair pricing")
+    model=create_time0_optimizer(solver;time_limit,seed,threads)
+    set_string_names_on_creation(model,false)
+    u=[@variable(model,[1:K,1:length(edges[t])],binary=true) for t in 1:2]
+    incidence=[Dict{Tuple{Int,Int},AffExpr}() for t in 1:2]
+    for t in 1:2
+        outgoing=[Int[] for i in 1:n];incoming=[Int[] for i in 1:n]
+        for (e,(i,j)) in enumerate(edges[t])
+            push!(outgoing[i],e);push!(incoming[j],e)
+            i==j && continue
+            expression=sum(u[t][h,e] for h in 1:K)
+            incidence[t][i,j]=expression
+            @constraint(model,expression<=1)
+        end
+        for h in 1:K,i in 1:n
+            rhs=h==1 ? AffExpr(i==s ? 1. : 0.) : sum(u[t][h-1,e] for e in incoming[i])
+            @constraint(model,sum(u[t][h,e] for e in outgoing[i])==rhs)
+        end
+        for i in 1:n
+            @constraint(model,sum(u[t][K,e] for e in incoming[i])==(i==target ? 1. : 0.))
+        end
+    end
+    h=@variable(model,[1:length(union_edges)],lower_bound=0.,upper_bound=1.)
+    for (a,edge) in enumerate(union_edges)
+        x0=get(incidence[1],edge,AffExpr(0.));x1=get(incidence[2],edge,AffExpr(0.))
+        @constraint(model,h[a]>=x1-x0);@constraint(model,h[a]>=x0-x1)
+        @constraint(model,h[a]<=x0+x1);@constraint(model,h[a]<=2-x0-x1)
+    end
+    @constraint(model,sum(h)<=data.budget)
+    for c in exclude_pairs
+        difference=AffExpr(0.)
+        for t in 1:2,edge in union_edges
+            expression=get(incidence[t],edge,AffExpr(0.))
+            present=edge in Set(zip(c.paths[t],c.paths[t][2:end]))
+            difference+=present ? 1-expression : expression
+        end
+        @constraint(model,difference>=1)
+    end
+    objective=AffExpr(0.)
+    for t in 1:2,(e,(i,j)) in enumerate(edges[t]),hop in 1:K
+        i==j && continue
+        add_to_expression!(objective,data.v[d,t-1]*physical[t][i,j],u[t][hop,e])
+    end
+    for a in eachindex(h)
+        add_to_expression!(objective,mu,h[a])
+    end
+    @objective(model,Min,objective)
+    return (;model,u,edges,h,incidence,union_edges,d)
+end
+
+# ╔═╡ 1e8b54ae-325c-4e54-a2cc-057ee34c0ac9
+md"""
+### `price_time01_demand` — solve, reconstruct and bound one route pair
+
+Every optimize call, including pricing MIPs, counts toward the shared budget. A feasible pricing incumbent generates a validated pair, but is an upper bound on the pricing minimum. Only a solver lower bound (or the conservative analytical floor) is used for the master correction. A time limit never turns a heuristic price into an exact pricing certificate. The native log is optional; all model instances are released after use.
+"""
+
+# ╔═╡ 2fdaf07d-a848-4cb3-ba89-b73e572c1e82
+function price_time01_demand(data,d,physical,mu;time_limit=1.,solver=:highs,seed=1,threads=1,
+        max_variables=200_000,exclude_pairs=NamedTuple[],log_file="")
+    pricer=build_time01_pair_pricer(data,d,physical,mu;time_limit,solver,seed,threads,max_variables,exclude_pairs)
+    try
+        set_stage_log!(pricer.model,solver,log_file)
+        solver==:highs && install_highs_deadline!(pricer.model,time_limit)
+        seconds=@elapsed optimize!(pricer.model)
+        status=termination_status(pricer.model)
+        bound=objective_bound(pricer.model)
+        lower_bound=isfinite(bound)&&abs(bound)<1e19 ? bound : missing
+        candidate=nothing
+        if primal_status(pricer.model)==ORANGE_MOI.FEASIBLE_POINT
+            paths=Vector{Int}[]
+            for t in 1:2
+                path=Int[data.sources[d]]
+                for hop in 1:data.MaxSeg
+                    selected=[e for e in eachindex(pricer.edges[t]) if value(pricer.u[t][hop,e])>.5]
+                    length(selected)==1 || error("Nonintegral pair pricing layer")
+                    i,j=pricer.edges[t][only(selected)]
+                    last(path)==i || error("Disconnected pair pricing path")
+                    i==j || push!(path,j)
+                end
+                time01_pair_route(data,d,t-1,path)
+                push!(paths,path)
+            end
+            cost=segment_change_count(paths[1],paths[2])
+            cost<=data.budget || error("Pair pricing violates Budget")
+            actual=sum(data.v[d,t-1]*physical[t][i,j] for t in 1:2 for (i,j) in zip(paths[t],paths[t][2:end]))+mu*cost
+            abs(actual-objective_value(pricer.model))<=1e-5*(1+abs(actual)) || error("Pricing objective reconstruction mismatch")
+            candidate=(;d,path0=paths[1],path1=paths[2],cost,objective=actual)
+        end
+        return (;d,seconds,status=string(status),lower_bound,candidate,nodes=node_count(pricer.model))
+    finally
+        close_stage_log!(pricer.model,solver)
+        empty!(pricer.model)
+    end
+end
+
+# ╔═╡ 23f76f06-9035-477c-9478-69808a03c56c
+md"""
+### `time01_pair_duals` and `time01_pair_bound` — retain a full-domain lower bound
+
+The missing-column correction uses the lower bound l_d on each pricing minimum:
+
+```math
+LB=D_R+\sum_d\min(0,l_d-\alpha_d).
+```
+
+Before pricing, a safe floor is K times the most negative segment cost in each period plus min(0,2K*mu). It relaxes connectivity and Budget and is therefore a lower bound even for unvisited demands. A completed pricing solve tightens that floor. Consequently a partial sweep can still supply a conservative global bound. Signed tiny load duals are priced directly, without an uncompensated projection. A numerical safety buffer is subtracted. This bound applies only to this LP stage and its inherited locks, not to an unrelated lexicographic stage.
+"""
+
+# ╔═╡ 808282e4-beeb-4bd3-abaf-383f793aa79b
+function time01_pair_duals(data,master)
+    m=length(data.arcs);n=length(data.node_ids)
+    weights=-dual.(master.load_rows);mu=-dual(master.budget_row);alpha=dual.(master.convexity)
+    physical=[reshape(data.periods[t+1].r.values*(weights[t*m+1:(t+1)*m]./data.c),n,n) for t in 0:1]
+    minima=[min(0.,minimum(matrix)) for matrix in physical]
+    floors=[data.MaxSeg*sum(data.v[d,t-1]*minima[t] for t in 1:2)+min(0.,2data.MaxSeg*mu) for d in eachindex(data.sources)]
+    return (;weights,mu,alpha,physical,floors,dual_value=dual_objective_value(master.model))
+end
+
+# ╔═╡ c37c7fe1-924d-48d0-85a8-3935d7ed0127
+function time01_pair_bound(prices,lower_bounds)
+    all(isfinite,lower_bounds) || error("Nonfinite pair pricing bound")
+    correction=sum(min(0.,lower_bounds[d]-prices.alpha[d]) for d in eachindex(lower_bounds))
+    safety=1e-8*(1+abs(prices.dual_value)+sum(abs,prices.alpha)+sum(abs,prices.weights)+abs(prices.mu))
+    return max(0.,prices.dual_value+correction-safety)
+end
+
+# ╔═╡ ddbf4545-1840-4180-9b66-2ca16b16a2ac
+md"""
+### `validate_time01_pairs` and `start_time01_pair_master!` — independent feasibility
+
+Rebuilds the two period selections and invokes the original validator, which recomputes r*v/c loads and symmetric-difference Budget from the paths. Pool costs and solver auxiliaries are not trusted. The master warm start uses that validated incumbent. It does not freeze any demand permanently.
+"""
+
+# ╔═╡ 70dd1245-04b7-4d27-8cd5-83a4f69c2bb4
+function validate_time01_pairs(data,columns,selection)
+    D=length(data.sources)
+    length(selection)==D || error("Missing demand pair")
+    all(columns[selection[d]].d==d for d in 1:D) || error("Wrong demand pair selection")
+    flat=vcat([columns[selection[d]].period_columns[1] for d in 1:D],
+        [columns[selection[d]].period_columns[2] for d in 1:D])
+    validation=validate_time01_selection(data,flat,collect(1:2D))
+    return merge(validation,(selection=collect(selection),))
+end
+
+# ╔═╡ bea594f2-b8f8-49dd-a356-e324b775ebbe
+function start_time01_pair_master!(master,validation)
+    chosen=Set(validation.selection)
+    for p in eachindex(master.y)
+        set_start_value(master.y[p],p in chosen ? 1. : 0.)
+    end
+    for a in eachindex(master.loads)
+        set_start_value(master.loads[a],validation.loads[a])
+    end
+    set_start_value(master.z,validation.mlu)
+    return nothing
+end
+
+# ╔═╡ a0f3d2ae-3024-4988-abe7-575e81bc9f47
+md"""
+### `solve_time01_pairs` — root master–pricing, then a restricted integer solve
+
+Starts with one feasible direct/direct pair per demand. Each cycle solves a restricted LP, prices pairs independently by demand, adds negative-reduced-cost columns, and solves a restricted binary master for an incumbent. If no improving column is generated while a global gap remains, a diversification pass excludes existing pair incidences to discover additional integer-useful columns; its restricted pricing bounds never enter the global bound.
+
+Previously certified top-k values remain locked. MLU gap 10% is only reported; it does not stop search. The shared budget counts master LP, pricing, diversification and master MIP optimize calls. A separate wall guard and variable/column guards bound non-solver work. Restricted integer bounds are logged but never treated as full-domain bounds. This is not branch-and-price: an LP/integer gap can prevent certification even after LP pricing converges. The former separate-period implementation remains callable as `solve_time01_separate` for regression comparison.
+"""
+
+# ╔═╡ 48ad4fbb-0400-4764-ab7f-1b56a5144cbf
+function solve_time01_pairs(data;time_limit=3600.,solver=:highs,seed=1,threads=1,target_gap=.10,
+        lock_tolerance=1e-7,proof_tolerance=2e-6,max_variables=2_000_000,max_columns=100_000,
+        max_pricing_variables=200_000,pricing_slice=2.,log_file="",solution_file="")
+    isfinite(time_limit)&&time_limit>0 && pricing_slice>0 || error("Invalid pair solve time limits")
+    max_columns>=length(data.sources) || error("Pair pool cannot hold initial solution")
+    isempty(log_file) || mkpath(dirname(abspath(log_file)))
+    isempty(solution_file) || mkpath(dirname(abspath(solution_file)))
+    pricing_log=isempty(log_file) ? "" : splitext(log_file)[1]*"_pricing.csv"
+    for path in (log_file,pricing_log)
+        isempty(path) || !isfile(path) || rm(path)
+    end
+    lock(ORANGE_SOLVER_LOCK)
+    try
+        HiGHS.Highs_resetGlobalScheduler(1)
+        started=time();elapsed=0.;lp_total=0.;pricing_total=0.;mip_total=0.;nodes=0;pricing_nodes=0
+        D=length(data.sources);M=2length(data.arcs)
+        columns=NamedTuple[];keys=[Set{Tuple}() for d in 1:D]
+        for d in 1:D
+            path=[data.sources[d],data.targets[d]]
+            add_time01_pair!(columns,keys,data,d,path,path;max_columns)
+        end
+        validation=validate_time01_pairs(data,columns,collect(1:D))
+        locks=Float64[];completed=0;k=1;cycle=0;stage_bound=0.;first_bound=0.
+        termination="TIME_LIMIT";status="Not Optimal";pricing_calls=0
+        last_lp_closed=false;last_visited=0;restricted_bound=missing;last_bound=0.
+        while k<=M && time_limit-elapsed>1e-3
+            time()-started>time_limit+max(30.,.1*time_limit) && (termination="SEARCH_WALL_LIMIT";break)
+            cycle+=1;remaining=time_limit-elapsed;added=0;visited=0;cycle_pricing=0.;cycle_lp=0.;cycle_mip=0.;mip_status="NOT_RUN"
+            slice=min(10.,remaining*.20)
+            master=build_time01_pair_master(data,columns,k,locks;time_limit=slice,seed,max_variables)
+            prices=nothing
+            try
+                install_highs_deadline!(master.model,slice)
+                seconds=@elapsed optimize!(master.model);elapsed+=seconds;lp_total+=seconds;cycle_lp=seconds
+                if termination_status(master.model)==ORANGE_MOI.OPTIMAL && dual_status(master.model)==ORANGE_MOI.FEASIBLE_POINT
+                    prices=time01_pair_duals(data,master)
+                end
+            finally
+                empty!(master.model)
+            end
+            closed=false
+            if prices!==nothing
+                lower_bounds=copy(prices.floors)
+                for d in 1:D
+                    remaining=time_limit-elapsed
+                    remaining<=.01 && break
+                    time()-started>time_limit+max(30.,.1*time_limit) && break
+                    slice=min(pricing_slice,remaining*.5/(D-d+1))
+                    price=try
+                        price_time01_demand(data,d,prices.physical,prices.mu;time_limit=slice,solver,seed,threads,
+                            max_variables=min(max_variables,max_pricing_variables))
+                    catch exception
+                        occursin("MODEL_SIZE_LIMIT",sprint(showerror,exception)) || rethrow()
+                        (d=d,seconds=0.,status="MODEL_SIZE_LIMIT",lower_bound=missing,candidate=nothing,nodes=0)
+                    end
+                    elapsed+=price.seconds;pricing_total+=price.seconds;cycle_pricing+=price.seconds;pricing_calls+=1;pricing_nodes+=price.nodes;visited+=1
+                    if !ismissing(price.lower_bound)
+                        lower_bounds[d]=max(lower_bounds[d],price.lower_bound-1e-7*(1+abs(price.lower_bound)))
+                    end
+                    reduced=price.candidate===nothing ? missing : price.candidate.objective-prices.alpha[d]
+                    accepted=0
+                    if !ismissing(reduced) && reduced < -1e-8
+                        c=price.candidate
+                        accepted=add_time01_pair!(columns,keys,data,d,c.path0,c.path1;max_columns)
+                        added+=accepted>0
+                    end
+                    row=(stage=k,cycle,demand_index=d,demand_id=data.demand_ids[d],mode="reduced_cost",status=price.status,
+                        minimum_lower_bound=lower_bounds[d],candidate_reduced_cost=reduced,added=accepted>0,
+                        optimize_seconds=price.seconds,cumulative_optimize_seconds=elapsed)
+                    isempty(pricing_log) || append_result_csv(pricing_log,row)
+                end
+                stage_bound=max(stage_bound,time01_pair_bound(prices,lower_bounds))
+                closed=all(lower_bounds[d]>=prices.alpha[d]-1e-7 for d in 1:D)
+            end
+            last_lp_closed=closed;last_visited=visited
+            value_now=sum(sort(validation.loads;rev=true)[1:k]);restricted_bound=missing
+            if time_limit-elapsed>.01 && value_now-stage_bound>proof_tolerance
+                slice=min(10.,(time_limit-elapsed)*.5)
+                master=build_time01_pair_master(data,columns,k,locks;integer=true,solver,time_limit=slice,seed,threads,max_variables)
+                try
+                    start_time01_pair_master!(master,validation)
+                    solver==:highs && install_highs_deadline!(master.model,slice)
+                    seconds=@elapsed optimize!(master.model);elapsed+=seconds;mip_total+=seconds;cycle_mip=seconds;nodes+=node_count(master.model);mip_status=string(termination_status(master.model))
+                    bound=objective_bound(master.model)
+                    isfinite(bound)&&abs(bound)<1e19 && (restricted_bound=bound)
+                    if primal_status(master.model)==ORANGE_MOI.FEASIBLE_POINT
+                        all(abs(value(y)-round(value(y)))<1e-5 for y in master.y) || error("Nonbinary pair master")
+                        selection=[only([p for p in master.bygroup[d] if value(master.y[p])>.5]) for d in 1:D]
+                        candidate=validate_time01_pairs(data,columns,selection)
+                        vector=sort(candidate.loads;rev=true)
+                        all(sum(vector[1:j])<=locks[j]+1e-5 for j in eachindex(locks)) || error("Pair master violates prior lock")
+                        if sum(vector[1:k])<=value_now+1e-7
+                            validation=candidate;value_now=sum(vector[1:k])
+                        end
+                    end
+                finally
+                    empty!(master.model)
+                end
+            end
+            stage_bound<=value_now+proof_tolerance || error("Pair global bound exceeds incumbent")
+            k==1 && (first_bound=max(first_bound,stage_bound))
+            certified=value_now-stage_bound<=proof_tolerance
+            if !certified && added==0 && prices!==nothing
+                for d in 1:D
+                    remaining=time_limit-elapsed
+                    remaining<=.01 && break
+                    time()-started>time_limit+max(30.,.1*time_limit) && break
+                    slice=min(pricing_slice,remaining*.25/(D-d+1))
+                    price=try
+                        price_time01_demand(data,d,prices.physical,prices.mu;time_limit=slice,solver,seed,threads,
+                            max_variables=min(max_variables,max_pricing_variables),exclude_pairs=[c for c in columns if c.d==d])
+                    catch exception
+                        occursin("MODEL_SIZE_LIMIT",sprint(showerror,exception)) || rethrow()
+                        (d=d,seconds=0.,status="MODEL_SIZE_LIMIT",lower_bound=missing,candidate=nothing,nodes=0)
+                    end
+                    elapsed+=price.seconds;pricing_total+=price.seconds;cycle_pricing+=price.seconds;pricing_calls+=1;pricing_nodes+=price.nodes
+                    accepted=0
+                    if price.candidate!==nothing
+                        c=price.candidate
+                        accepted=add_time01_pair!(columns,keys,data,d,c.path0,c.path1;max_columns)
+                        added+=accepted>0
+                    end
+                    row=(stage=k,cycle,demand_index=d,demand_id=data.demand_ids[d],mode="diversify",status=price.status,
+                        minimum_lower_bound=missing,candidate_reduced_cost=price.candidate===nothing ? missing : price.candidate.objective-prices.alpha[d],
+                        added=accepted>0,optimize_seconds=price.seconds,cumulative_optimize_seconds=elapsed)
+                    isempty(pricing_log) || append_result_csv(pricing_log,row)
+                end
+            end
+            row=(stage=k,cycle,objective=value_now,global_bound=stage_bound,gap=experiment_gap(value_now,stage_bound),
+                globally_certified=certified,pair_columns=length(columns),new_columns=added,pricing_demands=visited,
+                pricing_lp_closed=closed,restricted_integer_bound=restricted_bound,budget_used=validation.cost,
+                lp_seconds=cycle_lp,pricing_seconds=cycle_pricing,mip_seconds=cycle_mip,mip_status,
+                master_nodes=nodes,pricing_nodes,cumulative_optimize_seconds=elapsed)
+            isempty(log_file) || append_result_csv(log_file,row)
+            last_bound=stage_bound
+            if certified
+                completed=k;push!(locks,value_now+lock_tolerance);k+=1;cycle=0;stage_bound=0.
+            elseif length(columns)>=max_columns
+                termination="ROUTE_POOL_LIMIT";break
+            end
+            if !isempty(solution_file)
+                payload=(srpaths=validation.srpaths,validated=true,budget_used=validation.cost,budget=data.budget,
+                    mlu=validation.mlu,global_mlu_bound=first_bound,lex_completed_stages=completed,lex_total_stages=M,
+                    termination="RUNNING",formulation="paired_demand_master_pricing",sorted_loads=sort(validation.loads;rev=true))
+                write(solution_file*".tmp",JSON3.write(payload));mv(solution_file*".tmp",solution_file;force=true)
+            end
+        end
+        completed==M && (status="Optimal";termination="OPTIMAL")
+        gap=experiment_gap(validation.mlu,first_bound)
+        result=(status,termination,objective=validation.mlu,lower_bound=first_bound,gap,validated=true,
+            budget_used=validation.cost,budget=data.budget,lex_completed_stages=completed,lex_total_stages=M,
+            active_stage=min(k,M),stage_lower_bound=k>M ? last_bound : stage_bound,stage_objective=sum(sort(validation.loads;rev=true)[1:min(k,M)]),
+            cpu_time_seconds=elapsed,wall_time_seconds=time()-started,columns=length(columns),pool_complete=false,nodes,pricing_nodes,total_nodes=nodes+pricing_nodes,
+            mlu_target_met=!ismissing(gap)&&gap<=target_gap,sorted_loads=sort(validation.loads;rev=true),srpaths=validation.srpaths,
+            solver=String(solver),solver_version=orange_solver_version(solver),objective_mode="lexicographic_all_arcs_all_periods",
+            formulation="paired_demand_master_pricing",bound_scope="full_pair_domain_lp_correction",pricing_lp_closed=last_lp_closed,
+            pricing_demands_last_sweep=last_visited,pricing_calls,pricing_optimize_seconds=pricing_total,
+            lp_optimize_seconds=lp_total,mip_optimize_seconds=mip_total,restricted_integer_bound=restricted_bound,
+            lock_tolerance,proof_tolerance,log_file,pricing_log,solution_file)
+        if !isempty(solution_file)
+            write(solution_file*".tmp",JSON3.write(result));mv(solution_file*".tmp",solution_file;force=true)
+        end
+        return result
+    finally
+        unlock(ORANGE_SOLVER_LOCK)
+    end
+end
+
+# ╔═╡ e4bdc34f-6047-4a4f-88ca-d8700bc8a48b
+md"""
+### `solve_time01` — select the paired implementation explicitly or by default
+
+The default is now `:paired`. `:separate` retains the former implementation for regression checks. Both use identical Data, Budget and joint lexicographic objectives. Result metadata distinguishes the formulations; completed-run checkpoints must not be mixed.
+"""
+
+# ╔═╡ ed7fcf70-99f8-480a-b3c0-c5a11617d741
+function solve_time01(data;formulation=:paired,kwargs...)
+    formulation==:paired && return solve_time01_pairs(data;kwargs...)
+    formulation==:separate && return solve_time01_separate(data;kwargs...)
+    error("Choose time01 formulation :paired or :separate")
+end
+
+# ╔═╡ 51a413b5-7a55-410a-b287-12f5e5d52343
+md"""
+## Execute paired demand decomposition on the official example
+
+The following short local demonstration reports the actual generated pool, global bound, Budget, pricing calls and certified prefix. Unlike the separate-pool exhaustive reference demonstration, it need not certify all 44 stages within its short budget. An integer optimum on a restricted pool is never reported as a full optimum unless a global bound certifies every stage.
+"""
+
+# ╔═╡ bbf62fd6-91f6-4402-8228-a2f2f57ffb0a
+orange_paired_demo_result=solve_time01(orange_time01_demo_data;time_limit=3.)
+
+# ╔═╡ 07729ea6-f15e-4c4f-82b1-0a059a969226
+(status=orange_paired_demo_result.status,mlu=orange_paired_demo_result.objective,
+ budget_used=orange_paired_demo_result.budget_used,budget=orange_paired_demo_result.budget,
+ certified_stages=orange_paired_demo_result.lex_completed_stages,total_stages=orange_paired_demo_result.lex_total_stages,
+ pair_columns=orange_paired_demo_result.columns,pricing_calls=orange_paired_demo_result.pricing_calls,
+ global_mlu_bound=orange_paired_demo_result.lower_bound,gap=orange_paired_demo_result.gap,
+ optimize_seconds=orange_paired_demo_result.cpu_time_seconds,formulation=orange_paired_demo_result.formulation)
+
+# ╔═╡ 81255cde-5365-4998-843c-7160bf4dbfb4
+md"""
+## Two-period experiment runner — disabled unless explicitly invoked
+
+`run_time01_experiments` uses original SetA JSONs, both periods and the scenario's actual Budget. Defaults match the extended experiment's 3600-second shared optimize budget. Each result records the joint MLU and global bound, actual Budget usage, full lexicographic progress, dimensions, seeds, solver, time and checkpoint paths. It does not replace Step 6 or silently shorten repetitions. Completed runs resume only under identical configuration. Errors and allocation guards remain unexecuted/Not Optimal, not proofs of infeasibility.
+"""
+
+# ╔═╡ d07eddbd-9325-4260-9d60-8aacafe1a82a
+function run_time01_experiments(;instances=1:20,runs=10,time_limit=3600.,solver=:highs,
+        output_dir=joinpath(@__DIR__,"results","time01_highs"),seed_base=1000,threads=1,
+        max_variables=2_000_000,max_columns=100_000,formulation=:paired,max_pricing_variables=200_000,pricing_slice=2.)
+    formulation in (:paired,:separate) || error("Choose :paired or :separate")
+    ids=collect(Int,instances)
+    !isempty(ids)&&all(i->1<=i<=20,ids)&&length(unique(ids))==length(ids) || error("Invalid SetA selection")
+    runs>=1 || error("Invalid repetition count")
+    mkpath(output_dir)
+    config=(schema_version=3,formulation=String(formulation),max_pricing_variables,pricing_slice,periods=[0,1],objective="lexicographic_all_arcs_all_periods",splitting="ecmp",
+        instances=ids,runs,time_limit,solver=String(solver),seed_base,threads,max_variables,max_columns)
+    config_file=joinpath(output_dir,"config.json")
+    text=JSON3.write(config)
+    isfile(config_file) && read(config_file,String)!=text && error("Use a new directory: temporal settings differ")
+    write(config_file,text)
+    rows=NamedTuple[];csv=joinpath(output_dir,"runs.csv")
+    isfile(csv) && rm(csv)
+    for id in ids
+        instance="setA-"*lpad(id,2,'0')
+        data=load_time01_data(joinpath(@__DIR__,"setA",instance))
+        for run in 1:runs
+            base=joinpath(output_dir,instance*"_run-"*lpad(run,2,'0'))
+            checkpoint=base*".json"
+            if isfile(checkpoint)
+                saved=JSON3.read(read(checkpoint,String))
+                row=(;(Symbol(k)=>(isnothing(v) ? missing : v) for (k,v) in pairs(saved))...)
+            else
+                result=try
+                    solve_time01(data;time_limit,solver,seed=seed_base+run,threads,max_variables,max_columns,formulation,
+                        (formulation==:paired ? (;max_pricing_variables,pricing_slice) : NamedTuple())...,
+                        log_file=base*"_cycles.csv",solution_file=base*"_solution.json")
+                catch exception
+                    exception isa InterruptException && rethrow()
+                    message=sprint(showerror,exception)
+                    (status="Not Optimal",termination=occursin("MODEL_SIZE_LIMIT",message) ? "MODEL_SIZE_LIMIT" : "ERROR",
+                        objective=missing,lower_bound=missing,gap=missing,validated=false,budget_used=missing,
+                        lex_completed_stages=0,lex_total_stages=2length(data.arcs),cpu_time_seconds=missing,
+                        wall_time_seconds=missing,columns=missing,pool_complete=false,nodes=missing,
+                        sorted_loads=Float64[],error=message)
+                end
+                row=(instance,run,seed=seed_base+run,periods="0,1",solver=String(solver),solver_version=orange_solver_version(solver),
+                    vertices=length(data.node_ids),links=length(data.arcs),links_time1=ne(data.graphs[2]),demands=length(data.sources),
+                    budget=data.budget,budget_used=result.budget_used,status=result.status,termination=result.termination,
+                    objective=result.objective,lower_bound=result.lower_bound,gap=result.gap,validated=result.validated,
+                    lex_completed_stages=result.lex_completed_stages,lex_total_stages=result.lex_total_stages,
+                    cpu_time_seconds=result.cpu_time_seconds,wall_time_seconds=result.wall_time_seconds,nodes=result.nodes,
+                    candidate_columns=result.columns,pool_complete=result.pool_complete,formulation=String(formulation),
+                    pricing_calls=hasproperty(result,:pricing_calls) ? result.pricing_calls : missing,
+                    pricing_nodes=hasproperty(result,:pricing_nodes) ? result.pricing_nodes : missing,
+                    lp_optimize_seconds=hasproperty(result,:lp_optimize_seconds) ? result.lp_optimize_seconds : missing,
+                    pricing_optimize_seconds=hasproperty(result,:pricing_optimize_seconds) ? result.pricing_optimize_seconds : missing,
+                    mip_optimize_seconds=hasproperty(result,:mip_optimize_seconds) ? result.mip_optimize_seconds : missing,
+                    bound_scope=hasproperty(result,:bound_scope) ? result.bound_scope : "separate_reference_or_error",
+                    sorted_loads_json=JSON3.write(result.sorted_loads),solution_file=base*"_solution.json",
+                    error=hasproperty(result,:error) ? result.error : "")
+                write(checkpoint*".tmp",JSON3.write(row));mv(checkpoint*".tmp",checkpoint;force=true)
+            end
+            push!(rows,row);append_result_csv(csv,row)
+            println(instance," run ",run,": ",row.status," | ",row.termination," | Budget=",row.budget_used,"/",row.budget)
+            flush(stdout)
+        end
+    end
+    return (;rows,output_dir=abspath(output_dir))
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -2832,6 +4989,11 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─7fa918df-698f-4109-a3f1-f3610ff0089d
 # ╟─3a0b9ef2-b4da-4d67-9774-a7f6dd0be497
 # ╠═6a30c8cc-722c-4d0e-8f52-708b285aa477
+# ╟─883a391a-2e6e-4b9f-b03c-3416b8e13482
+# ╠═1c1bff3e-050a-40b7-8799-9fe482e0dc5a
+# ╠═19285b33-616b-409e-8481-1306f86498a8
+# ╠═fa63c98d-74b0-477c-ab15-261bb423b147
+# ╠═3c6a6416-d8c3-4169-b572-a8ffbd82eed5
 # ╟─ad946052-f7b2-4283-af1e-6c1a5e9adc76
 # ╠═62e7cb29-8eb2-4f7e-80e2-e3a5e4c59685
 # ╟─572e721a-0b40-483d-9cca-699697e967b8
@@ -2850,11 +5012,17 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─509862d6-b196-4c68-9b78-095105ade572
 # ╠═9441b09a-b55a-4693-bb71-5fd48be058a5
 # ╟─732eb7a7-7aa7-4ca1-8302-05a9d4d6cbda
+# ╟─0f630d76-c12e-4d83-a7a8-95a2eace1262
+# ╠═ff5ffe39-dfc4-4ccf-9c44-f9d16548f205
+# ╠═18d27926-6238-4933-a5f1-63b02bc39d1b
 # ╠═79524299-953d-4ea5-99ea-c5f555c2c73f
 # ╟─4ad642fe-2c86-4d74-979a-b48d657f2917
 # ╟─78a0ae6d-a64b-4f25-abb2-40bd06ab6e26
 # ╠═07d9e8b5-b949-4581-b3ca-a13eac2f28f4
 # ╠═43a769d5-c2db-451a-a2b1-dc3852794675
+# ╟─c77ef705-5cf7-4fda-ac94-508bf8193134
+# ╠═534fb5b2-9055-42ea-ac95-68d7919bd7fc
+# ╠═8b667b30-fffd-4231-97c4-a300612c4ffd
 # ╠═1cbf9a85-1cb6-4d46-80cc-fecdd47e0ddf
 # ╠═183437f5-305b-4b4d-abea-3fe485de65d5
 # ╟─ae31ff5d-31d1-4080-bd5e-a1ad45d11609
@@ -2884,6 +5052,96 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╠═7a3fa790-8a45-4ef3-9634-22990d4b691c
 # ╠═f4415922-4ed1-4d62-b970-3d5cddff3a71
 # ╟─7c4e16b6-a893-48da-98af-6e1fa7d2c271
+# ╟─469bf80a-c389-4ea0-8187-1a8fc6e8037a
+# ╟─c3ed0cf3-8514-47da-9930-6c719844eb6a
+# ╠═426ef93a-1177-4113-85be-a2013131b5e4
+# ╟─b9b4c5be-a1f0-4a58-b88f-b6ca02da8616
+# ╠═0e5bf6a1-e6d9-4517-bce7-eab1bccefe90
+# ╟─f72de83e-7527-456c-a302-cfa339323893
+# ╠═04cf4dfd-193b-4737-b8d8-d040611338e7
+# ╟─2e4328cc-785e-44ed-b548-4f4b920e7f7b
+# ╠═fe4bdc91-0eb6-40bc-8cba-7ebfaa7334a3
+# ╟─478f3c47-d0a9-4075-935f-0d122c393cb5
+# ╠═49fcd1cc-3ad0-4588-bc31-5a12f9c31ca6
+# ╟─48e92439-c8b4-4dc7-bc07-588959337922
+# ╠═b54c1180-cf5e-405a-9b4d-7e6905b570de
+# ╟─74d13c6e-0d13-4c34-868f-b9a485687a80
+# ╠═31a7b7be-dc05-4f55-887c-82a71cb6abae
+# ╟─68d3cd68-1300-4f1f-ae75-a6d82dab0e58
+# ╠═7d35907e-afc6-4cac-bee4-d3885f4f2459
+# ╟─a5aab9a2-4359-40a7-85f4-22a4f4715d11
+# ╠═92a75acf-fcb1-4e18-99da-4c62568c8af8
+# ╟─ecb8cc09-f4f3-40c9-a104-fcb8760fadf1
+# ╠═da4dedcf-d034-4ad3-8b32-eac230815a68
+# ╟─536bfb31-5629-4273-b0ec-0adf06d8bb62
+# ╠═3186551c-93ef-4462-803f-1c1b0f061c8f
+# ╟─5e8da978-1cd6-4f7f-b72c-3df3ed413c2f
+# ╠═f137ffe6-5823-486f-bbed-f328dab305a8
+# ╟─16cb313f-d096-4c3f-a798-3a3974b914a1
+# ╠═af329d02-2385-412a-9f94-779afa8bae64
+# ╟─8e4569ee-47a2-4cbf-83b2-25cfa73bb5c8
+# ╠═91f7c7d3-c219-40e3-bb4c-7517478f94b8
+# ╟─82029e20-1987-451e-a27f-bd24c61809c0
+# ╟─1c462a22-e6f0-4ef7-8c8b-560780682355
+# ╠═e80fae9f-d0c0-4be7-b391-dd8327236ced
+# ╟─cf434e7f-4d91-4dc1-8442-fe30f9e6af52
+# ╠═ef4be839-72c5-46f0-a574-c18135b6eb47
+# ╠═de3e2d40-0941-490c-983b-d614c4090f41
+# ╟─79b800a9-48e4-45a8-b597-9b8076728465
+# ╠═b3659101-8e23-406c-96ca-a80b36579c7c
 # ╠═f1b17671-4b54-4b2b-9231-20300509c373
+# ╟─bc2aa034-eec5-4be9-8e67-f42e53274e97
+# ╠═0b8dc725-5f9e-4bb8-b28f-39ea4d795bec
+# ╟─2b4d01b6-060a-4a1f-a746-b11e7600a3c9
+# ╠═32f0ec3c-773f-4935-9c7c-c6efa67af057
+# ╟─15eb46ca-9e71-4253-88f5-1a27e44cbf30
+# ╠═77d88db4-3a6d-43ec-bd57-89a3ce8a614b
+# ╟─bd9a019c-a5f2-49d6-9866-ffe672b17684
+# ╟─91725283-c491-4833-8761-f3392001721e
+# ╠═5cea359a-93dc-484a-b9fa-7506880410cf
+# ╟─f21f8c26-ef05-420d-9084-f9e19c57ef81
+# ╠═a7f93306-bc7c-45f6-a236-fc02a64a4dcd
+# ╟─58534b35-038a-4589-8911-c9266655d42c
+# ╠═e72379af-2de9-4b3b-bcc1-35b1cbaf32ee
+# ╟─7003ce69-5a05-4db5-b8ca-a71b15ab0061
+# ╠═c86c4c6c-6816-4b47-abe1-9d4f53ee102f
+# ╟─728107f3-38e8-49eb-82cd-ac3556a23c02
+# ╠═266dfd3f-b287-49d7-9a3a-65892b36c770
+# ╟─824855af-6248-4b15-9578-ba9b06881abe
+# ╠═1958d2c4-f17f-4dfc-8905-a4ea32570430
+# ╟─77eb45a4-a033-4906-afac-c5eedf0618bf
+# ╠═8c2c269f-ae46-4281-a5de-7aacde226a8e
+# ╟─73bd06cb-46f4-4575-bf95-df966b1249dc
+# ╠═24e03d85-549e-4048-a07b-c76c927c239f
+# ╟─12515315-5f71-4eb4-b405-5ca901ebffcb
+# ╠═a1f95b24-c1c5-478c-936a-63b90b602562
+# ╠═ca0e6c98-d6ee-47a4-b9b6-dbe3caabb914
+# ╠═447f38c1-525b-46e8-ac64-d13624aad031
+# ╠═35b21d5d-99f6-443f-87f4-2a4a16c8a081
+# ╟─a8210754-6806-4466-a97f-c27323f6ac3d
+# ╟─bfa1a8c7-e37e-4959-ad89-d12eed9a827b
+# ╠═89e8fe74-8770-4a9f-a26c-abe0f33a940f
+# ╠═86d52d2f-1256-46d9-8b22-0ac58e705fd3
+# ╟─ecd1fc1a-8f22-47a7-bd14-f42ac885c3d2
+# ╠═ecb40588-559b-45c1-a321-c17fa002f441
+# ╟─078626be-dbe4-46d9-85cc-b3746fdab7bc
+# ╠═5ad94785-6cdf-47df-aa5c-32f620439eae
+# ╟─1e8b54ae-325c-4e54-a2cc-057ee34c0ac9
+# ╠═2fdaf07d-a848-4cb3-ba89-b73e572c1e82
+# ╟─23f76f06-9035-477c-9478-69808a03c56c
+# ╠═808282e4-beeb-4bd3-abaf-383f793aa79b
+# ╠═c37c7fe1-924d-48d0-85a8-3935d7ed0127
+# ╟─ddbf4545-1840-4180-9b66-2ca16b16a2ac
+# ╠═70dd1245-04b7-4d27-8cd5-83a4f69c2bb4
+# ╠═bea594f2-b8f8-49dd-a356-e324b775ebbe
+# ╟─a0f3d2ae-3024-4988-abe7-575e81bc9f47
+# ╠═48ad4fbb-0400-4764-ab7f-1b56a5144cbf
+# ╟─e4bdc34f-6047-4a4f-88ca-d8700bc8a48b
+# ╠═ed7fcf70-99f8-480a-b3c0-c5a11617d741
+# ╟─51a413b5-7a55-410a-b287-12f5e5d52343
+# ╠═bbf62fd6-91f6-4402-8228-a2f2f57ffb0a
+# ╠═07729ea6-f15e-4c4f-82b1-0a059a969226
+# ╟─81255cde-5365-4998-843c-7160bf4dbfb4
+# ╠═d07eddbd-9325-4260-9d60-8aacafe1a82a
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

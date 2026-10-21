@@ -3,14 +3,14 @@ using Test, JSON3
 @testset "Full lexicographic objective, not MLU alone" begin
     data = time0_demo_data()
     output = mktempdir()
-    result = solve_time0(data; time_limit=5.0,
+    result = solve_time0(data; solver=:scip, time_limit=5.0,
         log_file=joinpath(output,"trial.log"),solution_file=joinpath(output,"solution.json"))
     @test result.status == "Optimal"
     @test result.solver == "scip"
     @test result.solver_version == orange_solver_version(:scip)
     @test result.lex_completed_stages == result.lex_total_stages == 4
     @test result.validated
-    threaded = solve_time0(data; time_limit=3.0, threads=2)
+    threaded = solve_time0(data; solver=:scip,time_limit=3.0, threads=2)
     @test threaded.status == "Optimal"
     @test threaded.lex_completed_stages == 4
     @test result.objective ≈ 1.0 atol=1e-5
@@ -50,6 +50,8 @@ using Test, JSON3
     @test limited.status == "Not Optimal"
     @test limited.lex_completed_stages < limited.lex_total_stages
     @test limited.status != "Infeasible"
+    @test ismissing(limited.lower_bound) || abs(limited.lower_bound) < 1e20
+    @test ismissing(limited.stage_lower_bound) || abs(limited.stage_lower_bound) < 1e20
     if !limited.feasible
         @test ismissing(limited.objective)
         @test ismissing(limited.gap)
@@ -81,8 +83,28 @@ end
     @test length(resumed.rows) == 2
     @test experiment_summary_table(resumed.summary) isa Markdown.MD
     @test length(readlines(joinpath(batchdir,"runs.csv"))) == 3
-    @test_throws ErrorException run_seta_experiments(; solver=:highs, instances=[1],runs=2,
+    @test_throws ErrorException run_seta_experiments(; solver=:scip, instances=[1],runs=2,
         time_limit=.01,max_binary_variables=1,output_dir=batchdir)
     @test_throws ErrorException run_seta_experiments(; instances=[1],runs=3,
         time_limit=.01,max_binary_variables=1,output_dir=batchdir)
+end
+
+@testset "HiGHS profiles and honest approximation labels" begin
+    data = time0_demo_data()
+    @test solve_time0(data;time_limit=5.0).solver == "highs"
+    for profile in (:default,:devex,:incumbent,:lean)
+        result = solve_time0(data;solver=:highs,highs_profile=profile,time_limit=5.0)
+        @test result.status == "Optimal"
+        @test result.quality_status == "LEX_OPTIMAL"
+        @test result.mlu_target_met
+        @test collect(JSON3.read(result.sorted_loads_json)) ≈ [1.,.5,.5,0.] atol=1e-5
+    end
+    @test approximation_quality(true,.04,.20,1,4,.05).quality_status == "MLU_TARGET_MET_LEX_INCOMPLETE"
+    @test !approximation_quality(true,.04,.20,1,4,.05).active_stage_target_met
+    @test approximation_quality(true,.06,.20,0,4,.05).quality_status == "TARGET_NOT_MET"
+    @test !approximation_quality(true,missing,missing,0,4,.05).mlu_target_met
+    @test approximation_quality(false,missing,missing,0,4,.05).quality_status == "NO_FEASIBLE_SOLUTION"
+    @test_throws ErrorException highs_search_options(:unknown)
+    @test_throws ErrorException solve_time0(data;solver=:scip,highs_profile=:lean)
+    @test_throws ErrorException solve_time0(data;target_gap=-.1)
 end

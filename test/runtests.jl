@@ -8,8 +8,9 @@ include(joinpath(@__DIR__, "..", "Project_Orange.jl"))
         add_edge!(g,u,v)
     end
     weights = sparse(first.(arcs), last.(arcs), [1.,1.,2.,1.,1.,1.,1.], 7,7)
-    paths = routing_ratios(g, weights, arcs)
+    paths = routing_ratios(g, weights, arcs;splitting=:uniform_paths)
     ecmp = routing_ratios(g, weights, arcs; splitting=:ecmp)
+    @test routing_ratios(g,weights,arcs).r[1,6,1,0] == 0.5
     @test size(paths.r) == (7, 7, 7, 1)
     @test axes(paths.r, 4) == 0:0
     @test_throws BoundsError paths.r[1,6,1,1]
@@ -54,3 +55,11 @@ end
 
 include("optimization.jl")
 
+
+include("routes.jl")
+
+include("reference.jl")
+
+include("time01.jl")
+
+include("paired_pricing.jl")

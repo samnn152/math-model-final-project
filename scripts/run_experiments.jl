@@ -13,9 +13,13 @@ end
 function experiment_cli(args)
     options = Dict(
         "--instances" => "1:20", "--runs" => "10", "--time-limit" => "1800",
-        "--solver" => "scip", "--output" => "",
-        "--threads" => "1", "--seed-base" => "1000", "--splitting" => "uniform_paths",
-        "--max-binary-variables" => "2000000", "--lock-tolerance" => "1e-7",
+        "--solver" => "highs", "--output" => "",
+        "--threads" => "1", "--seed-base" => "1000", "--splitting" => "ecmp",
+        "--highs-profile" => "auto", "--target-gap" => "0.10",
+        "--formulation"=>"auto", "--compact-threshold"=>"100000",
+        "--max-routes"=>"16", "--pricing-rounds"=>"40", "--pricing-time"=>"30",
+        "--proof-tolerance"=>"1e-7", "--warm-start-seconds"=>"3",
+        "--deadline-callback" => "true", "--max-binary-variables" => "2000000", "--lock-tolerance" => "1e-7",
     )
     if "--help" in args
         println("Time-0 lexicographic SetA experiments")
@@ -38,6 +42,12 @@ function experiment_cli(args)
         seed_base=parse(Int,options["--seed-base"]), splitting=Symbol(options["--splitting"]),
         max_binary_variables=parse(Int,options["--max-binary-variables"]),
         lock_tolerance=parse(Float64,options["--lock-tolerance"]),
+        highs_profile=Symbol(options["--highs-profile"]),target_gap=parse(Float64,options["--target-gap"]),
+        deadline_callback=parse(Bool,options["--deadline-callback"]),
+        formulation=Symbol(options["--formulation"]),compact_threshold=parse(Int,options["--compact-threshold"]),
+        max_routes_per_demand=parse(Int,options["--max-routes"]),pricing_rounds=parse(Int,options["--pricing-rounds"]),
+        pricing_time_limit=parse(Float64,options["--pricing-time"]),proof_tolerance=parse(Float64,options["--proof-tolerance"]),
+        warm_start_seconds=parse(Float64,options["--warm-start-seconds"]),
     )
     println("Results: ", result.output_dir)
     println("Per-run CSV: ", joinpath(result.output_dir, "runs.csv"))

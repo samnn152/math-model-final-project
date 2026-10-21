@@ -8,3 +8,6 @@ output/
 .env
 .env.*
 gurobi.lic
+
+__pycache__/
+*.pyc
