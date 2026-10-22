@@ -1,0 +1,16 @@
+{
+  "original_runs": 40,
+  "accepted_mlu_10pct": 19,
+  "validated": 40,
+  "repetitions_per_instance": 1,
+  "sd": null,
+  "sd_reason": "Sample SD requires at least two independent repetitions; coursework requests ten.",
+  "full_lex_optimal": 0,
+  "step6_accepted": 18,
+  "step9_accepted": 1,
+  "acceptance_definition": "supervisor completed, independently validated by runner, no error, valid global MLU gap <= 0.10",
+  "source_sha256": "1c85deface0a03b2330925bebde32d8f4cb9087cbdcbd713cc11a8288005b9e0",
+  "optimize_hours": 14.33786792310389,
+  "cpu_average_percent": 25.339155854197593,
+  "cpu_samples_5minute": 204
+}
