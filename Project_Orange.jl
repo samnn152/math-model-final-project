@@ -2535,6 +2535,70 @@ md"""
 Bounds MLU using total source/sink traffic divided by their outgoing/incoming physical capacity.
 """
 
+# ╔═╡ df89efc2-fa06-43c1-bfdb-c6ea609b28cb
+md"""
+### Endpoint assignment lower bound — retain indivisible demands
+
+For a source ``s`` and period ``t``, every valid route begins with one segment ``(s,j)``. The vector of physical loads on the active outgoing arcs produced by that first segment is nonnegative and componentwise no greater than the full route load. Keep only these initial contributions, drop Budget and all other physical rows, and let each originating demand select any reachable ``j``:
+
+```math
+L_{s,t}=\min_{z,y}\ z:\quad
+\sum_j y_{dj}=1,\quad y_{dj}\in\{0,1\},\quad
+\sum_{d:s_d=s}\sum_j\frac{v_{dt}r[s,j,a,t]}{c_a}y_{dj}\le z\ (a\in\delta^+(s)).
+```
+
+This is a relaxation of the original feasible set but retains the integer assignment of each demand. Incoming arcs at a target give the analogous last-segment relaxation. Identical coefficient vectors are deduplicated exactly. The maximum **solver lower bound** across visited endpoint problems is a valid global MLU lower bound even when endpoint solves time out. Unvisited groups still contribute their aggregate traffic/capacity cut bound. The original master remains unchanged; no endpoint optimizer incumbent is used as a bound. Endpoint optimize-call seconds are charged to the shared experiment budget and reported separately.
+"""
+
+# ╔═╡ ae65ba8d-0472-4b3c-86be-d0c16f88a187
+function time01_endpoint_bound(data;time_limit=20.,seed=1,threads=1,max_groups=48,time0=false)
+    n=length(data.node_ids);groups=NamedTuple[]
+    times=time0 ? (0:0) : (0:1)
+    for t in times,direction in (:source,:target),vertex in 1:n
+        demands=findall((direction==:source ? data.sources : data.targets).==vertex)
+        isempty(demands) && continue
+        active=time0 ? eachindex(data.arcs) : data.periods[t+1].active_arc_indices
+        arcs=[a for a in active if (direction==:source ? data.arcs[a][1] : data.arcs[a][2])==vertex]
+        isempty(arcs) && continue
+        floor=sum(time0 ? data.v[d] : data.v[d,t] for d in demands)/sum(data.c[a] for a in arcs)
+        push!(groups,(;t,direction,vertex,demands,arcs,floor))
+    end
+    sort!(groups;by=g->g.floor,rev=true)
+    bound=isempty(groups) ? 0. : maximum(g.floor for g in groups)
+    seconds=0.;nodes=0;visited=0
+    for g in first(groups,min(max_groups,length(groups)))
+        remaining=time_limit-seconds;remaining<=.01 && break
+        vectors=Vector{Float64}[];seen=Set{Tuple}()
+        for waypoint in 1:n
+            waypoint==g.vertex && continue
+            i,j=g.direction==:source ? (g.vertex,waypoint) : (waypoint,g.vertex)
+            (time0 ? data.counts[i,j] : data.periods[g.t+1].counts[i,j])>0 || continue
+            vector=[(time0 ? data.r[i,j,a] : data.r[i,j,a,g.t])/data.c[a] for a in g.arcs]
+            key=Tuple(vector)
+            key in seen && continue
+            push!(seen,key);push!(vectors,vector)
+        end
+        isempty(vectors) && continue
+        model=create_time0_optimizer(:highs;time_limit=min(1.,remaining),seed,threads=1)
+        set_string_names_on_creation(model,false)
+        try
+            y=@variable(model,[1:length(g.demands),1:length(vectors)],binary=true)
+            z=@variable(model,lower_bound=0.)
+            @constraint(model,[d in eachindex(g.demands)],sum(y[d,p] for p in eachindex(vectors))==1)
+            volumes=[time0 ? data.v[d] : data.v[d,g.t] for d in g.demands]
+            @constraint(model,[a in eachindex(g.arcs)],sum(volumes[d]*vectors[p][a]*y[d,p] for d in eachindex(g.demands),p in eachindex(vectors))<=z)
+            @objective(model,Min,1.0*z)
+            install_highs_deadline!(model,min(1.,remaining))
+            seconds+=@elapsed optimize!(model);nodes+=node_count(model);visited+=1
+            lower=objective_bound(model)
+            isfinite(lower)&&abs(lower)<1e19 && (bound=max(bound,lower-1e-7*(1+abs(lower))))
+        finally
+            empty!(model)
+        end
+    end
+    return (;bound,seconds,nodes,visited)
+end
+
 # ╔═╡ 91f7c7d3-c219-40e3-bb4c-7517478f94b8
 function route_cut_lower_bound(data)
     outgoing_capacity = zeros(nv(data.graph))
@@ -2661,13 +2725,14 @@ function solve_time0_routes(data; solver=:highs,instance="instance",run=1,time_l
     warm = improve_route_pool!(data,pool;seconds=warm_start_seconds,max_routes=max_routes_per_demand)
     heuristic_seconds = (time_ns()-heuristic_started)/1e9
     validation = warm.validation
-    first_bound = route_cut_lower_bound(data)
+    endpoint=time01_endpoint_bound(data;time0=true,time_limit=min(30.,.1time_limit),seed,threads)
+    first_bound = max(route_cut_lower_bound(data),endpoint.bound)
     active_bound = first_bound
     completed = 0
     active_stage = 1
-    total_nodes = 0
-    elapsed = 0.0
-    lp_seconds = 0.0
+    total_nodes = endpoint.nodes
+    elapsed = endpoint.seconds
+    lp_seconds = endpoint.seconds
     pricing_wall = 0.0
     locks = Float64[]
     certified_bounds = Float64[]
@@ -2942,14 +3007,14 @@ end
 
 # ╔═╡ d4e261ad-a0f6-4cd4-9c30-d351c3bdcf93
 function run_seta_experiments(; solver=:highs, instances=1:20, runs=10, time_limit=1800.0,
-        output_dir=nothing, seed_base=1000, threads=1,
+        output_dir=nothing, seed_base=1000, threads=1,run_start=1,
         splitting=:ecmp, max_binary_variables=2_000_000, console=false, lock_tolerance=1e-7,
         highs_profile=:auto, target_gap=0.10, deadline_callback=true,
         formulation=:auto,compact_threshold=100_000,max_routes_per_demand=16,
         pricing_rounds=40,pricing_time_limit=30.0,proof_tolerance=1e-7,warm_start_seconds=3.0)
     solver in (:scip,:highs) || error("Unknown solver $solver; choose :scip or :highs")
     output_dir = isnothing(output_dir) ? joinpath(@__DIR__,"results","time0_lex_$(solver)") : abspath(output_dir)
-    runs >= 1 || error("runs must be positive")
+    runs >= 1 && run_start>=1 || error("runs and run_start must be positive")
     isfinite(time_limit) && time_limit > 0 || error("Invalid time limit")
     ids = collect(Int, instances)
     !isempty(ids) && all(i -> 1 <= i <= 20, ids) && length(unique(ids)) == length(ids) || error("Invalid instance IDs")
@@ -2958,7 +3023,7 @@ function run_seta_experiments(; solver=:highs, instances=1:20, runs=10, time_lim
         max_routes_per_demand=max_routes_per_demand,pricing_rounds=pricing_rounds,
         pricing_time_limit=pricing_time_limit,proof_tolerance=proof_tolerance,warm_start_seconds=warm_start_seconds, highs_profile=String(highs_profile), target_gap=Float64(target_gap),
         deadline_callback=deadline_callback, solver=String(solver),solver_version=orange_solver_version(solver),
-        instances=ids, runs=runs, time_limit=Float64(time_limit), seed_base=seed_base,
+        instances=ids, runs=runs,run_start, time_limit=Float64(time_limit), seed_base=seed_base,
         threads=threads, splitting=String(splitting), objective_mode="lexicographic_sorted_loads",
         max_binary_variables=max_binary_variables,lock_tolerance=lock_tolerance,
         relative_gap_tolerance=0.0,absolute_gap_tolerance=1e-8,feasibility_tolerance=1e-7)
@@ -2984,7 +3049,7 @@ function run_seta_experiments(; solver=:highs, instances=1:20, runs=10, time_lim
     for id in ids
         instance = "setA-" * lpad(id,2,'0')
         data = load_data(joinpath(@__DIR__,"setA",instance); splitting)
-        for run in 1:runs
+        for run in run_start:run_start+runs-1
             basename_run = instance * "_run-" * lpad(run,2,'0')
             checkpoint = joinpath(output_dir,basename_run * ".json")
             log_file = joinpath(output_dir,basename_run * ".log")
@@ -3675,8 +3740,15 @@ function time01_pair_route(data,d,t,path)
     length(pairs)<=data.MaxSeg && length(unique(pairs))==length(pairs) || error("Invalid pair segment count/incidence")
     all(i!=j && data.periods[t+1].counts[i,j]>0 for (i,j) in pairs) || error("Unreachable pair segment")
     coefficients=zeros(length(data.arcs))
-    for (i,j) in pairs,a in eachindex(coefficients)
-        coefficients[a]+=data.v[d,t]*data.r[i,j,a,t]/data.c[a]
+    if hasproperty(data,:pair_ratios)
+        ratios=data.pair_ratios[t+1];rows=rowvals(ratios);values=nonzeros(ratios)
+        for (i,j) in pairs,entry in nzrange(ratios,i+(j-1)*n)
+            a=rows[entry];coefficients[a]+=data.v[d,t]*values[entry]/data.c[a]
+        end
+    else
+        for (i,j) in pairs,a in eachindex(coefficients)
+            coefficients[a]+=data.v[d,t]*data.r[i,j,a,t]/data.c[a]
+        end
     end
     return (;q=t*length(data.sources)+d,d,t,path=collect(Int,path),coefficients=sparsevec(coefficients),
         segments=[i+(j-1)*n for (i,j) in pairs])
@@ -3866,6 +3938,104 @@ LB=D_R+\sum_d\min(0,l_d-\alpha_d).
 Before pricing, a safe floor is K times the most negative segment cost in each period plus min(0,2K*mu). It relaxes connectivity and Budget and is therefore a lower bound even for unvisited demands. A completed pricing solve tightens that floor. Consequently a partial sweep can still supply a conservative global bound. Signed tiny load duals are priced directly, without an uncompensated projection. A numerical safety buffer is subtracted. This bound applies only to this LP stage and its inherited locks, not to an unrelated lexicographic stage.
 """
 
+# ╔═╡ 6182b0cb-c9dd-4d99-b81f-a83b853fa6a3
+md"""
+### Fast pair pricing: shared dynamic programs and a valid Budget bound
+
+The large-instance default avoids building millions of hop-indexed binaries for every demand. `time01_hop_prices` computes a hop-bounded minimum walk for all sources sharing a destination. Repeated segment walks form a relaxation for the bound; only routes with no repeated ordered segments enter the master. All original MILP constraints and the exact pricing routine remain available.
+
+Let ``a_d`` be the sum of independent period minimum walk costs, and ``b_d`` a lower bound for the cheapest common route under both periods' physical dual costs. If two binary segment sets differ while retaining the same flow balance, their symmetric difference contains at least two arcs (a two-edge cycle is permitted). Consequently, for nonnegative Budget dual ``\mu``,
+
+```math
+\min_q c_d(q)\ \ge\ \min\{b_d,a_d+2\mu\}.
+```
+
+When Budget is less than two, only identical sets are possible and ``b_d`` alone is valid. Tiny negative duals use the conservative ``2K\mu`` floor instead. None of these bounds treats a restricted-pool MIP bound as global.
+
+For a common route define ``f_d(\rho)=\min_p\sum_{(i,j)\in p}[\rho P^0_{ij}+(1-\rho)P^1_{ij}]``. This is concave as a minimum of affine functions. Linear interpolation of exact walk minima on ``\rho\in\{0,1/4,1/2,3/4,1\}`` is therefore a lower bound, with ``\rho=v_{d0}/(v_{d0}+v_{d1})`` and scale ``v_{d0}+v_{d1}``. Signed costs and relaxed walks preserve the lower-bound direction. Valid grid paths and independent paths supply candidate columns; every chosen incumbent is revalidated against the original Budget and physical loads. A full sweep is required before installing the bound.
+
+Dynamic-program time is recorded as pricing wall time, **not** as `optimize!` time. MLU gap at most 10% remains a reporting target: search continues, and later lexicographic stages are entered only after a global certificate.
+"""
+
+# ╔═╡ 1e6d2f6f-ba1d-43f7-93b4-702a437e8936
+function time01_hop_prices(data,costs;deadline=Inf,period=nothing)
+    n=length(data.node_ids);D=length(data.sources);K=data.MaxSeg
+    matrix=copy(costs)
+    for j in 1:n,i in 1:n
+        available=period===nothing ? all(p.counts[i,j]>0 for p in data.periods) : data.periods[period+1].counts[i,j]>0
+        (i==j || !available) && (matrix[i,j]=Inf)
+    end
+    lower=fill(-Inf,D);paths=[Int[] for _ in 1:D]
+    for target in sort(unique(data.targets))
+        previous=fill(Inf,n);previous[target]=0.;successors=zeros(Int,n,K)
+        for hop in 1:K
+            time()>deadline && return (;complete=false,lower,paths)
+            current=copy(previous)
+            for j in 1:n
+                isfinite(previous[j]) || continue
+                for i in 1:n
+                    candidate=matrix[i,j]+previous[j]
+                    if candidate<current[i]
+                        current[i]=candidate;successors[i,hop]=j
+                    end
+                end
+            end
+            previous=current
+        end
+        for d in 1:D
+            data.targets[d]==target || continue
+            lower[d]=previous[data.sources[d]]
+            path=Int[data.sources[d]];vertex=data.sources[d]
+            for hop in K:-1:1
+                j=successors[vertex,hop]
+                j==0 && continue
+                push!(path,j);vertex=j
+            end
+            pairs=collect(zip(path,path[2:end]))
+            last(path)==target && length(unique(pairs))==length(pairs) && (paths[d]=path)
+        end
+    end
+    return (;complete=true,lower,paths)
+end
+
+# ╔═╡ a4a33462-4a02-4e36-b9e3-de7208ecc704
+function fast_time01_pair_sweep!(columns,keys,data,prices;deadline=Inf,max_columns=100_000)
+    # Independent-period walks and common-route walks relax the full pricing domain.
+    D=length(data.sources)
+    separate=[time01_hop_prices(data,prices.physical[t+1];deadline,period=t) for t in 0:1]
+    all(p.complete for p in separate) || return (;complete=false,lower_bounds=copy(prices.floors),added=0,visited=0)
+    grid=[0.,.25,.5,.75,1.]
+    common=[time01_hop_prices(data,rho.*prices.physical[1].+(1-rho).*prices.physical[2];deadline) for rho in grid]
+    all(p.complete for p in common) || return (;complete=false,lower_bounds=copy(prices.floors),added=0,visited=0)
+    lower_bounds=copy(prices.floors);added=0
+    for d in 1:D
+        v0=data.v[d,0];v1=data.v[d,1];total=v0+v1
+        rho=total>0 ? v0/total : .5
+        left=min(length(grid)-1,max(1,searchsortedlast(grid,rho)))
+        fraction=(rho-grid[left])/(grid[left+1]-grid[left])
+        common_bound=total*((1-fraction)*common[left].lower[d]+fraction*common[left+1].lower[d])
+        separate_bound=v0*separate[1].lower[d]+v1*separate[2].lower[d]
+        # Distinct binary segment sets with identical flow balance differ in at least two arcs.
+        change_floor=prices.mu>=0 ? 2prices.mu : 2data.MaxSeg*prices.mu
+        price_bound=data.budget<2 ? common_bound : min(common_bound,separate_bound+change_floor)
+        isfinite(price_bound) && (lower_bounds[d]=max(lower_bounds[d],price_bound-1e-9*(1+abs(price_bound))))
+        choices=Tuple{Vector{Int},Vector{Int}}[]
+        push!(choices,(separate[1].paths[d],separate[2].paths[d]))
+        for p in common
+            push!(choices,(p.paths[d],p.paths[d]))
+        end
+        for (p0,p1) in choices
+            (isempty(p0)||isempty(p1)) && continue
+            objective=sum(data.v[d,t-1]*prices.physical[t][i,j] for (t,path) in enumerate((p0,p1)) for (i,j) in zip(path,path[2:end]))+prices.mu*segment_change_count(p0,p1)
+            if objective-prices.alpha[d]<-1e-8
+                accepted=add_time01_pair!(columns,keys,data,d,p0,p1;max_columns)
+                added+=accepted>0
+            end
+        end
+    end
+    return (;complete=true,lower_bounds,added,visited=D)
+end
+
 # ╔═╡ 808282e4-beeb-4bd3-abaf-383f793aa79b
 function time01_pair_duals(data,master)
     m=length(data.arcs);n=length(data.node_ids)
@@ -3919,15 +4089,39 @@ end
 md"""
 ### `solve_time01_pairs` — root master–pricing, then a restricted integer solve
 
-Starts with one feasible direct/direct pair per demand. Each cycle solves a restricted LP, prices pairs independently by demand, adds negative-reduced-cost columns, and solves a restricted binary master for an incumbent. If no improving column is generated while a global gap remains, a diversification pass excludes existing pair incidences to discover additional integer-useful columns; its restricted pricing bounds never enter the global bound.
+Starts with one feasible direct/direct pair per demand. `seed_time01_pairs!` can also load saved time-0 routes as identical pairs in both periods (Budget cost zero), revalidate their reachability and physical loads, and use the better feasible start. These routes are only optional candidates; they impose no route restriction. Each cycle solves a restricted LP, prices pairs independently by demand, adds negative-reduced-cost columns, and solves a restricted binary master for an incumbent. If no improving column is generated while a global gap remains, a diversification pass excludes existing pair incidences to discover additional integer-useful columns; its restricted pricing bounds never enter the global bound.
 
 Previously certified top-k values remain locked. MLU gap 10% is only reported; it does not stop search. The shared budget counts master LP, pricing, diversification and master MIP optimize calls. A separate wall guard and variable/column guards bound non-solver work. Restricted integer bounds are logged but never treated as full-domain bounds. This is not branch-and-price: an LP/integer gap can prevent certification even after LP pricing converges. The former separate-period implementation remains callable as `solve_time01_separate` for regression comparison.
 """
 
+# ╔═╡ eb02b7e9-ddfd-4e6c-ad77-7fd298565bb5
+function seed_time01_pairs!(columns,keys,data;max_columns=100_000,warm_start_file="")
+    isempty(warm_start_file) && return nothing
+    isfile(warm_start_file) || return nothing
+    saved=JSON3.read(read(warm_start_file,String))
+    indices=Dict(id=>i for (i,id) in enumerate(data.node_ids))
+    routes=Dict(Int(r.d)=>r.w for r in saved.srpaths if Int(r.t)==0)
+    selection=collect(1:length(data.sources))
+    for d in eachindex(data.sources)
+        haskey(routes,data.demand_ids[d]) || continue
+        path=vcat(data.sources[d],[indices[Int(id)] for id in routes[data.demand_ids[d]]],data.targets[d])
+        pairs=collect(zip(path,path[2:end]))
+        all(data.periods[2].counts[i,j]>0 for (i,j) in pairs) || continue
+        accepted=add_time01_pair!(columns,keys,data,d,path,path;max_columns)
+        if accepted>0
+            selection[d]=accepted
+        else
+            found=findfirst(c->c.d==d && c.paths==(path,path),columns)
+            found===nothing || (selection[d]=found)
+        end
+    end
+    return validate_time01_pairs(data,columns,selection)
+end
+
 # ╔═╡ 48ad4fbb-0400-4764-ab7f-1b56a5144cbf
 function solve_time01_pairs(data;time_limit=3600.,solver=:highs,seed=1,threads=1,target_gap=.10,
         lock_tolerance=1e-7,proof_tolerance=2e-6,max_variables=2_000_000,max_columns=100_000,
-        max_pricing_variables=200_000,pricing_slice=2.,log_file="",solution_file="")
+        max_pricing_variables=200_000,pricing_slice=2.,pair_pricing=:auto,warm_start_file="",log_file="",solution_file="")
     isfinite(time_limit)&&time_limit>0 && pricing_slice>0 || error("Invalid pair solve time limits")
     max_columns>=length(data.sources) || error("Pair pool cannot hold initial solution")
     isempty(log_file) || mkpath(dirname(abspath(log_file)))
@@ -3941,17 +4135,29 @@ function solve_time01_pairs(data;time_limit=3600.,solver=:highs,seed=1,threads=1
         HiGHS.Highs_resetGlobalScheduler(1)
         started=time();elapsed=0.;lp_total=0.;pricing_total=0.;mip_total=0.;nodes=0;pricing_nodes=0
         D=length(data.sources);M=2length(data.arcs)
+        pair_pricing in (:auto,:dynamic,:milp) || error("Invalid pair pricing method")
+        dynamic=pair_pricing==:dynamic || (pair_pricing==:auto && length(data.node_ids)>12)
+        data=merge(data,(pair_ratios=[sparse(transpose(p.r.values)) for p in data.periods],))
+        pricing_wall_total=0.
+        wall_allowance=dynamic ? 2time_limit+300. : time_limit+max(30.,.1time_limit)
         columns=NamedTuple[];keys=[Set{Tuple}() for d in 1:D]
         for d in 1:D
             path=[data.sources[d],data.targets[d]]
             add_time01_pair!(columns,keys,data,d,path,path;max_columns)
         end
         validation=validate_time01_pairs(data,columns,collect(1:D))
-        locks=Float64[];completed=0;k=1;cycle=0;stage_bound=0.;first_bound=0.
+        warm=seed_time01_pairs!(columns,keys,data;max_columns,warm_start_file)
+        warm!==nothing && warm.mlu<validation.mlu && (validation=warm)
+        isempty(log_file) || (println("Paired start | MLU=",validation.mlu," | pairs=",length(columns)," | pricing=",dynamic ? "dynamic" : "milp");flush(stdout))
+        endpoint=dynamic ? time01_endpoint_bound(data;time_limit=min(30.,.15time_limit),seed,threads) : (bound=0.,seconds=0.,nodes=0,visited=0)
+        elapsed+=endpoint.seconds;nodes+=endpoint.nodes
+        endpoint.bound<=validation.mlu+proof_tolerance || error("Endpoint bound exceeds incumbent")
+        isempty(log_file) || (println("Endpoint global MLU bound=",endpoint.bound," | optimize_seconds=",endpoint.seconds);flush(stdout))
+        locks=Float64[];completed=0;k=1;cycle=0;stage_bound=endpoint.bound;first_bound=endpoint.bound
         termination="TIME_LIMIT";status="Not Optimal";pricing_calls=0
         last_lp_closed=false;last_visited=0;restricted_bound=missing;last_bound=0.
         while k<=M && time_limit-elapsed>1e-3
-            time()-started>time_limit+max(30.,.1*time_limit) && (termination="SEARCH_WALL_LIMIT";break)
+            time()-started>wall_allowance && (termination="SEARCH_WALL_LIMIT";break)
             cycle+=1;remaining=time_limit-elapsed;added=0;visited=0;cycle_pricing=0.;cycle_lp=0.;cycle_mip=0.;mip_status="NOT_RUN"
             slice=min(10.,remaining*.20)
             master=build_time01_pair_master(data,columns,k,locks;time_limit=slice,seed,max_variables)
@@ -3968,10 +4174,22 @@ function solve_time01_pairs(data;time_limit=3600.,solver=:highs,seed=1,threads=1
             closed=false
             if prices!==nothing
                 lower_bounds=copy(prices.floors)
-                for d in 1:D
+                if dynamic
+                    pricing_started=time()
+                    sweep=fast_time01_pair_sweep!(columns,keys,data,prices;
+                        deadline=started+wall_allowance,max_columns)
+                    pricing_wall_total+=time()-pricing_started
+                    lower_bounds=sweep.lower_bounds;added+=sweep.added;visited=sweep.visited
+                    pricing_calls+=sweep.visited
+                    isempty(pricing_log) || append_result_csv(pricing_log,
+                        (stage=k,cycle,demand_index=0,demand_id=0,mode="dynamic_all_demands",status=sweep.complete ? "COMPLETE" : "INTERRUPTED",
+                         minimum_lower_bound=minimum(lower_bounds),candidate_reduced_cost=missing,added=sweep.added>0,
+                         optimize_seconds=0.,cumulative_optimize_seconds=elapsed))
+                end
+                for d in (dynamic ? (1:0) : (1:D))
                     remaining=time_limit-elapsed
                     remaining<=.01 && break
-                    time()-started>time_limit+max(30.,.1*time_limit) && break
+                    time()-started>wall_allowance && break
                     slice=min(pricing_slice,remaining*.5/(D-d+1))
                     price=try
                         price_time01_demand(data,d,prices.physical,prices.mu;time_limit=slice,solver,seed,threads,
@@ -4027,11 +4245,11 @@ function solve_time01_pairs(data;time_limit=3600.,solver=:highs,seed=1,threads=1
             stage_bound<=value_now+proof_tolerance || error("Pair global bound exceeds incumbent")
             k==1 && (first_bound=max(first_bound,stage_bound))
             certified=value_now-stage_bound<=proof_tolerance
-            if !certified && added==0 && prices!==nothing
+            if !certified && added==0 && prices!==nothing && !dynamic
                 for d in 1:D
                     remaining=time_limit-elapsed
                     remaining<=.01 && break
-                    time()-started>time_limit+max(30.,.1*time_limit) && break
+                    time()-started>wall_allowance && break
                     slice=min(pricing_slice,remaining*.25/(D-d+1))
                     price=try
                         price_time01_demand(data,d,prices.physical,prices.mu;time_limit=slice,solver,seed,threads,
@@ -4082,7 +4300,9 @@ function solve_time01_pairs(data;time_limit=3600.,solver=:highs,seed=1,threads=1
             solver=String(solver),solver_version=orange_solver_version(solver),objective_mode="lexicographic_all_arcs_all_periods",
             formulation="paired_demand_master_pricing",bound_scope="full_pair_domain_lp_correction",pricing_lp_closed=last_lp_closed,
             pricing_demands_last_sweep=last_visited,pricing_calls,pricing_optimize_seconds=pricing_total,
-            lp_optimize_seconds=lp_total,mip_optimize_seconds=mip_total,restricted_integer_bound=restricted_bound,
+            lp_optimize_seconds=lp_total,mip_optimize_seconds=mip_total,pricing_wall_seconds=pricing_wall_total,
+            pair_pricing=String(dynamic ? :dynamic : :milp),endpoint_lower_bound=endpoint.bound,
+            endpoint_optimize_seconds=endpoint.seconds,endpoint_groups=endpoint.visited,restricted_integer_bound=restricted_bound,
             lock_tolerance,proof_tolerance,log_file,pricing_log,solution_file)
         if !isempty(solution_file)
             write(solution_file*".tmp",JSON3.write(result));mv(solution_file*".tmp",solution_file;force=true)
@@ -4134,15 +4354,16 @@ md"""
 
 # ╔═╡ d07eddbd-9325-4260-9d60-8aacafe1a82a
 function run_time01_experiments(;instances=1:20,runs=10,time_limit=3600.,solver=:highs,
-        output_dir=joinpath(@__DIR__,"results","time01_highs"),seed_base=1000,threads=1,
-        max_variables=2_000_000,max_columns=100_000,formulation=:paired,max_pricing_variables=200_000,pricing_slice=2.)
+        output_dir=joinpath(@__DIR__,"results","time01_highs"),seed_base=1000,threads=1,run_start=1,
+        max_variables=2_000_000,max_columns=100_000,formulation=:paired,max_pricing_variables=200_000,pricing_slice=2.,pair_pricing=:auto,
+        warm_start_dir=joinpath(@__DIR__,"warm_starts"))
     formulation in (:paired,:separate) || error("Choose :paired or :separate")
     ids=collect(Int,instances)
     !isempty(ids)&&all(i->1<=i<=20,ids)&&length(unique(ids))==length(ids) || error("Invalid SetA selection")
-    runs>=1 || error("Invalid repetition count")
+    runs>=1 && run_start>=1 || error("Invalid repetition count")
     mkpath(output_dir)
-    config=(schema_version=3,formulation=String(formulation),max_pricing_variables,pricing_slice,periods=[0,1],objective="lexicographic_all_arcs_all_periods",splitting="ecmp",
-        instances=ids,runs,time_limit,solver=String(solver),seed_base,threads,max_variables,max_columns)
+    config=(schema_version=4,formulation=String(formulation),max_pricing_variables,pricing_slice,pair_pricing=String(pair_pricing),warm_start_dir,periods=[0,1],objective="lexicographic_all_arcs_all_periods",splitting="ecmp",
+        instances=ids,runs,run_start,time_limit,solver=String(solver),seed_base,threads,max_variables,max_columns)
     config_file=joinpath(output_dir,"config.json")
     text=JSON3.write(config)
     isfile(config_file) && read(config_file,String)!=text && error("Use a new directory: temporal settings differ")
@@ -4152,7 +4373,7 @@ function run_time01_experiments(;instances=1:20,runs=10,time_limit=3600.,solver=
     for id in ids
         instance="setA-"*lpad(id,2,'0')
         data=load_time01_data(joinpath(@__DIR__,"setA",instance))
-        for run in 1:runs
+        for run in run_start:run_start+runs-1
             base=joinpath(output_dir,instance*"_run-"*lpad(run,2,'0'))
             checkpoint=base*".json"
             if isfile(checkpoint)
@@ -4161,7 +4382,8 @@ function run_time01_experiments(;instances=1:20,runs=10,time_limit=3600.,solver=
             else
                 result=try
                     solve_time01(data;time_limit,solver,seed=seed_base+run,threads,max_variables,max_columns,formulation,
-                        (formulation==:paired ? (;max_pricing_variables,pricing_slice) : NamedTuple())...,
+                        (formulation==:paired ? (;max_pricing_variables,pricing_slice,pair_pricing,
+                            warm_start_file=joinpath(warm_start_dir,instance*"_time0.json")) : NamedTuple())...,
                         log_file=base*"_cycles.csv",solution_file=base*"_solution.json")
                 catch exception
                     exception isa InterruptException && rethrow()
@@ -4184,6 +4406,10 @@ function run_time01_experiments(;instances=1:20,runs=10,time_limit=3600.,solver=
                     lp_optimize_seconds=hasproperty(result,:lp_optimize_seconds) ? result.lp_optimize_seconds : missing,
                     pricing_optimize_seconds=hasproperty(result,:pricing_optimize_seconds) ? result.pricing_optimize_seconds : missing,
                     mip_optimize_seconds=hasproperty(result,:mip_optimize_seconds) ? result.mip_optimize_seconds : missing,
+                    endpoint_lower_bound=hasproperty(result,:endpoint_lower_bound) ? result.endpoint_lower_bound : missing,
+                    endpoint_optimize_seconds=hasproperty(result,:endpoint_optimize_seconds) ? result.endpoint_optimize_seconds : missing,
+                    pricing_wall_seconds=hasproperty(result,:pricing_wall_seconds) ? result.pricing_wall_seconds : missing,
+                    pair_pricing=hasproperty(result,:pair_pricing) ? result.pair_pricing : "separate",
                     bound_scope=hasproperty(result,:bound_scope) ? result.bound_scope : "separate_reference_or_error",
                     sorted_loads_json=JSON3.write(result.sorted_loads),solution_file=base*"_solution.json",
                     error=hasproperty(result,:error) ? result.error : "")
@@ -5080,6 +5306,8 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─16cb313f-d096-4c3f-a798-3a3974b914a1
 # ╠═af329d02-2385-412a-9f94-779afa8bae64
 # ╟─8e4569ee-47a2-4cbf-83b2-25cfa73bb5c8
+# ╟─df89efc2-fa06-43c1-bfdb-c6ea609b28cb
+# ╠═ae65ba8d-0472-4b3c-86be-d0c16f88a187
 # ╠═91f7c7d3-c219-40e3-bb4c-7517478f94b8
 # ╟─82029e20-1987-451e-a27f-bd24c61809c0
 # ╟─1c462a22-e6f0-4ef7-8c8b-560780682355
@@ -5129,12 +5357,16 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─1e8b54ae-325c-4e54-a2cc-057ee34c0ac9
 # ╠═2fdaf07d-a848-4cb3-ba89-b73e572c1e82
 # ╟─23f76f06-9035-477c-9478-69808a03c56c
+# ╟─6182b0cb-c9dd-4d99-b81f-a83b853fa6a3
+# ╠═1e6d2f6f-ba1d-43f7-93b4-702a437e8936
+# ╠═a4a33462-4a02-4e36-b9e3-de7208ecc704
 # ╠═808282e4-beeb-4bd3-abaf-383f793aa79b
 # ╠═c37c7fe1-924d-48d0-85a8-3935d7ed0127
 # ╟─ddbf4545-1840-4180-9b66-2ca16b16a2ac
 # ╠═70dd1245-04b7-4d27-8cd5-83a4f69c2bb4
 # ╠═bea594f2-b8f8-49dd-a356-e324b775ebbe
 # ╟─a0f3d2ae-3024-4988-abe7-575e81bc9f47
+# ╠═eb02b7e9-ddfd-4e6c-ad77-7fd298565bb5
 # ╠═48ad4fbb-0400-4764-ab7f-1b56a5144cbf
 # ╟─e4bdc34f-6047-4a4f-88ca-d8700bc8a48b
 # ╠═ed7fcf70-99f8-480a-b3c0-c5a11617d741

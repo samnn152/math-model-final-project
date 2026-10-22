@@ -19,6 +19,9 @@ PY
 fi
 rss=48
 [[ "$workers" == 2 ]] && rss=24
+source_dir="${ORANGE_BATCH_SOURCE:-/opt/orange/source}"
+output_dir="${ORANGE_BATCH_OUTPUT:-/opt/orange/results/one_pass}"
+phase_args="${ORANGE_PHASE_ARGS:-}"
 cat > /etc/systemd/system/orange-batch.service <<UNIT
 [Unit]
 Description=Orange one-pass Step 6 and Step 9
@@ -27,13 +30,14 @@ Wants=network-online.target
 [Service]
 Type=simple
 User=orange
-WorkingDirectory=/opt/orange/source
+WorkingDirectory=$source_dir
 Environment=JULIA_DEPOT_PATH=/opt/orange/depot
 Environment=JULIA_NUM_THREADS=1
 Environment=OPENBLAS_NUM_THREADS=1
 Environment=OMP_NUM_THREADS=1
-ExecStart=/usr/bin/python3 /opt/orange/source/cloud/run_cloud_jobs.py --mode batch --workers $workers --rss-gib $rss --output /opt/orange/results/one_pass --run
+ExecStart=/usr/bin/python3 $source_dir/cloud/run_cloud_jobs.py --mode batch --workers $workers --rss-gib $rss $phase_args --output $output_dir --run
 MemoryMax=56G
+Environment=ORANGE_RESULTS_ROOT=$output_dir
 MemorySwapMax=0
 RuntimeMaxSec=35h
 TimeoutStopSec=30

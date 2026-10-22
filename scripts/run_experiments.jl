@@ -12,7 +12,7 @@ end
 
 function experiment_cli(args)
     options = Dict(
-        "--instances" => "1:20", "--runs" => "10", "--time-limit" => "1800",
+        "--instances" => "1:20", "--runs" => "10", "--run-start"=>"1", "--time-limit" => "1800",
         "--solver" => "highs", "--output" => "",
         "--threads" => "1", "--seed-base" => "1000", "--splitting" => "ecmp",
         "--highs-profile" => "auto", "--target-gap" => "0.10",
@@ -37,7 +37,7 @@ function experiment_cli(args)
     result = run_seta_experiments(
         solver=Symbol(lowercase(options["--solver"])),
         instances=parse_instance_selection(options["--instances"]),
-        runs=parse(Int, options["--runs"]), time_limit=parse(Float64, options["--time-limit"]),
+        runs=parse(Int, options["--runs"]),run_start=parse(Int,options["--run-start"]), time_limit=parse(Float64, options["--time-limit"]),
         output_dir=isempty(options["--output"]) ? nothing : abspath(options["--output"]), threads=parse(Int,options["--threads"]),
         seed_base=parse(Int,options["--seed-base"]), splitting=Symbol(options["--splitting"]),
         max_binary_variables=parse(Int,options["--max-binary-variables"]),

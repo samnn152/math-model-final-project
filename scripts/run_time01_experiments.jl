@@ -2,10 +2,10 @@
 include(joinpath(@__DIR__,"..","Project_Orange.jl"))
 
 function time01_cli(args)
-    options=Dict("--instances"=>"1:20","--runs"=>"10","--time-limit"=>"3600",
+    options=Dict("--instances"=>"1:20","--runs"=>"10","--run-start"=>"1","--time-limit"=>"3600",
         "--solver"=>"highs","--output"=>"results/time01_highs","--threads"=>"1","--seed-base"=>"1000",
         "--max-variables"=>"2000000","--max-columns"=>"100000","--formulation"=>"paired",
-        "--max-pricing-variables"=>"200000","--pricing-slice"=>"2")
+        "--max-pricing-variables"=>"200000","--pricing-slice"=>"2","--pair-pricing"=>"auto")
     if "--help" in args
         println("Original SetA, paired demand master-pricing with joint lexicographic objective and Budget; no batch starts with --help.")
         for key in sort(collect(keys(options)))
@@ -26,10 +26,10 @@ function time01_cli(args)
     else
         ids=parse.(Int,split(selection,','))
     end
-    return run_time01_experiments(;instances=ids,runs=parse(Int,options["--runs"]),time_limit=parse(Float64,options["--time-limit"]),
+    return run_time01_experiments(;instances=ids,runs=parse(Int,options["--runs"]),run_start=parse(Int,options["--run-start"]),time_limit=parse(Float64,options["--time-limit"]),
         solver=Symbol(options["--solver"]),output_dir=abspath(options["--output"]),threads=parse(Int,options["--threads"]),
         seed_base=parse(Int,options["--seed-base"]),max_variables=parse(Int,options["--max-variables"]),max_columns=parse(Int,options["--max-columns"]),formulation=Symbol(options["--formulation"]),
-        max_pricing_variables=parse(Int,options["--max-pricing-variables"]),pricing_slice=parse(Float64,options["--pricing-slice"]))
+        max_pricing_variables=parse(Int,options["--max-pricing-variables"]),pricing_slice=parse(Float64,options["--pricing-slice"]),pair_pricing=Symbol(options["--pair-pricing"]))
 end
 
 if abspath(PROGRAM_FILE)==@__FILE__

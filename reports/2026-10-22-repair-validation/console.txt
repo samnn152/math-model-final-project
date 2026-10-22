@@ -1,0 +1,3 @@
+Paired start | MLU=0.0983606 | pairs=11281 | pricing=dynamic
+Endpoint global MLU bound=0.04683839333333334 | optimize_seconds=20.437851582000004
+setA-19 run 1: Not Optimal | TIME_LIMIT | Budget=3/13

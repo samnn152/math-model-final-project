@@ -8,6 +8,7 @@ from pathlib import Path
 import platform
 import shutil
 import signal
+import statistics
 import subprocess
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -20,15 +21,15 @@ def write_json(path, value):
     temporary.replace(path)
 
 
-def tasks(mode):
+def tasks(mode,runs=1):
     if mode=='pilot':
-        return [(9,20,60)]
-    return [(stage,instance,1800 if stage==6 else 3600)
-            for stage in (9,6) for instance in range(20,0,-1)]
+        return [(9,19,300,1)]
+    return [(stage,instance,1800 if stage==6 else 3600,run)
+            for stage in (9,6) for instance in range(20,0,-1) for run in range(1,runs+1)]
 
 
-def job_command(source, output, stage, instance, limit):
-    common=['--instances',str(instance),'--runs','1','--time-limit',str(limit),
+def job_command(source, output, stage, instance, limit,run=1):
+    common=['--instances',str(instance),'--runs','1','--run-start',str(run),'--time-limit',str(limit),
             '--solver','highs','--threads','1','--seed-base','1000','--output',str(output)]
     if stage==6:
         extra=['--splitting','ecmp','--formulation','routes','--highs-profile','default',
@@ -38,7 +39,7 @@ def job_command(source, output, stage, instance, limit):
                '--max-binary-variables','2000000']
         runner='run_experiments.jl'
     else:
-        extra=['--formulation','paired','--pricing-slice','2','--max-columns','100000',
+        extra=['--formulation','paired','--pair-pricing','dynamic','--pricing-slice','2','--max-columns','100000',
                '--max-variables','2200000','--max-pricing-variables','2200000']
         runner='run_time01_experiments.jl'
     return ['julia','--project=.',str(source/'scripts'/runner)]+common+extra
@@ -80,8 +81,8 @@ def terminate_group(child):
 
 
 def execute_job(source, root, job, rss_gib, stop):
-    stage,instance,limit=job
-    name=f'step{stage}_setA-{instance:02d}'
+    stage,instance,limit,run=job
+    name=f'step{stage}_setA-{instance:02d}_run-{run:02d}'
     directory=root/name;directory.mkdir(parents=True,exist_ok=True)
     metadata=directory/'supervisor.json'
     if metadata.exists() and json.loads(metadata.read_text()).get('completed'):
@@ -90,7 +91,7 @@ def execute_job(source, root, job, rss_gib, stop):
     private=root/'workers'/name
     if not private.exists():
         shutil.copytree(source,private,ignore=shutil.ignore_patterns('results','output','.git','__pycache__'))
-    output=directory/'experiment';command=job_command(private,output,stage,instance,limit)
+    output=directory/'experiment';command=job_command(private,output,stage,instance,limit,run)
     env=os.environ.copy()
     env.update({key:'1' for key in ['JULIA_NUM_THREADS','OPENBLAS_NUM_THREADS','OMP_NUM_THREADS',
                                    'MKL_NUM_THREADS','VECLIB_MAXIMUM_THREADS']})
@@ -104,16 +105,16 @@ def execute_job(source, root, job, rss_gib, stop):
             if stop.is_set():reason='another_job_failed'
             elif measurement['tree_rss_bytes']>rss_gib*1024**3:reason='RSS_GUARD'
             elif measurement['available_bytes']<3*1024**3:reason='LOW_SYSTEM_MEMORY'
-            elif elapsed>limit*1.25+300:reason='EXTERNAL_WALL_LIMIT'
+            elif elapsed>(limit*2.25+600 if stage==9 else limit*1.25+300):reason='EXTERNAL_WALL_LIMIT'
             if reason:
                 terminate_group(child);break
             time.sleep(2)
         code=child.wait()
-    row_file=output/f'setA-{instance:02d}_run-01.json'
+    row_file=output/f'setA-{instance:02d}_run-{run:02d}.json'
     row=json.loads(row_file.read_text()) if row_file.exists() else {}
     completed=code==0 and reason is None and row.get('validated') is True and not row.get('error')
     completed=completed and row.get('termination') not in ['ERROR','MODEL_SIZE_LIMIT']
-    summary=dict(job=name,stage=stage,instance=instance,limit_seconds=limit,completed=completed,
+    summary=dict(job=name,stage=stage,instance=instance,run=run,seed=1000+run,limit_seconds=limit,completed=completed,
                  returncode=code,reason=reason,termination=row.get('termination'),
                  wall_seconds=time.monotonic()-started,sampled_tree_peak_rss_bytes=peak,
                  observed_process_hwm_bytes=hwm,command=command,result_file=str(row_file))
@@ -126,12 +127,28 @@ def execute_job(source, root, job, rss_gib, stop):
 def collect_results(root):
     for stage in (6,9):
         rows=[]
-        for path in sorted(root.glob(f'step{stage}_setA-*/experiment/setA-*_run-01.json')):
+        for path in sorted(root.glob(f'step{stage}_setA-*/experiment/setA-*_run-*.json')):
+            if path.name.endswith('_solution.json'):continue
             rows.append(json.loads(path.read_text()))
         if rows:
             fields=list(dict.fromkeys(key for row in rows for key in row))
             with (root/f'step{stage}_runs.csv').open('w',newline='') as stream:
                 writer=csv.DictWriter(stream,fieldnames=fields);writer.writeheader();writer.writerows(rows)
+            summaries=[]
+            for instance in sorted({r.get('instance') for r in rows}):
+                group=[r for r in rows if r.get('instance')==instance]
+                summary=dict(instance=instance,executed=len(group),validated=sum(r.get('validated') is True for r in group),
+                             mlu_target_met=sum(r.get('validated') is True and isinstance(r.get('gap'),(float,int)) and r['gap']<=.10 for r in group),
+                             full_lex_optimal=sum(r.get('status')=='Optimal' and r.get('lex_completed_stages')==r.get('lex_total_stages') for r in group))
+                for metric in ('objective','cpu_time_seconds','gap','nodes','pricing_nodes'):
+                    values=[r[metric] for r in group if r.get('validated') is True and isinstance(r.get(metric),(int,float))]
+                    summary[metric+'_n']=len(values)
+                    summary[metric+'_mean']=statistics.mean(values) if values else None
+                    summary[metric+'_sd']=statistics.stdev(values) if len(values)>1 else None
+                summaries.append(summary)
+            with (root/f'step{stage}_summary.csv').open('w') as stream:
+                writer=csv.DictWriter(stream,fieldnames=list(summaries[0]));writer.writeheader();writer.writerows(summaries)
+
 
 
 def main():
@@ -139,19 +156,32 @@ def main():
     parser.add_argument('--source',type=Path,default=Path(__file__).resolve().parents[1])
     parser.add_argument('--output',type=Path,default=Path('/opt/orange/results/one_pass'))
     parser.add_argument('--mode',choices=['pilot','batch'],default='pilot')
-    parser.add_argument('--workers',type=int,choices=[1,2],default=1)
+    parser.add_argument('--runs',type=int,default=10)
+    parser.add_argument('--shards',type=int,default=1)
+    parser.add_argument('--shard-index',type=int,default=0)
+    parser.add_argument('--workers',type=int,choices=range(1,7),default=1)
+    parser.add_argument('--step6-workers',type=int,choices=range(1,7))
+    parser.add_argument('--step9-workers',type=int,choices=range(1,7))
+    parser.add_argument('--step6-rss-gib',type=float)
+    parser.add_argument('--step9-rss-gib',type=float)
     parser.add_argument('--rss-gib',type=float,default=48)
     parser.add_argument('--run',action='store_true')
-    args=parser.parse_args();jobs=tasks(args.mode)
-    if args.workers*args.rss_gib>50:parser.error('Aggregate job RSS allowance must not exceed 50 GiB')
+    args=parser.parse_args()
+    if args.runs<1 or args.shards<1 or not 0<=args.shard_index<args.shards:parser.error('Invalid runs/shard')
+    all_jobs=tasks(args.mode,args.runs)
+    jobs=[job for index,job in enumerate(all_jobs) if index%args.shards==args.shard_index]
+    stage_workers={6:args.step6_workers or args.workers,9:args.step9_workers or args.workers}
+    stage_rss={6:args.step6_rss_gib or args.rss_gib,9:args.step9_rss_gib or args.rss_gib}
+    if any(stage_workers[s]*stage_rss[s]>50 for s in (6,9)):parser.error('Each phase must allow at most 50 GiB aggregate RSS')
     plan=dict(mode=args.mode,jobs=len(jobs),workers=args.workers,rss_gib=args.rss_gib,
-              optimize_allowance_hours=sum(job[2] for job in jobs)/3600,execute=args.run)
+              optimize_allowance_hours=sum(job[2] for job in jobs)/3600,execute=args.run,
+              stage_workers=stage_workers,stage_rss_gib=stage_rss,runs=args.runs,shard_index=args.shard_index,shards=args.shards,campaign_jobs=len(all_jobs))
     print(json.dumps(plan,indent=2),flush=True)
     if not args.run:return
     if platform.system()!='Linux':parser.error('--run is Linux-only; no solver starts on the Mac')
     source=args.source.resolve();root=args.output.resolve();root.mkdir(parents=True,exist_ok=True)
     fingerprints={str(path.relative_to(source)):hashlib.sha256(path.read_bytes()).hexdigest()
-                  for name in ['Project_Orange.jl','Project.toml','Manifest.toml','scripts','cloud']
+                  for name in ['Project_Orange.jl','Project.toml','Manifest.toml','scripts','cloud','warm_starts']
                   for path in ([source/name] if (source/name).is_file() else sorted((source/name).rglob('*')))
                   if path.is_file() and '__pycache__' not in path.parts}
     config=dict(plan=plan,source_sha256=fingerprints)
@@ -160,11 +190,15 @@ def main():
         parser.error('Source/config changed; use a new output directory')
     write_json(config_file,config);stop=Event();observations=[]
     try:
-        with ThreadPoolExecutor(max_workers=args.workers) as pool:
-            futures=[pool.submit(execute_job,source,root,job,args.rss_gib,stop) for job in jobs]
-            for future in as_completed(futures):
-                observations.append(future.result());collect_results(root)
-                write_json(root/'queue-status.json',observations)
+        for stage in (9,6):
+            phase=[job for job in jobs if job[0]==stage]
+            if not phase or stop.is_set():continue
+            print(json.dumps(dict(phase=stage,workers=stage_workers[stage],rss_gib=stage_rss[stage])),flush=True)
+            with ThreadPoolExecutor(max_workers=stage_workers[stage]) as pool:
+                futures=[pool.submit(execute_job,source,root,job,stage_rss[stage],stop) for job in phase]
+                for future in as_completed(futures):
+                    observations.append(future.result());collect_results(root)
+                    write_json(root/'queue-status.json',observations)
     finally:
         stop.set();collect_results(root)
     if any(not row['completed'] for row in observations):raise SystemExit(1)

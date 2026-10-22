@@ -1,5 +1,7 @@
 # Dedicated GCP worker deployment
 
+Current campaign: see [TEN_RUN_CAMPAIGN.md](TEN_RUN_CAMPAIGN.md). On 2026-10-22 the user raised the credit ceiling to 5,000,000 VND, kept the no-Paid-upgrade restriction, and required ten repetitions after a local repair test. The one-pass deployment below is retained as history.
+
 The user authorized up to 1,000,000 VND of existing credit on 2026-10-21, without upgrading the Free Trial account. The selected worker is `orange-seta-onepass`, `us-central1-a`, `e2-highmem-8` (8 vCPUs, 64 GiB), Debian 12 with a 50-GiB balanced boot disk. It has no service account or attached Cloud API scopes. Source is transferred over SSH, not published to GitHub or a public bucket.
 
 Compute runtime is capped at 36 hours per start with STOP as the termination action. The persistent disk and results remain after stop; storage charges continue until the disk is removed after exporting results. At the verified Iowa rate of $0.36159864/hour, 36 hours of compute is about $13.02; disk and IPv4 add approximately $0.43, before tax/exchange-rate differences. The corresponding planning estimate is about 350,000 VND, below the authorized reserve. This is an estimate, not a Google billing hard cap. No Paid upgrade, additional VM, GPU or commitment is part of this deployment.
@@ -60,3 +62,27 @@ sudo tail -f /opt/orange/results/one_pass/step9_setA-20/console.log
 ```
 
 Ctrl+C exits log viewing without stopping the batch. Disconnecting SSH or switching off the local Mac also leaves the systemd batch running. The journal may be quiet until a job finishes; detailed solver output is in each job's console and experiment directories. The service shuts the VM down on completion or failure, so a stopped VM alone is not proof of successful completion. Inspect the saved supervisor and queue records after restarting the VM to retrieve results.
+
+## Cloud-only three-hour email monitor
+
+The local Codex automation is paused. `orange-monitor.timer` runs `cloud/monitor_batch.py` directly on the VM every three hours and once when installed. It reads supervisor records and the last 8 KiB of memory logs, writes local JSON reports and serial output, then sends one structured entry to Cloud Logging. Two log-based Monitoring policies deliver progress and terminal notifications through an email notification channel. No model inference, local Mac uptime or SMTP account is required.
+
+The batch service shutdown hook records and submits the final state before powering off. The timer stops on terminal outcome. If the VM loses power abruptly or is forcibly stopped, the final hook cannot run; this on-VM monitor cannot report that event while the VM is off. Results and previous reports remain on disk.
+
+A dedicated service-account credential is stored root-only at `/etc/orange-monitor/writer.json`; the account has only `roles/logging.logWriter`, conditionally expiring 48 hours after setup. The local temporary key copy is removed, and the VM copy is deleted after the terminal report. Credentials are not part of Git or the source archive. Key resource cleanup can be performed later by the project owner.
+
+Monitor logs: `sudo journalctl -u orange-monitor.service --no-pager`. Timer: `systemctl list-timers orange-monitor.timer`. Latest local report: `/opt/orange/results/monitor/latest.json`. Cloud Logging log ID: `orange-batch-monitor`. Cloud Monitoring policy names: `Orange batch three-hour progress` and `Orange batch finished or stopped`. Delivery accepted by Logging confirms ingestion, not email receipt; check inbox/spam for the first notification.
+
+### Automatic email interpretation
+
+The cloud monitor now reads completed runner JSON files and active validated-solution checkpoints. Email includes per-job MLU objective, global lower bound, MLU gap, certified lexicographic prefix, total optimize-call seconds and whole-process wall seconds. It counts validated solutions, MLU gaps at most 10% and fully certified lexicographic results separately. A 100% gap is described as weak certification rather than a measured distance from the true optimum. SEARCH_WALL_LIMIT with optimize time below half of process wall time is explicitly flagged.
+
+ETA uses separate observed median process durations for Step 6 and Step 9, subtracts active elapsed time with a residual floor, and divides remaining work by two configured workers. Unobserved stages use the nominal optimize budget plus a stated 15% overhead assumption. The displayed scenario band (80–130% of the estimate) is not a confidence interval or a completion guarantee. Active checkpoint metrics are provisional, and absent values remain NA. Detailed rows are kept in the monitor JSON and Cloud Logging; email tables are split into groups of ten to keep extracted labels within notification limits.
+
+Deployment replaces only the monitor script and alert-policy documentation/label extraction. The batch service and solver processes are not restarted. An immediate monitor invocation verifies ingestion and sends the updated format; subsequent checks retain their three-hour cadence.
+
+## Second pass resource configuration (2026-10-22)
+
+The first-pass archive remains under its original directory. The repaired source and results use separate directories. The second run is gated on a validated SetA-19 test with global MLU gap at most 10%; do not launch it merely because the process exits normally. `ORANGE_BATCH_SOURCE` and `ORANGE_BATCH_OUTPUT` select the new source and results roots. The dispatcher supports `--step9-workers 4 --step9-rss-gib 12 --step6-workers 6 --step6-rss-gib 6`, executes phases separately and records their settings. Monitor service and terminal hook receive `ORANGE_RESULTS_ROOT` so emails refer to the new run rather than the archived pass.
+
+The original resource measurements and quality failures are documented in [CLOUD_AUDIT_20261022.md](CLOUD_AUDIT_20261022.md). A source/destination endpoint integer relaxation strengthens global MLU bounds in both time-0 and paired modes. In time 0 its optimize seconds are included in the pricing/LP accounting total; in paired mode they are additionally reported as endpoint optimize seconds. Neither formulation's native restricted MIP bound is automatically a global certificate.

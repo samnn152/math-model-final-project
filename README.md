@@ -52,3 +52,9 @@ Tests cover all 20 instances' Data, unequal shortest-path branches, tiny exact l
 The notebook now includes time-1 Data and the joint time-0/time-1 model with the original reconfiguration Budget. See [the implementation and local-test guide](docs/TIME01.md). The one-pass cloud batch runs on a dedicated GCP VM with two concurrent HiGHS jobs. See [CLOUD_RUN.md](docs/CLOUD_RUN.md) for deployment, resource guards, logs and checkpoints; the earlier [cloud assessment](docs/cloud-performance-cost-assessment.md) retains planning assumptions.
 
 The current two-period default uses a paired-route master with demand-specific pricing MILPs. The original Budget and joint lexicographic objective are retained. Run the short fixture audit with `julia --project=. scripts/audit_time01_pairs.jl`; see [TIME01.md](docs/TIME01.md) for pricing bounds, logs and limitations. The separate-period formulation remains available for reference checks.
+
+## Experiment archives and final campaign
+
+The [first cloud pass](reports/2026-10-22-cloud-pass-01/README.md) is preliminary: one repetition per instance, not the required ten. It includes all 40 raw results and logs, the exact source archive, accepted MLU-quality rows and an analysis of the poor original Step 9 pricing performance.
+
+The [repaired Step 9 local test](reports/2026-10-22-repair-validation/README.md) passes the requested 10% MLU-gap gate on SetA-19, with 3.8462% gap and original Budget compliance; full lexicographic optimality remains unproven. The [ten-run campaign](docs/TEN_RUN_CAMPAIGN.md) creates 400 uniquely indexed jobs across three disjoint VM shards, with seeds 1001–1010 and cloud-only progress email. Free Trial credit is used without upgrading to Paid. Final mean ± sample SD requires collecting all three shards.
