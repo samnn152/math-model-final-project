@@ -186,8 +186,16 @@ def main():
                   if path.is_file() and '__pycache__' not in path.parts}
     config=dict(plan=plan,source_sha256=fingerprints)
     config_file=root/'cloud-config.json'
-    if config_file.exists() and json.loads(config_file.read_text())!=config:
-        parser.error('Source/config changed; use a new output directory')
+    if config_file.exists():
+        saved_config=json.loads(config_file.read_text())
+        # JSON object keys are always strings. Restore the integer stage keys
+        # before comparing a saved plan with the in-memory plan.
+        saved_plan=saved_config.get('plan',{})
+        for field in ('stage_workers','stage_rss_gib'):
+            if field in saved_plan:
+                saved_plan[field]={int(stage):value for stage,value in saved_plan[field].items()}
+        if saved_config!=config:
+            parser.error('Source/config changed; use a new output directory')
     write_json(config_file,config);stop=Event();observations=[]
     try:
         for stage in (9,6):
