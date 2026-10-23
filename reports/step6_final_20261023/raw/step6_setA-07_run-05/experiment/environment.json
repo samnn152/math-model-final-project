@@ -1,0 +1,1 @@
+{"solver":"highs","solver_version":"1.15.1","julia":"1.13.1","jump":"1.32.1","scip_jl":"0.12.8","highs_jl":"1.26.0","cpu":"znver2","kernel":"Linux","architecture":"x86_64","threads":1,"julia_threads":1,"warmup_excluded":true,"created_utc":"2026-10-23T00:24:56.456","cpu_time_definition":"wall time of optimize! only"}

@@ -1,0 +1,114 @@
+{
+  "metadata": {
+    "schema_version": 1,
+    "scope": "Step 6, SetA, time 0, 20 instances x 10 runs",
+    "objective": "MLU: first component of the lexicographically sorted normalized arc-load vector; smaller is better",
+    "variance": "sample_variance uses n-1; population_variance uses n; ± denotes sample_sd, not a confidence interval",
+    "gap": "mean of individual max(0, 1 - lower_bound / objective) values; stored as a fraction",
+    "timing": "All times in seconds. cpu_time_seconds sums elapsed optimize! calls, not OS CPU time. wall_time_seconds is runner wall time; process_wall_seconds includes process startup.",
+    "certification": "Original runner numerical certificates retained; feasible solutions independently audited. This package does not independently prove dual bounds.",
+    "no_pooled_objective": "Objectives from different instances are not pooled into a single performance mean."
+  },
+  "instances": [
+    {
+      "instance": "setA-01",
+      "runs": 10,
+      "path": "raw_json/setA-01.json"
+    },
+    {
+      "instance": "setA-02",
+      "runs": 10,
+      "path": "raw_json/setA-02.json"
+    },
+    {
+      "instance": "setA-03",
+      "runs": 10,
+      "path": "raw_json/setA-03.json"
+    },
+    {
+      "instance": "setA-04",
+      "runs": 10,
+      "path": "raw_json/setA-04.json"
+    },
+    {
+      "instance": "setA-05",
+      "runs": 10,
+      "path": "raw_json/setA-05.json"
+    },
+    {
+      "instance": "setA-06",
+      "runs": 10,
+      "path": "raw_json/setA-06.json"
+    },
+    {
+      "instance": "setA-07",
+      "runs": 10,
+      "path": "raw_json/setA-07.json"
+    },
+    {
+      "instance": "setA-08",
+      "runs": 10,
+      "path": "raw_json/setA-08.json"
+    },
+    {
+      "instance": "setA-09",
+      "runs": 10,
+      "path": "raw_json/setA-09.json"
+    },
+    {
+      "instance": "setA-10",
+      "runs": 10,
+      "path": "raw_json/setA-10.json"
+    },
+    {
+      "instance": "setA-11",
+      "runs": 10,
+      "path": "raw_json/setA-11.json"
+    },
+    {
+      "instance": "setA-12",
+      "runs": 10,
+      "path": "raw_json/setA-12.json"
+    },
+    {
+      "instance": "setA-13",
+      "runs": 10,
+      "path": "raw_json/setA-13.json"
+    },
+    {
+      "instance": "setA-14",
+      "runs": 10,
+      "path": "raw_json/setA-14.json"
+    },
+    {
+      "instance": "setA-15",
+      "runs": 10,
+      "path": "raw_json/setA-15.json"
+    },
+    {
+      "instance": "setA-16",
+      "runs": 10,
+      "path": "raw_json/setA-16.json"
+    },
+    {
+      "instance": "setA-17",
+      "runs": 10,
+      "path": "raw_json/setA-17.json"
+    },
+    {
+      "instance": "setA-18",
+      "runs": 10,
+      "path": "raw_json/setA-18.json"
+    },
+    {
+      "instance": "setA-19",
+      "runs": 10,
+      "path": "raw_json/setA-19.json"
+    },
+    {
+      "instance": "setA-20",
+      "runs": 10,
+      "path": "raw_json/setA-20.json"
+    }
+  ]
+}

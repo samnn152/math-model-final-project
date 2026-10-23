@@ -1,0 +1,8 @@
+{
+  "expected_runs": 200,
+  "records": 200,
+  "passed": 200,
+  "errors": [],
+  "max_arc_load_error": 0.0,
+  "method": "Independent Python reverse Dijkstra + next-hop ECMP; reconstruct all routes, MaxSeg, normalized physical loads, MLU and sorted load vectors. Bounds only checked for consistency, not independently proved."
+}
