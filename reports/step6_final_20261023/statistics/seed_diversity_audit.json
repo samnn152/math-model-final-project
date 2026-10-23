@@ -1,0 +1,3274 @@
+{
+  "metadata": {
+    "scope": "Step 6: SetA-01 through SetA-20, runs 1 through 10",
+    "seed_rule": "seed_base + run = 1000 + run; expected seeds 1001 through 1010 per instance",
+    "route_equality": "Exact equality of sorted (demand id, period, ordered waypoint tuple) assignments; JSON array order is ignored. Physical ECMP subpaths are not counted as independently chosen routes.",
+    "load_equality": "Exact numerical equality of the entire saved sorted_loads tuple after JSON parsing; no rounding or tolerance clustering.",
+    "mlu_equality": "Exact numerical equality of the saved scalar objective after JSON parsing.",
+    "evidence_limit": "Saved command/configuration/result/supervisor provenance is checked. Different timing/node/trace records support separate executions; this is not a new runtime readback of the solver RNG or a rerun. Unique trace hashes can reflect timestamps or measurements, not necessarily different search paths."
+  },
+  "instances": [
+    {
+      "instance": "setA-01",
+      "runs": 10,
+      "seeds": [
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010
+      ],
+      "seed_checks_passed": 10,
+      "distinct_mlu": 1,
+      "distinct_route_assignments": 10,
+      "distinct_sorted_load_vectors": 10,
+      "distinct_optimize_times": 10,
+      "distinct_node_counts": 10,
+      "distinct_stage_trace_files": 10
+    },
+    {
+      "instance": "setA-02",
+      "runs": 10,
+      "seeds": [
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010
+      ],
+      "seed_checks_passed": 10,
+      "distinct_mlu": 1,
+      "distinct_route_assignments": 1,
+      "distinct_sorted_load_vectors": 1,
+      "distinct_optimize_times": 10,
+      "distinct_node_counts": 10,
+      "distinct_stage_trace_files": 10
+    },
+    {
+      "instance": "setA-03",
+      "runs": 10,
+      "seeds": [
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010
+      ],
+      "seed_checks_passed": 10,
+      "distinct_mlu": 1,
+      "distinct_route_assignments": 4,
+      "distinct_sorted_load_vectors": 4,
+      "distinct_optimize_times": 10,
+      "distinct_node_counts": 10,
+      "distinct_stage_trace_files": 10
+    },
+    {
+      "instance": "setA-04",
+      "runs": 10,
+      "seeds": [
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010
+      ],
+      "seed_checks_passed": 10,
+      "distinct_mlu": 1,
+      "distinct_route_assignments": 10,
+      "distinct_sorted_load_vectors": 10,
+      "distinct_optimize_times": 10,
+      "distinct_node_counts": 10,
+      "distinct_stage_trace_files": 10
+    },
+    {
+      "instance": "setA-05",
+      "runs": 10,
+      "seeds": [
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010
+      ],
+      "seed_checks_passed": 10,
+      "distinct_mlu": 1,
+      "distinct_route_assignments": 10,
+      "distinct_sorted_load_vectors": 10,
+      "distinct_optimize_times": 10,
+      "distinct_node_counts": 10,
+      "distinct_stage_trace_files": 10
+    },
+    {
+      "instance": "setA-06",
+      "runs": 10,
+      "seeds": [
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010
+      ],
+      "seed_checks_passed": 10,
+      "distinct_mlu": 3,
+      "distinct_route_assignments": 10,
+      "distinct_sorted_load_vectors": 10,
+      "distinct_optimize_times": 10,
+      "distinct_node_counts": 10,
+      "distinct_stage_trace_files": 10
+    },
+    {
+      "instance": "setA-07",
+      "runs": 10,
+      "seeds": [
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010
+      ],
+      "seed_checks_passed": 10,
+      "distinct_mlu": 1,
+      "distinct_route_assignments": 8,
+      "distinct_sorted_load_vectors": 8,
+      "distinct_optimize_times": 10,
+      "distinct_node_counts": 10,
+      "distinct_stage_trace_files": 10
+    },
+    {
+      "instance": "setA-08",
+      "runs": 10,
+      "seeds": [
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010
+      ],
+      "seed_checks_passed": 10,
+      "distinct_mlu": 1,
+      "distinct_route_assignments": 4,
+      "distinct_sorted_load_vectors": 4,
+      "distinct_optimize_times": 10,
+      "distinct_node_counts": 9,
+      "distinct_stage_trace_files": 10
+    },
+    {
+      "instance": "setA-09",
+      "runs": 10,
+      "seeds": [
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010
+      ],
+      "seed_checks_passed": 10,
+      "distinct_mlu": 1,
+      "distinct_route_assignments": 10,
+      "distinct_sorted_load_vectors": 10,
+      "distinct_optimize_times": 10,
+      "distinct_node_counts": 10,
+      "distinct_stage_trace_files": 10
+    },
+    {
+      "instance": "setA-10",
+      "runs": 10,
+      "seeds": [
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010
+      ],
+      "seed_checks_passed": 10,
+      "distinct_mlu": 4,
+      "distinct_route_assignments": 10,
+      "distinct_sorted_load_vectors": 10,
+      "distinct_optimize_times": 10,
+      "distinct_node_counts": 10,
+      "distinct_stage_trace_files": 10
+    },
+    {
+      "instance": "setA-11",
+      "runs": 10,
+      "seeds": [
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010
+      ],
+      "seed_checks_passed": 10,
+      "distinct_mlu": 1,
+      "distinct_route_assignments": 10,
+      "distinct_sorted_load_vectors": 10,
+      "distinct_optimize_times": 10,
+      "distinct_node_counts": 10,
+      "distinct_stage_trace_files": 10
+    },
+    {
+      "instance": "setA-12",
+      "runs": 10,
+      "seeds": [
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010
+      ],
+      "seed_checks_passed": 10,
+      "distinct_mlu": 1,
+      "distinct_route_assignments": 10,
+      "distinct_sorted_load_vectors": 10,
+      "distinct_optimize_times": 10,
+      "distinct_node_counts": 9,
+      "distinct_stage_trace_files": 10
+    },
+    {
+      "instance": "setA-13",
+      "runs": 10,
+      "seeds": [
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010
+      ],
+      "seed_checks_passed": 10,
+      "distinct_mlu": 5,
+      "distinct_route_assignments": 10,
+      "distinct_sorted_load_vectors": 10,
+      "distinct_optimize_times": 10,
+      "distinct_node_counts": 10,
+      "distinct_stage_trace_files": 10
+    },
+    {
+      "instance": "setA-14",
+      "runs": 10,
+      "seeds": [
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010
+      ],
+      "seed_checks_passed": 10,
+      "distinct_mlu": 3,
+      "distinct_route_assignments": 10,
+      "distinct_sorted_load_vectors": 10,
+      "distinct_optimize_times": 10,
+      "distinct_node_counts": 10,
+      "distinct_stage_trace_files": 10
+    },
+    {
+      "instance": "setA-15",
+      "runs": 10,
+      "seeds": [
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010
+      ],
+      "seed_checks_passed": 10,
+      "distinct_mlu": 1,
+      "distinct_route_assignments": 8,
+      "distinct_sorted_load_vectors": 8,
+      "distinct_optimize_times": 10,
+      "distinct_node_counts": 9,
+      "distinct_stage_trace_files": 10
+    },
+    {
+      "instance": "setA-16",
+      "runs": 10,
+      "seeds": [
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010
+      ],
+      "seed_checks_passed": 10,
+      "distinct_mlu": 9,
+      "distinct_route_assignments": 10,
+      "distinct_sorted_load_vectors": 10,
+      "distinct_optimize_times": 10,
+      "distinct_node_counts": 10,
+      "distinct_stage_trace_files": 10
+    },
+    {
+      "instance": "setA-17",
+      "runs": 10,
+      "seeds": [
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010
+      ],
+      "seed_checks_passed": 10,
+      "distinct_mlu": 1,
+      "distinct_route_assignments": 10,
+      "distinct_sorted_load_vectors": 10,
+      "distinct_optimize_times": 10,
+      "distinct_node_counts": 10,
+      "distinct_stage_trace_files": 10
+    },
+    {
+      "instance": "setA-18",
+      "runs": 10,
+      "seeds": [
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010
+      ],
+      "seed_checks_passed": 10,
+      "distinct_mlu": 1,
+      "distinct_route_assignments": 8,
+      "distinct_sorted_load_vectors": 8,
+      "distinct_optimize_times": 10,
+      "distinct_node_counts": 10,
+      "distinct_stage_trace_files": 10
+    },
+    {
+      "instance": "setA-19",
+      "runs": 10,
+      "seeds": [
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010
+      ],
+      "seed_checks_passed": 10,
+      "distinct_mlu": 9,
+      "distinct_route_assignments": 10,
+      "distinct_sorted_load_vectors": 10,
+      "distinct_optimize_times": 10,
+      "distinct_node_counts": 10,
+      "distinct_stage_trace_files": 10
+    },
+    {
+      "instance": "setA-20",
+      "runs": 10,
+      "seeds": [
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010
+      ],
+      "seed_checks_passed": 10,
+      "distinct_mlu": 1,
+      "distinct_route_assignments": 10,
+      "distinct_sorted_load_vectors": 10,
+      "distinct_optimize_times": 10,
+      "distinct_node_counts": 10,
+      "distinct_stage_trace_files": 10
+    }
+  ],
+  "run_checks": [
+    {
+      "instance": "setA-01",
+      "run": 1,
+      "expected_seed": 1001,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "4c94f5bed1c7a9e74b49ea3c7f228f6892fc7a3788e4df115c8a8a2d79e339bb"
+    },
+    {
+      "instance": "setA-01",
+      "run": 2,
+      "expected_seed": 1002,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "7501f214fb52f91ce317aa4599870a4a37594ed8caf99136c1745c399f56e279"
+    },
+    {
+      "instance": "setA-01",
+      "run": 3,
+      "expected_seed": 1003,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "cfaf548f666c86e5c92e3a96a521fd3dc79b2edd7447ea1d5ba75d72d0e3ee7a"
+    },
+    {
+      "instance": "setA-01",
+      "run": 4,
+      "expected_seed": 1004,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "9dfb1577b283c6b5698a2859fc75b2fac72f4af227cb968626d9af514ab3efc5"
+    },
+    {
+      "instance": "setA-01",
+      "run": 5,
+      "expected_seed": 1005,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "50a4daa7a0900c0f742ed994a9bde9247151fb510b77bfb26a9251d3e27daf24"
+    },
+    {
+      "instance": "setA-01",
+      "run": 6,
+      "expected_seed": 1006,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "563451dfc6b091f9cd91996a151ec8906390605a53d1395dd8862fe249687041"
+    },
+    {
+      "instance": "setA-01",
+      "run": 7,
+      "expected_seed": 1007,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "45e3b85e8d2be2506a4d4ef3913efed8e9ab95e0acfa3e4759699dfb0a822e2d"
+    },
+    {
+      "instance": "setA-01",
+      "run": 8,
+      "expected_seed": 1008,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "d1e0739b34f28d1bea8e692b955aecde11617fe432150ed1002f28723cc070e1"
+    },
+    {
+      "instance": "setA-01",
+      "run": 9,
+      "expected_seed": 1009,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "fca22579cb0d466917be0d9d32f8a3fa8f5ec3a403b84fb469077d2b995d073d"
+    },
+    {
+      "instance": "setA-01",
+      "run": 10,
+      "expected_seed": 1010,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "48dd7b2ff3df731186c052b4cf1c1903e9b21c913165cc7f63b8cb32d5d9e1ba"
+    },
+    {
+      "instance": "setA-02",
+      "run": 1,
+      "expected_seed": 1001,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "eb66ea46c78dc95bc759e1c6d4715e184c31a19b35061401320a97d764677765"
+    },
+    {
+      "instance": "setA-02",
+      "run": 2,
+      "expected_seed": 1002,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "5fa464d2707c893df17f6d6f90fbb41f86d69cc15b1c439433a4cdd1f269243e"
+    },
+    {
+      "instance": "setA-02",
+      "run": 3,
+      "expected_seed": 1003,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "09deb7ce789477623815e49bfc9a3bce61b0d1de073fcd5f87e2a092843e02cb"
+    },
+    {
+      "instance": "setA-02",
+      "run": 4,
+      "expected_seed": 1004,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "3d2451e181a0e739449f17f5277371a44fa2a9c3437682decbc4356910fc25fd"
+    },
+    {
+      "instance": "setA-02",
+      "run": 5,
+      "expected_seed": 1005,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "cf69d45482889a74944599462353e0d24858545ca149addc3ec2e387de255bdf"
+    },
+    {
+      "instance": "setA-02",
+      "run": 6,
+      "expected_seed": 1006,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "38da3badbd223fe485b1411acaa23ff51a2bffb7be6b621f5845635289ff8c03"
+    },
+    {
+      "instance": "setA-02",
+      "run": 7,
+      "expected_seed": 1007,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "414b6f7032428314b86314431c9bac0320db5b99908e514fc6ced75062fc0e02"
+    },
+    {
+      "instance": "setA-02",
+      "run": 8,
+      "expected_seed": 1008,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "8a48a0bd4d3b9231f59087aeb2b4170aac23b395de1fdf06391af927243024f9"
+    },
+    {
+      "instance": "setA-02",
+      "run": 9,
+      "expected_seed": 1009,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "d57d8324e8924f671482da04b419d802fe35e7b6ecc1b783fe50f54f8f07b915"
+    },
+    {
+      "instance": "setA-02",
+      "run": 10,
+      "expected_seed": 1010,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "3afc89cd194ed2d4f8b4575b0cea94f0cb51f947ddd06ab0991d3d5fa63d311e"
+    },
+    {
+      "instance": "setA-03",
+      "run": 1,
+      "expected_seed": 1001,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "a21abd090c4c71852555b9ee3318722325770827e3c4b6bc41b7dc30f84eff30"
+    },
+    {
+      "instance": "setA-03",
+      "run": 2,
+      "expected_seed": 1002,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "be66dba5f25c6ded28643959fd928f3dcf4b6502f4fa59ebeb78b13d83ef628c"
+    },
+    {
+      "instance": "setA-03",
+      "run": 3,
+      "expected_seed": 1003,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "8c75ddd2f247875b2320b273f4575678fae01119aaf248d4cb99bbe8c319d198"
+    },
+    {
+      "instance": "setA-03",
+      "run": 4,
+      "expected_seed": 1004,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "2a2a955ae9a9a40e19b40b5037495cbf5a60413fa50a9a0d479d9ec5b8bb03ed"
+    },
+    {
+      "instance": "setA-03",
+      "run": 5,
+      "expected_seed": 1005,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "50be32be3107349946dbf1e3a9ebc6d4185108a2bd0a568f26c20b018f99b52b"
+    },
+    {
+      "instance": "setA-03",
+      "run": 6,
+      "expected_seed": 1006,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "5a04457d2b3ae7d0c19c5e6a54d47b1905cd300f33c97436e5aeaa41183aeecd"
+    },
+    {
+      "instance": "setA-03",
+      "run": 7,
+      "expected_seed": 1007,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "5f02411d51fa97822a09e487ea6206f62c9c16dba8de7aed6c5dbdd9eed3a4b5"
+    },
+    {
+      "instance": "setA-03",
+      "run": 8,
+      "expected_seed": 1008,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "5645b67ffa428ae9d011faa79b6b92c0405a93739976f61748f00b64562e785c"
+    },
+    {
+      "instance": "setA-03",
+      "run": 9,
+      "expected_seed": 1009,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "dc174433b5b3e0aded109088a2705e7010af0c87ade333b5bf6822b8d3f44675"
+    },
+    {
+      "instance": "setA-03",
+      "run": 10,
+      "expected_seed": 1010,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "4d3bf1b067352faa8a157b7b59dfe0b25a53e0657d73222ca712c5ac60de15f0"
+    },
+    {
+      "instance": "setA-04",
+      "run": 1,
+      "expected_seed": 1001,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "1df7971d0df95c687d81e5ac6474c0c869ad53a033bdf1f55693647b80b446be"
+    },
+    {
+      "instance": "setA-04",
+      "run": 2,
+      "expected_seed": 1002,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "af43f707fcc79e2bc96517a490d5a3bb62dd80c8375bfa7d4fc69c7c8bb843c3"
+    },
+    {
+      "instance": "setA-04",
+      "run": 3,
+      "expected_seed": 1003,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "df8a395dd84e29ddd5eac9c134e1197bf60d8be0cedb05b00e3cc8b2f998ec6a"
+    },
+    {
+      "instance": "setA-04",
+      "run": 4,
+      "expected_seed": 1004,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "256e702d5960ef4bc4d6dcf0868afa971b8f84d24660492159444986cd8b2e7e"
+    },
+    {
+      "instance": "setA-04",
+      "run": 5,
+      "expected_seed": 1005,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "66a7549f63d684dea2869ae2024fe985ab76ba2ceb95a7e2d367dd9b563eed66"
+    },
+    {
+      "instance": "setA-04",
+      "run": 6,
+      "expected_seed": 1006,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "1559b5495320dd77bcbea1b952955e38eb8bd36ddb4272a64f57ca2c92bd9da8"
+    },
+    {
+      "instance": "setA-04",
+      "run": 7,
+      "expected_seed": 1007,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "a2d9ba3f75bf8f09afba5b470ac9ccfa488f02703065173aa9ab684c7d09200e"
+    },
+    {
+      "instance": "setA-04",
+      "run": 8,
+      "expected_seed": 1008,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "f0f67ae901f2aeceec7ea66c790bf7e0a42275834ceae61289c47b76e7ada7d8"
+    },
+    {
+      "instance": "setA-04",
+      "run": 9,
+      "expected_seed": 1009,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "87f54cc8adb1474ef72e1657100f90c7c6f235644952548f2577a5ca8711f0bc"
+    },
+    {
+      "instance": "setA-04",
+      "run": 10,
+      "expected_seed": 1010,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "d7a1e6da5f8ed1bdf26d8047d4fbcd45ee6757604a69d8b7a92b9ed9b44814a0"
+    },
+    {
+      "instance": "setA-05",
+      "run": 1,
+      "expected_seed": 1001,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "909d3d2c7e0c99117d5923dff5a5d1716938442e2a82c7e6c4a0c8c137881dc8"
+    },
+    {
+      "instance": "setA-05",
+      "run": 2,
+      "expected_seed": 1002,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "7a776bbabc256f17f9acfff70138a05b1afbee9e473308ce8b6d713ca5f0b592"
+    },
+    {
+      "instance": "setA-05",
+      "run": 3,
+      "expected_seed": 1003,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "543e40b80513ac2a16bbb64e946d385bf049599bdd3947e742c79483c94326a2"
+    },
+    {
+      "instance": "setA-05",
+      "run": 4,
+      "expected_seed": 1004,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "f14b083b783131437789c215315ed236a4b6a787cae87ea9c92fd0b2760a8a81"
+    },
+    {
+      "instance": "setA-05",
+      "run": 5,
+      "expected_seed": 1005,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "9c5e020fbe523f7f7aa5d03150cd0043b51a8ff246a6cbf659c87c4d5933e94d"
+    },
+    {
+      "instance": "setA-05",
+      "run": 6,
+      "expected_seed": 1006,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "8fb671d18ca79cb43fcb7da72183918e40d0d41f2092195c7651e6bbc299823d"
+    },
+    {
+      "instance": "setA-05",
+      "run": 7,
+      "expected_seed": 1007,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "7821bf5c76190455806ca119cf3251b909b917553ef137cdcf76a8618444a0da"
+    },
+    {
+      "instance": "setA-05",
+      "run": 8,
+      "expected_seed": 1008,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "4b9396fcf444ffa668ffe12531ef6a82769f38c1706a507dc2f204b5d6a08089"
+    },
+    {
+      "instance": "setA-05",
+      "run": 9,
+      "expected_seed": 1009,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "782c6faebb53c7fdbd25023324dc14908cab537e6b0ec4a262af390cf18c6db2"
+    },
+    {
+      "instance": "setA-05",
+      "run": 10,
+      "expected_seed": 1010,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "550c0b192a958d1618c2b7b9e75f72ade693b503d5e1a21c0d03f947ca437a0a"
+    },
+    {
+      "instance": "setA-06",
+      "run": 1,
+      "expected_seed": 1001,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "ed2e414a5616b6e184ae3619fff1656c8ba95682dc229f26b7658494cd18ab3f"
+    },
+    {
+      "instance": "setA-06",
+      "run": 2,
+      "expected_seed": 1002,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "4e7207e23182d425e22053673b712d91087dd5bc95507f3a427403d1b066b141"
+    },
+    {
+      "instance": "setA-06",
+      "run": 3,
+      "expected_seed": 1003,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "8b262d1c8a222aee59aa2f8af1bb1a8bc3ec25b9db934213504c052503e84219"
+    },
+    {
+      "instance": "setA-06",
+      "run": 4,
+      "expected_seed": 1004,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "6297999c95be90b8d6bb02209047ad9bd5ba14b825667389d7fccbe5d10d6b9f"
+    },
+    {
+      "instance": "setA-06",
+      "run": 5,
+      "expected_seed": 1005,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "7f8d0b05df9604950495724f7c0f6a395396125172917f52e998707d4f084292"
+    },
+    {
+      "instance": "setA-06",
+      "run": 6,
+      "expected_seed": 1006,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "818a3dae8c71ab7409926d37e4bd9ba4922fe17bd13c64760c9d18a41124fd13"
+    },
+    {
+      "instance": "setA-06",
+      "run": 7,
+      "expected_seed": 1007,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "a792e1fd3713ad6f52a5a09f1d8dd5c6c7339bfc575340f4c7927696a2b165f0"
+    },
+    {
+      "instance": "setA-06",
+      "run": 8,
+      "expected_seed": 1008,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "ea2ceefe1d75dd27c7e15cf9bcc9b5663e17c3f29391556aa753a349805c2493"
+    },
+    {
+      "instance": "setA-06",
+      "run": 9,
+      "expected_seed": 1009,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "b37d3c5907f8ddd05f5e98ece633357647553c9a25c7bebd77779a695d56b0a1"
+    },
+    {
+      "instance": "setA-06",
+      "run": 10,
+      "expected_seed": 1010,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "ac247ff5de4905a2bdf63c6986e370bc45353edb0621d069e94469fd7d04258a"
+    },
+    {
+      "instance": "setA-07",
+      "run": 1,
+      "expected_seed": 1001,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "c12006c6c46f1c071cd72beb2f762d97b43f5acf39ff83f47fb3ada28bb84ac6"
+    },
+    {
+      "instance": "setA-07",
+      "run": 2,
+      "expected_seed": 1002,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "c06ba18886b7ec1bde4efd69d9fa497bf42307dd8552d3c79271c87d3a0aab57"
+    },
+    {
+      "instance": "setA-07",
+      "run": 3,
+      "expected_seed": 1003,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "4a76ce06831a5e2d58506694c55fdb2040ad1d0ac9a3a54068901753914b6beb"
+    },
+    {
+      "instance": "setA-07",
+      "run": 4,
+      "expected_seed": 1004,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "8a630b5e73a2bd312c453f74c5836f738ecd915743e3f67a7ba3b99a521429b0"
+    },
+    {
+      "instance": "setA-07",
+      "run": 5,
+      "expected_seed": 1005,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "359d6036c21327ca88dc025750750a15d9dbe29f8cc6f3ae6b635fc8d03243cd"
+    },
+    {
+      "instance": "setA-07",
+      "run": 6,
+      "expected_seed": 1006,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "fdcb6ae31d45f02fc9ca5c454fb3870eab8f32202b8a33595229f888aae6a307"
+    },
+    {
+      "instance": "setA-07",
+      "run": 7,
+      "expected_seed": 1007,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "9288a65ac8971ae03f5e9d5b82cf736aa9961c50886b8de7653e865a32042ea7"
+    },
+    {
+      "instance": "setA-07",
+      "run": 8,
+      "expected_seed": 1008,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "6f1191d47b381f7f45009d80c712f5db265901bf8988a3a9ebd042a831644072"
+    },
+    {
+      "instance": "setA-07",
+      "run": 9,
+      "expected_seed": 1009,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "e7b85a5b243b9a740de444f8093bd7441e53f38864c15151519589849cd1f5bb"
+    },
+    {
+      "instance": "setA-07",
+      "run": 10,
+      "expected_seed": 1010,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "840b91dc958edd7b6ac89757d5a1999ec40b793da1af84c3e7902bada12cbf68"
+    },
+    {
+      "instance": "setA-08",
+      "run": 1,
+      "expected_seed": 1001,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "b63c327395bbe2edde53a68bfc6e9b70cb216a8265b4ed5d8a039cf926c627b7"
+    },
+    {
+      "instance": "setA-08",
+      "run": 2,
+      "expected_seed": 1002,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "ba8d7e3c2ff36a65c49169420721c1291de5552c3864d84a71c1adb04666e6b5"
+    },
+    {
+      "instance": "setA-08",
+      "run": 3,
+      "expected_seed": 1003,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "61ad80137a938097d0ac95080c20759f4e291addae36fbf05d8ba92c937fb672"
+    },
+    {
+      "instance": "setA-08",
+      "run": 4,
+      "expected_seed": 1004,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "601c5254ffd7de6ca80e2b741014a8b0792bb970153c612435c690fc295af0ec"
+    },
+    {
+      "instance": "setA-08",
+      "run": 5,
+      "expected_seed": 1005,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "020397786ae2944017c25c0d2d9ab86fe9fe338c4356dbee7ded36b637da9075"
+    },
+    {
+      "instance": "setA-08",
+      "run": 6,
+      "expected_seed": 1006,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "1f52757d0794649e8b2e1524ca333a3187db424cca780d8f23e89de62d86639a"
+    },
+    {
+      "instance": "setA-08",
+      "run": 7,
+      "expected_seed": 1007,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "e7148e344a8c46c49a481cc9a58774740a382a035e35c3b0743e611b6df93d6a"
+    },
+    {
+      "instance": "setA-08",
+      "run": 8,
+      "expected_seed": 1008,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "f1d557de122b9a6a1053606b84a99e9a0b0c8caf18a05ba77e73d1105b078ad8"
+    },
+    {
+      "instance": "setA-08",
+      "run": 9,
+      "expected_seed": 1009,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "6726ea4f584d0a0bfc4c3646f3e760b58e287e57e763209e8351fb3ce5532071"
+    },
+    {
+      "instance": "setA-08",
+      "run": 10,
+      "expected_seed": 1010,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "b36342979201f9376ab8c25db0b732ff8b573fd58f88e1bce9f6f0fff2512903"
+    },
+    {
+      "instance": "setA-09",
+      "run": 1,
+      "expected_seed": 1001,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "23fc2599a35b2ba1f726d611d2acef14c57c8e384427013e12aeb534913f3f5f"
+    },
+    {
+      "instance": "setA-09",
+      "run": 2,
+      "expected_seed": 1002,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "1cc3124ed8734a5e145cb35363c33386486088987d884b880b04b1eeab3ea871"
+    },
+    {
+      "instance": "setA-09",
+      "run": 3,
+      "expected_seed": 1003,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "2d538cfaa224b105034be1fecca7b0dd8a6866e84866579c56902050508dc45e"
+    },
+    {
+      "instance": "setA-09",
+      "run": 4,
+      "expected_seed": 1004,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "7b3879fb9df460b072dffa75a6ba15a612cafc75d49836511df945508eca8fae"
+    },
+    {
+      "instance": "setA-09",
+      "run": 5,
+      "expected_seed": 1005,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "f9257f7af20f24e1b4e23c737834a3ea8e30a9ea3e579de8523c503368eeaaaf"
+    },
+    {
+      "instance": "setA-09",
+      "run": 6,
+      "expected_seed": 1006,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "2219f9ee673dc53aeb80c3aa6ae1dbf2fc88deaf341d24233384f4fb4ed0fe02"
+    },
+    {
+      "instance": "setA-09",
+      "run": 7,
+      "expected_seed": 1007,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "d89529823ea16b35f49bbf600d398a90dc65f5577a5f2a9aeb702504d2b51b95"
+    },
+    {
+      "instance": "setA-09",
+      "run": 8,
+      "expected_seed": 1008,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "fc1ace5feffb2ee99a414dc85b8ce5c4270c554b0384fdc99e9f9bae425fc9d8"
+    },
+    {
+      "instance": "setA-09",
+      "run": 9,
+      "expected_seed": 1009,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "6f4fd088ad5dad86f48c4b81a1014dd4ed7d58f4a94fb20906e0d04e4db2fefe"
+    },
+    {
+      "instance": "setA-09",
+      "run": 10,
+      "expected_seed": 1010,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "0b66a65df342168f421d30a6c455767b98383276364a9659466e1e223b5ff6b0"
+    },
+    {
+      "instance": "setA-10",
+      "run": 1,
+      "expected_seed": 1001,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "978c25940c5fc1156ed4cd3fe8b3aa4f4f3dd043ed61ac5d2ee83b205ecb58ec"
+    },
+    {
+      "instance": "setA-10",
+      "run": 2,
+      "expected_seed": 1002,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "5cd50d256b57a3a8d15b5d0c15363bb7e7ffd5e535c6a42494153c41a94a71a6"
+    },
+    {
+      "instance": "setA-10",
+      "run": 3,
+      "expected_seed": 1003,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "70570b4fc672971602b1ebc5c290cc5e95134c26e61d12dcb2c93d357a3ecda5"
+    },
+    {
+      "instance": "setA-10",
+      "run": 4,
+      "expected_seed": 1004,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "8f4f28e3ffa2d7519c26b22b64b62ae18de92e4a32c22c38af3698c7378b2646"
+    },
+    {
+      "instance": "setA-10",
+      "run": 5,
+      "expected_seed": 1005,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "6926618577e0b1d0556b4c724eba3a47d839e60794c9fbc103d0bdbfcf7ddb94"
+    },
+    {
+      "instance": "setA-10",
+      "run": 6,
+      "expected_seed": 1006,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "26c6fbc34333dd27da6e904f2a4f1809e6359d26147faf27a8ac45726f54bd5a"
+    },
+    {
+      "instance": "setA-10",
+      "run": 7,
+      "expected_seed": 1007,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "99dd69a30600993dd9c3ed681a8bbf5b3e7f611e30ac3d0b717237149b2001ac"
+    },
+    {
+      "instance": "setA-10",
+      "run": 8,
+      "expected_seed": 1008,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "f5e64b157fe7231f687e1ca342a7685fc71c60f6677e77c61fc29c43fb1840d9"
+    },
+    {
+      "instance": "setA-10",
+      "run": 9,
+      "expected_seed": 1009,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "2bd261b4ff650dd039f502003a12e163e48a61fe4036138971235d7cdcd78183"
+    },
+    {
+      "instance": "setA-10",
+      "run": 10,
+      "expected_seed": 1010,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "5e77779e373a0e010181707b1d661e40704fb71fc3836a2aabf5a0d0a4e8485d"
+    },
+    {
+      "instance": "setA-11",
+      "run": 1,
+      "expected_seed": 1001,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "eb2780952ca245a581bece178ebb47ba3dacd59963073f878abe55f5c13abe1c"
+    },
+    {
+      "instance": "setA-11",
+      "run": 2,
+      "expected_seed": 1002,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "d7a49ae58e64c1e1c02c955163411a4a19e217332670ed528b3c25777601b415"
+    },
+    {
+      "instance": "setA-11",
+      "run": 3,
+      "expected_seed": 1003,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "65db17b2e0c0da5875b0a42aa683068753d244c19e60f064807dd24121de9c59"
+    },
+    {
+      "instance": "setA-11",
+      "run": 4,
+      "expected_seed": 1004,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "71a951e2b7999c1d65b37ff93c93a52159bee89e7beb827191904877659027fb"
+    },
+    {
+      "instance": "setA-11",
+      "run": 5,
+      "expected_seed": 1005,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "e0e6e623d5a5e59faa039cdf16e9488ecec3287f402a7e4217949a95c4d952e5"
+    },
+    {
+      "instance": "setA-11",
+      "run": 6,
+      "expected_seed": 1006,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "825c146f081cad803ba90c7e063b7420accaf11f8de1661e2a67aa31018692ca"
+    },
+    {
+      "instance": "setA-11",
+      "run": 7,
+      "expected_seed": 1007,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "33a166b3c9846c73dff098c57102f72956da4f7ff90c726e00bada9f97b43404"
+    },
+    {
+      "instance": "setA-11",
+      "run": 8,
+      "expected_seed": 1008,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "696b5068d8f11ff7e6270ffb717c47f4205747f3b798d67f88b91e153ab937d0"
+    },
+    {
+      "instance": "setA-11",
+      "run": 9,
+      "expected_seed": 1009,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "d477878248ea094fae306d847267ae37631f875c71677bca5bfb6ee488b2173a"
+    },
+    {
+      "instance": "setA-11",
+      "run": 10,
+      "expected_seed": 1010,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "9fe0b7a3ed3fcef563aa91eff60f74a88d9382e3d8b0ce7a3289789625b01978"
+    },
+    {
+      "instance": "setA-12",
+      "run": 1,
+      "expected_seed": 1001,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "7181d4a1e5d8b46ea3649995d9d8ea016e454432210482422de9df3c5765f807"
+    },
+    {
+      "instance": "setA-12",
+      "run": 2,
+      "expected_seed": 1002,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "d3c65ff2f854d97e9aba1d2d22dc23a3a3ae4fd59a2b0a8f9f25674c2f33aac4"
+    },
+    {
+      "instance": "setA-12",
+      "run": 3,
+      "expected_seed": 1003,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "068fcff4385507755eb4a434293a4ebd92f4c2ae449a0a07fa03265faa58b702"
+    },
+    {
+      "instance": "setA-12",
+      "run": 4,
+      "expected_seed": 1004,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "53d9063f468404055c20b9d2b641cb5666c23befc0369629951d476d53efcc82"
+    },
+    {
+      "instance": "setA-12",
+      "run": 5,
+      "expected_seed": 1005,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "233b68b14abd3f40b64a4196d889ffdeaa3b513d8af4b75b5bb27c997e12cff1"
+    },
+    {
+      "instance": "setA-12",
+      "run": 6,
+      "expected_seed": 1006,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "3338fe518e768b3f570f3030e17eb9ea7708d0f3d9e2667c62ad55fb720121ea"
+    },
+    {
+      "instance": "setA-12",
+      "run": 7,
+      "expected_seed": 1007,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "5018b1d3e6d4aa4be18f0b9673b8eabaef71c35b41f2a999bc7752f65ac01bf9"
+    },
+    {
+      "instance": "setA-12",
+      "run": 8,
+      "expected_seed": 1008,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "2007bafa5c5d57cff698bfa60cc7d03f3f0cda63a32b227355236c59a00b605d"
+    },
+    {
+      "instance": "setA-12",
+      "run": 9,
+      "expected_seed": 1009,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "9448d3c754d343549ea5b1866c64c1d405c1ea2da0066f64a50ba1ab7afd3a23"
+    },
+    {
+      "instance": "setA-12",
+      "run": 10,
+      "expected_seed": 1010,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "c65f9a554eb9f95ae3ae8ba7ebcc44c7312c10a24e5f61b53074ce5084bd0493"
+    },
+    {
+      "instance": "setA-13",
+      "run": 1,
+      "expected_seed": 1001,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "4cf8f53099d7902459c5204d437e87d4f4b464ae54e3348a9c2af152ca0acb6c"
+    },
+    {
+      "instance": "setA-13",
+      "run": 2,
+      "expected_seed": 1002,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "ab45dc1ae4568ea97982a048bbd7a260dd588a4e66f437a7dc3ac94d83570b5f"
+    },
+    {
+      "instance": "setA-13",
+      "run": 3,
+      "expected_seed": 1003,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "0a45ee98700fa2c0d36e24edfe50be296a1d4332ad66f968cfa67227eb6f3aeb"
+    },
+    {
+      "instance": "setA-13",
+      "run": 4,
+      "expected_seed": 1004,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "4e94627c84d7e9657df5b8a1a681ceb937ff5b1a832097571005b92af38b893d"
+    },
+    {
+      "instance": "setA-13",
+      "run": 5,
+      "expected_seed": 1005,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "4ecc2523c94184750b807b31a0b35f5769e56d938d6483ce20b534ca4905e2d4"
+    },
+    {
+      "instance": "setA-13",
+      "run": 6,
+      "expected_seed": 1006,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "0fcfcead56f39770a62a39b002ccbbc005d12e7e480f0cabfe9622007a9fceef"
+    },
+    {
+      "instance": "setA-13",
+      "run": 7,
+      "expected_seed": 1007,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "a20bf9422ace601b399c166c6c53757dc3fb484d843f7cd122ae5c2de58361f2"
+    },
+    {
+      "instance": "setA-13",
+      "run": 8,
+      "expected_seed": 1008,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "ada61db44e895d9cd458b9b8c1836887f35b12fcee5c70a97b288b49246a0ef8"
+    },
+    {
+      "instance": "setA-13",
+      "run": 9,
+      "expected_seed": 1009,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "f70248b3d012b2a38dc5a86c285a59a2b605e57a0f08806227aafc7d336651d5"
+    },
+    {
+      "instance": "setA-13",
+      "run": 10,
+      "expected_seed": 1010,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "ba9731abb32b1361b93a6e7efd0b5a31e72b028ede7c09cb7afdbabec4616c8e"
+    },
+    {
+      "instance": "setA-14",
+      "run": 1,
+      "expected_seed": 1001,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "199e81c91281e2de8cc51bcf61f70b7026dd2d5e0146d458d00eedfdb3bf814f"
+    },
+    {
+      "instance": "setA-14",
+      "run": 2,
+      "expected_seed": 1002,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "b1a02a082c6ace85703a711ba979408eb67168439e3d41b006c52169cd475d99"
+    },
+    {
+      "instance": "setA-14",
+      "run": 3,
+      "expected_seed": 1003,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "4a69f6062e8d201bcca9dd24736b32ad25558db311222d0902fd8be1233baf30"
+    },
+    {
+      "instance": "setA-14",
+      "run": 4,
+      "expected_seed": 1004,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "5119431ebea245428654b1ca24fed90d1c7e261502dca430a694ebd2045cddff"
+    },
+    {
+      "instance": "setA-14",
+      "run": 5,
+      "expected_seed": 1005,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "e4de7bcdcd3aba992140e7e8c86be2d8636e0d4987b0684b89aaa50a97dff066"
+    },
+    {
+      "instance": "setA-14",
+      "run": 6,
+      "expected_seed": 1006,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "e2d07ccf818d6a80a8608973b060425293c2b9e083d61eef9ba874d8802c8d8c"
+    },
+    {
+      "instance": "setA-14",
+      "run": 7,
+      "expected_seed": 1007,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "ce27b56b3ce805cef331c3eebedace7b803a0a1870bec26640e62288c687525a"
+    },
+    {
+      "instance": "setA-14",
+      "run": 8,
+      "expected_seed": 1008,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "78f48032a61041b28fbc3c2f2442b426d62a5c7061e4df51186e7f8f219a4a39"
+    },
+    {
+      "instance": "setA-14",
+      "run": 9,
+      "expected_seed": 1009,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "a62edad9a962788b9a6369878ba2f40fad869c118c46bfd5fdd50bacab58aaed"
+    },
+    {
+      "instance": "setA-14",
+      "run": 10,
+      "expected_seed": 1010,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "c10595e7e457a68ef3a5a8900d060e25926ba1b8c5020f50ce63e3e9c77493e0"
+    },
+    {
+      "instance": "setA-15",
+      "run": 1,
+      "expected_seed": 1001,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "f02324ab75dd66e65032d5f7fa3abd8f1138f4c18899159b8e0e4e82950b3194"
+    },
+    {
+      "instance": "setA-15",
+      "run": 2,
+      "expected_seed": 1002,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "d0ddbb8d82c2711f24937611b1d20e6f75e114cbdda0412b1ec9e356523be8c0"
+    },
+    {
+      "instance": "setA-15",
+      "run": 3,
+      "expected_seed": 1003,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "0f0e263b60b8215f1b34cccbc82bf00403d277ccbfafb6d473ee2283e80ae20d"
+    },
+    {
+      "instance": "setA-15",
+      "run": 4,
+      "expected_seed": 1004,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "39a62adf92afbe6514b44344c6d6d3843a67b3f576c0c613b2ec1fc33b9811dc"
+    },
+    {
+      "instance": "setA-15",
+      "run": 5,
+      "expected_seed": 1005,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "0476c5ff01af4444042eaccb8d20f9f32aac6f2f283427de58e73dfdc66ba644"
+    },
+    {
+      "instance": "setA-15",
+      "run": 6,
+      "expected_seed": 1006,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "e51d582ff553f87a48ca402052c294eb34d49ec310e50193ccb90f85eb98c5b6"
+    },
+    {
+      "instance": "setA-15",
+      "run": 7,
+      "expected_seed": 1007,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "56f2ada532b2c8c810fd8d6b27a0ee98324528ed163a3403f519c6b4aec9c0fc"
+    },
+    {
+      "instance": "setA-15",
+      "run": 8,
+      "expected_seed": 1008,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "727bfeb898b2c6dc16dc8258a8fca4805672f47e0545b92fa9a00a0fcd3eb238"
+    },
+    {
+      "instance": "setA-15",
+      "run": 9,
+      "expected_seed": 1009,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "8da46a423bf4c1e130b54282aa531fffbe1f02f713e6ae8945e114280687fac5"
+    },
+    {
+      "instance": "setA-15",
+      "run": 10,
+      "expected_seed": 1010,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "34cd487b0881afe3e73bef30fd4aede15a7e9547e504ff856c80119cd9d61609"
+    },
+    {
+      "instance": "setA-16",
+      "run": 1,
+      "expected_seed": 1001,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "81a6754dcd60a9c7933d9935e0a4df1567ee35830882f9406a2f9f02a9c81338"
+    },
+    {
+      "instance": "setA-16",
+      "run": 2,
+      "expected_seed": 1002,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "1c2a8c3e9ed804530bd2b33a99fbc0c9a6ba75130a27beb84ebdb878515c5f78"
+    },
+    {
+      "instance": "setA-16",
+      "run": 3,
+      "expected_seed": 1003,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "10cdf70de60898362b030b12b17c34cda7178665625a602621b3f46243648684"
+    },
+    {
+      "instance": "setA-16",
+      "run": 4,
+      "expected_seed": 1004,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "df8056bb6cbe87cf7a18fcfbb6cd97228ebc9f6108a7ee48f765a5a76db3d159"
+    },
+    {
+      "instance": "setA-16",
+      "run": 5,
+      "expected_seed": 1005,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "3a543eb01f1872372c0823320585867472ffa22178556f09ef41bca3a218c036"
+    },
+    {
+      "instance": "setA-16",
+      "run": 6,
+      "expected_seed": 1006,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "595c618e50a746c8cff03bcd9d2e8fe46b00daf1715d1c845c27e28c169bb266"
+    },
+    {
+      "instance": "setA-16",
+      "run": 7,
+      "expected_seed": 1007,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "45fc67be38b17a7919e5e17105ff7f4691f4332632bc5052b4faa1169d3d0106"
+    },
+    {
+      "instance": "setA-16",
+      "run": 8,
+      "expected_seed": 1008,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "1f81b93498babd17f51c93c8882e578b36c9bbc62fa49f3bcb2f7fd5c1b034fb"
+    },
+    {
+      "instance": "setA-16",
+      "run": 9,
+      "expected_seed": 1009,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "e908f5b957033edb83947c0ddc3cad1ef25207af4b247cc27a80631185571b80"
+    },
+    {
+      "instance": "setA-16",
+      "run": 10,
+      "expected_seed": 1010,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "163e403f6b364fb0f97a79543b16af7c1b984b8b38c985cb1b1d54742e38b595"
+    },
+    {
+      "instance": "setA-17",
+      "run": 1,
+      "expected_seed": 1001,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "08d189e16b6ffa65e9f381e051349f4939b728dcc628eb2922fe13c745abcc1e"
+    },
+    {
+      "instance": "setA-17",
+      "run": 2,
+      "expected_seed": 1002,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "bc2a24a3c1e5c51666ac88099e78597be0aa7b4af37f558b442da55cd23a3c76"
+    },
+    {
+      "instance": "setA-17",
+      "run": 3,
+      "expected_seed": 1003,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "847716595e588b584e0ece9c269a5dd97ddba4b024d9b2359b4c6603e0426565"
+    },
+    {
+      "instance": "setA-17",
+      "run": 4,
+      "expected_seed": 1004,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "d8c3ac945b289d4e6a30e0e023ec7120fe71393c84dcc40a85c2e4f3fd0b4377"
+    },
+    {
+      "instance": "setA-17",
+      "run": 5,
+      "expected_seed": 1005,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "41185b9b649f0bd929f3a6f123adb55cd002b74f60014c4d18f0f8928d91d51d"
+    },
+    {
+      "instance": "setA-17",
+      "run": 6,
+      "expected_seed": 1006,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "bc6ad9854a0b4a88279fd3f76f7336c085e4f0d91bf2f5e666d610e6d369ea73"
+    },
+    {
+      "instance": "setA-17",
+      "run": 7,
+      "expected_seed": 1007,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "2f7da89ef5e0197960f5b008d92eb74cdd5de2bcb36545e2ef9c036f42f9873a"
+    },
+    {
+      "instance": "setA-17",
+      "run": 8,
+      "expected_seed": 1008,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "5bf42c359b124195648797b1c4e4dcd316b98861ce252239120bfb36fd62f85a"
+    },
+    {
+      "instance": "setA-17",
+      "run": 9,
+      "expected_seed": 1009,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "4959a6d2e346de9412a9fa0bc353526a7d8f9f76e4f4922b81977e9dca4463ed"
+    },
+    {
+      "instance": "setA-17",
+      "run": 10,
+      "expected_seed": 1010,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "cf9d289743c7791585999850a577497e09a2988fa5240399839dd0f20fefdf54"
+    },
+    {
+      "instance": "setA-18",
+      "run": 1,
+      "expected_seed": 1001,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "d9735092dbf8d614b2e2e318c62041cf241ca5a4f4b6034b786f50d07d66341e"
+    },
+    {
+      "instance": "setA-18",
+      "run": 2,
+      "expected_seed": 1002,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "f95ae7e4d9098d5a5101521001143007c7dd8e6f62e0c2fa180327b5593820c4"
+    },
+    {
+      "instance": "setA-18",
+      "run": 3,
+      "expected_seed": 1003,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "c8e0f26b38f825cecbc90f017b1e62d8abc646b789d68f00b414f9bd88fa2fc9"
+    },
+    {
+      "instance": "setA-18",
+      "run": 4,
+      "expected_seed": 1004,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "43d75a008b1b4518194acf9f610d4ffe090ae7e7119401737a76665574550e43"
+    },
+    {
+      "instance": "setA-18",
+      "run": 5,
+      "expected_seed": 1005,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "42fdf0d73d11f13836bbdd0eda021d4f67cb7391c621d16985eeb4a18ff0a12d"
+    },
+    {
+      "instance": "setA-18",
+      "run": 6,
+      "expected_seed": 1006,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "e52f3727968e756647490bf33146da2abb090e1396f4718ee54b51e1a18e90ba"
+    },
+    {
+      "instance": "setA-18",
+      "run": 7,
+      "expected_seed": 1007,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "a934a183f8e7a0d9bcf555d106528868ea2105204213bb1b8b3bfc33b10d990e"
+    },
+    {
+      "instance": "setA-18",
+      "run": 8,
+      "expected_seed": 1008,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "cdbc4c39c547ca3286519e3a2bfa47c83dd27b74e3d47582993b6ea02e7e0c5d"
+    },
+    {
+      "instance": "setA-18",
+      "run": 9,
+      "expected_seed": 1009,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "efb1bf37564884d410df61f12567cd340ad0e4e528420bac3ba7c4201735e224"
+    },
+    {
+      "instance": "setA-18",
+      "run": 10,
+      "expected_seed": 1010,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "69ba89a3d55bc3b7a71e2a7ca61f1102a23cdc65a124f02422c083b1ff915a97"
+    },
+    {
+      "instance": "setA-19",
+      "run": 1,
+      "expected_seed": 1001,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "eda9be1c3c41ac0b0b968a9360a4f2243049a2ac828f4c91c364757642f48e75"
+    },
+    {
+      "instance": "setA-19",
+      "run": 2,
+      "expected_seed": 1002,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "c00f38dd91ca441c2ba64261bb31e4cd1a7bbbb06a17bbce4bde605fba8a1b41"
+    },
+    {
+      "instance": "setA-19",
+      "run": 3,
+      "expected_seed": 1003,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "59acea4a35b86ca2142d434ebf87ed46458091073aa73f9a51a82e7e1c6957a4"
+    },
+    {
+      "instance": "setA-19",
+      "run": 4,
+      "expected_seed": 1004,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "448e0ac56f25587e4dcebb55be2eef326c5638ee2c4e3f272cf06f39cde377cb"
+    },
+    {
+      "instance": "setA-19",
+      "run": 5,
+      "expected_seed": 1005,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "7e7a4e233565946a7d39dab43e14c34d79a36c718f6333b41a2eaebc5bd580af"
+    },
+    {
+      "instance": "setA-19",
+      "run": 6,
+      "expected_seed": 1006,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "bcc1f8c4aa2a0eb8caad0175210a87ef8aef0cb2eab56f4f1c7d4d00680f3278"
+    },
+    {
+      "instance": "setA-19",
+      "run": 7,
+      "expected_seed": 1007,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "4f356bcd23ec36f216ac5341be1a506a29f107af62883dd5bb236395c885f303"
+    },
+    {
+      "instance": "setA-19",
+      "run": 8,
+      "expected_seed": 1008,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "40540cf6c807668e7a1ecf44bf30b9f5babb0d8b68119a1ed253080f767b1ef2"
+    },
+    {
+      "instance": "setA-19",
+      "run": 9,
+      "expected_seed": 1009,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "03df4fb7e9bfd94a977766ecc9c7907f2cb70fa259cdce99848c79bb0e39c3ef"
+    },
+    {
+      "instance": "setA-19",
+      "run": 10,
+      "expected_seed": 1010,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "5baa5358d23c0322383ce39a6566be5294dc47df3cf3b682eb0f5a1f2fb6cf51"
+    },
+    {
+      "instance": "setA-20",
+      "run": 1,
+      "expected_seed": 1001,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "4ac159f12d09af070fae70bc496f2e8499b600c24813a3a6fc5a269528aa9cf1"
+    },
+    {
+      "instance": "setA-20",
+      "run": 2,
+      "expected_seed": 1002,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "981251ac08d75a37eacf059b66f4c45f6371134514c90c69419553b265d84c77"
+    },
+    {
+      "instance": "setA-20",
+      "run": 3,
+      "expected_seed": 1003,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "f8cce977a4e7f78f29210c41c8ad736a8e546db0b9013e63a8745d1829e22747"
+    },
+    {
+      "instance": "setA-20",
+      "run": 4,
+      "expected_seed": 1004,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "8bfca4077f7afe58cc5c28cf474fee8007d264045285f21551905d239fbc605f"
+    },
+    {
+      "instance": "setA-20",
+      "run": 5,
+      "expected_seed": 1005,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "17aa0542d3f2a9a210c5d124b6f464a3b1f9eab35b5cd061b2289206f4996433"
+    },
+    {
+      "instance": "setA-20",
+      "run": 6,
+      "expected_seed": 1006,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "95258807c264cd30352de1d53ed8c52d0e8a409ddbe944b317be7f3309dfe464"
+    },
+    {
+      "instance": "setA-20",
+      "run": 7,
+      "expected_seed": 1007,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "7d2095cba86496548afe65a6656ae66dec436f8d23e0db3beb9432fc0a35d2c5"
+    },
+    {
+      "instance": "setA-20",
+      "run": 8,
+      "expected_seed": 1008,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "b00730c64329916d6420a90896040d102a05ace0400c67038c8b7da70232cc14"
+    },
+    {
+      "instance": "setA-20",
+      "run": 9,
+      "expected_seed": 1009,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "f0bced62f18ac48be71b8b8b2f6628eaf8986bdda875e5de166c678d0e842bca"
+    },
+    {
+      "instance": "setA-20",
+      "run": 10,
+      "expected_seed": 1010,
+      "checks": {
+        "result_seed_matches": true,
+        "supervisor_seed_matches": true,
+        "config_matches": true,
+        "command_matches": true,
+        "run_identity_matches": true,
+        "successful_process": true
+      },
+      "stage_trace_sha256": "dc175dd2b745742b4fba2770375de9f528ba9972f9dc8c998c7fe69dcf73dd7d"
+    }
+  ]
+}

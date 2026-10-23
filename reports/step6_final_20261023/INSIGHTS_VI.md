@@ -9,3 +9,12 @@
 - Dịch vụ bị đánh dấu failed do bước tổng hợp CSV đọc nhầm event JSON, không phải do 200 nghiệm bị lỗi. Bảng sạch đã dựng lại từ đúng 200 JSON chính.
 
 Bảng và biểu đồ đầy đủ: STEP6_ANALYSIS.md, STEP6_TABLE.md, summary_by_instance.csv và charts/.
+
+
+## Kiểm tra seed và variance bằng 0
+
+Đã đối chiếu đủ 200 lượt: seed trong kết quả và supervisor đều bằng `1000 + run`; cấu hình và lệnh khởi chạy cũng khớp seed base và số lượt. Mỗi instance dùng seed 1001–1010. Không chạy lại solver khi thực hiện kiểm tra này.
+
+Variance MLU bằng 0 chỉ có nghĩa tải cung lớn nhất giống nhau, không có nghĩa toàn bộ route hay vector tải giống nhau. SetA-01 và SetA-20 đều có 10 bộ route và 10 vector tải khác nhau nhưng chỉ một giá trị MLU. SetA-02 tìm lại cùng bộ route ở cả 10 lượt, trong khi thời gian, số node và file trace khác nhau. Bằng chứng này hỗ trợ các lượt chạy riêng biệt; đây không phải phép đọc lại trạng thái RNG bên trong solver lịch sử.
+
+[Bảng đủ 20 instance và quy tắc đếm](SEED_VARIANCE_AUDIT.md). “Số nghiệm route” đếm bộ waypoint của toàn bộ demand, đã chuẩn hóa thứ tự demand; không đếm riêng từng đường vật lý ECMP. Vector tải được so sánh toàn bộ, không làm tròn. Các sai khác cỡ 1e-17 vẫn được giữ trong phép đếm chính xác nhưng không có ý nghĩa thực tiễn về chất lượng nghiệm.

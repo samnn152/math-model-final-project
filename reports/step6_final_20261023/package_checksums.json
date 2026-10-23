@@ -1,11 +1,13 @@
 {
-  "INSIGHTS_VI.md": "4a4d82b46f519bc0e766d40577f5f77f4d4bc28a41880754566218794dd25eba",
-  "README.md": "1b95cb6613f7453995495d0313967480c292b325938830d85cf5eb84e41ff6fa",
-  "STEP6_ANALYSIS.md": "003fd9450bd928ffdfdedf44fa790ee4df50b2b4337e8f056ff2fa064afc0a5b",
+  "INSIGHTS_VI.md": "bdf1e870f1bbddab521e56bdad3a82753afbb1b2f7b94a4d8e8a014accf29da9",
+  "README.md": "f69c5d85a3bd9cebdfe6dc540b2024e9e09ca5d9ef19be7d04034a6842de2965",
+  "SEED_VARIANCE_AUDIT.md": "44140a4c969b3993daef8d1a98f521b3704b41faeb088354d23dea17e29835f7",
+  "STEP6_ANALYSIS.md": "203d5c4527e264b4770aa2a5a0ce621d169e8aaae76db2b5c9763c9ebc0aaf77",
   "STEP6_TABLE.md": "fa4dc890ce1c87d8dbf9d5dfe0124d4d3262f778be00c1cafdd89806286935ff",
   "analysis_summary.json": "16b5bc73b4eb67c0d73807a7f02ac979f299fd97d6be07b9fe66eb144b194d44",
   "audit.csv": "7d77a3a58f5cd11b307536a5af52fa7f93489822e001ca133abfca3ef1b0eae6",
   "audit.json": "799fdae6277be8d807676e689791f3e34453bd29502da1f71b6a8f1a9e91a088",
+  "audit_seed_diversity.py": "a1f70b2d87f5f89f281188a29f43f9d458ace9c27ce1881e59a5cd15375c41ad",
   "charts/01_solution_quality.pdf": "e06280be4d14bfff65c24c8e75f13391302f8677de6b67d871d3fb74b36da5ac",
   "charts/01_solution_quality.png": "bcc67f7a03f4e5af48fc238fcb981a245011adfcf739dd679ec3105e1eac4251",
   "charts/02_runtime_budget.pdf": "ccad88692289aa106df4db64505de2f3111954f4b3e47a1eda43ad681aab7797",
@@ -1242,5 +1244,7 @@
   "sha256_manifest.json": "754ead1deebaa40f90904afdf12bbec4cef71b40d4782a5d450ff57a341ad35b",
   "statistics/instance_statistics.csv": "a70dfd9d42a7619ddef231d50593ad33e299be6fa2f680665e38c2dfcb8de576",
   "statistics/instance_statistics.json": "4c9f8f10a7d44742d36a11feb4745b0382b07311054967a8e4e1fa22d5c0960f",
+  "statistics/seed_diversity_audit.json": "29598fa26bc267a19b7867ea08e4f7e3bc052e8bd167d0d38b4613b7f40d2f56",
+  "statistics/seed_diversity_summary.csv": "44286475c07cf83e2b6811b4e7b3f67b0a8e7fab440f19749646c2112b46adb9",
   "summary_by_instance.csv": "5f25fe23f56fc50d067db38480f7361ba5e2529deb91a6042ff72b62f613ac52"
 }

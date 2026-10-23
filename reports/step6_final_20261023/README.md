@@ -6,6 +6,7 @@ This package contains **200 completed runs: 20 original SetA instances × 10 see
 
 - [Statistical tables](STEP6_TABLE.md): dimensions, MLU mean ± sample SD, sample variance, best MLU, mean lower bound, mean gap, optimize! time, wall time, nodes and certified stages.
 - [Full statistics JSON](statistics/instance_statistics.json) and [CSV](statistics/instance_statistics.csv): full precision, including median, minimum, maximum, sample and population variance for every metric.
+- [Seed and variance audit](SEED_VARIANCE_AUDIT.md): all 200 seed checks and the 20-instance route/load-vector diversity table.
 - [Analysis and charts](STEP6_ANALYSIS.md) and [Vietnamese insights](INSIGHTS_VI.md).
 - [Raw JSON index](raw_json/index.json): one bundle per instance, each containing its ten original result records, supervisor records, analysis records and paths to full solutions.
 - `raw/step6_setA-NN_run-RR/`: original per-run result, full route solution, stage trace CSV, environment and configuration. The solution JSON retains the sorted load vector; the scalar MLU table does not replace it.
