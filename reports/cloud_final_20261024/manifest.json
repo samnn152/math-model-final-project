@@ -1,0 +1,114 @@
+{
+  "collected_at": "2026-10-24T05:22:56.247786+00:00",
+  "expected": 400,
+  "returned": 400,
+  "selection": "Newest result mtime among completed supervisor records, then VM and source path for ties",
+  "duplicates": [
+    {
+      "job": "step9_setA-20_run-04",
+      "previous": "/opt/orange/results/tenrun_20261022/step9_setA-20_run-04/experiment/setA-20_run-04.json",
+      "selected": "/opt/orange/results/tenrun_20261022_seta_step9_resume/step9_setA-20_run-04/experiment/setA-20_run-04.json"
+    },
+    {
+      "job": "step9_setA-20_run-01",
+      "previous": "/opt/orange/results/tenrun_20261022/step9_setA-20_run-01/experiment/setA-20_run-01.json",
+      "selected": "/opt/orange/results/tenrun_20261022_seta_step9_resume/step9_setA-20_run-01/experiment/setA-20_run-01.json"
+    },
+    {
+      "job": "step9_setA-20_run-07",
+      "previous": "/opt/orange/results/tenrun_20261022/step9_setA-20_run-07/experiment/setA-20_run-07.json",
+      "selected": "/opt/orange/results/tenrun_20261022_seta_step9_resume/step9_setA-20_run-07/experiment/setA-20_run-07.json"
+    },
+    {
+      "job": "step9_setA-19_run-06",
+      "previous": "/opt/orange/results/tenrun_20261022/step9_setA-19_run-06/experiment/setA-19_run-06.json",
+      "selected": "/opt/orange/results/tenrun_20261022_seta_step9_resume/step9_setA-19_run-06/experiment/setA-19_run-06.json"
+    },
+    {
+      "job": "step9_setA-19_run-03",
+      "previous": "/opt/orange/results/tenrun_20261022/step9_setA-19_run-03/experiment/setA-19_run-03.json",
+      "selected": "/opt/orange/results/tenrun_20261022_seta_step9_resume/step9_setA-19_run-03/experiment/setA-19_run-03.json"
+    },
+    {
+      "job": "step9_setA-20_run-10",
+      "previous": "/opt/orange/results/tenrun_20261022/step9_setA-20_run-10/experiment/setA-20_run-10.json",
+      "selected": "/opt/orange/results/tenrun_20261022_seta_step9_resume/step9_setA-20_run-10/experiment/setA-20_run-10.json"
+    },
+    {
+      "job": "step9_setA-18_run-02",
+      "previous": "/opt/orange/results/tenrun_20261022/step9_setA-18_run-02/experiment/setA-18_run-02.json",
+      "selected": "/opt/orange/results/tenrun_20261022_seta_step9_resume/step9_setA-18_run-02/experiment/setA-18_run-02.json"
+    },
+    {
+      "job": "step9_setA-19_run-09",
+      "previous": "/opt/orange/results/tenrun_20261022/step9_setA-19_run-09/experiment/setA-19_run-09.json",
+      "selected": "/opt/orange/results/tenrun_20261022_seta_step9_resume/step9_setA-19_run-09/experiment/setA-19_run-09.json"
+    },
+    {
+      "job": "step9_setA-18_run-05",
+      "previous": "/opt/orange/results/tenrun_20261022/step9_setA-18_run-05/experiment/setA-18_run-05.json",
+      "selected": "/opt/orange/results/tenrun_20261022_seta_step9_resume/step9_setA-18_run-05/experiment/setA-18_run-05.json"
+    },
+    {
+      "job": "step9_setA-18_run-08",
+      "previous": "/opt/orange/results/tenrun_20261022/step9_setA-18_run-08/experiment/setA-18_run-08.json",
+      "selected": "/opt/orange/results/tenrun_20261022_seta_step9_resume/step9_setA-18_run-08/experiment/setA-18_run-08.json"
+    },
+    {
+      "job": "step9_setA-17_run-01",
+      "previous": "/opt/orange/results/tenrun_20261022/step9_setA-17_run-01/experiment/setA-17_run-01.json",
+      "selected": "/opt/orange/results/tenrun_20261022_seta_step9_resume/step9_setA-17_run-01/experiment/setA-17_run-01.json"
+    },
+    {
+      "job": "step9_setA-17_run-04",
+      "previous": "/opt/orange/results/tenrun_20261022/step9_setA-17_run-04/experiment/setA-17_run-04.json",
+      "selected": "/opt/orange/results/tenrun_20261022_seta_step9_resume/step9_setA-17_run-04/experiment/setA-17_run-04.json"
+    },
+    {
+      "job": "step9_setA-17_run-07",
+      "previous": "/opt/orange/results/tenrun_20261022/step9_setA-17_run-07/experiment/setA-17_run-07.json",
+      "selected": "/opt/orange/results/tenrun_20261022_seta_step9_resume/step9_setA-17_run-07/experiment/setA-17_run-07.json"
+    },
+    {
+      "job": "step9_setA-17_run-10",
+      "previous": "/opt/orange/results/tenrun_20261022/step9_setA-17_run-10/experiment/setA-17_run-10.json",
+      "selected": "/opt/orange/results/tenrun_20261022_seta_step9_resume/step9_setA-17_run-10/experiment/setA-17_run-10.json"
+    },
+    {
+      "job": "step9_setA-16_run-03",
+      "previous": "/opt/orange/results/tenrun_20261022/step9_setA-16_run-03/experiment/setA-16_run-03.json",
+      "selected": "/opt/orange/results/tenrun_20261022_seta_step9_resume/step9_setA-16_run-03/experiment/setA-16_run-03.json"
+    },
+    {
+      "job": "step9_setA-16_run-06",
+      "previous": "/opt/orange/results/tenrun_20261022/step9_setA-16_run-06/experiment/setA-16_run-06.json",
+      "selected": "/opt/orange/results/tenrun_20261022_seta_step9_resume/step9_setA-16_run-06/experiment/setA-16_run-06.json"
+    },
+    {
+      "job": "step9_setA-16_run-09",
+      "previous": "/opt/orange/results/tenrun_20261022/step9_setA-16_run-09/experiment/setA-16_run-09.json",
+      "selected": "/opt/orange/results/tenrun_20261022_seta_step9_resume/step9_setA-16_run-09/experiment/setA-16_run-09.json"
+    },
+    {
+      "job": "step9_setA-15_run-02",
+      "previous": "/opt/orange/results/tenrun_20261022/step9_setA-15_run-02/experiment/setA-15_run-02.json",
+      "selected": "/opt/orange/results/tenrun_20261022_seta_step9_resume/step9_setA-15_run-02/experiment/setA-15_run-02.json"
+    },
+    {
+      "job": "step9_setA-15_run-05",
+      "previous": "/opt/orange/results/tenrun_20261022/step9_setA-15_run-05/experiment/setA-15_run-05.json",
+      "selected": "/opt/orange/results/tenrun_20261022_seta_step9_resume/step9_setA-15_run-05/experiment/setA-15_run-05.json"
+    },
+    {
+      "job": "step9_setA-15_run-08",
+      "previous": "/opt/orange/results/tenrun_20261022/step9_setA-15_run-08/experiment/setA-15_run-08.json",
+      "selected": "/opt/orange/results/tenrun_20261022_seta_step9_resume/step9_setA-15_run-08/experiment/setA-15_run-08.json"
+    }
+  ],
+  "files": {
+    "orange-tenrun-02.json.gz": "491a6ab3a5512406a3a88693fcb0087527326817fef257da41f07b0003314a98",
+    "orange-tenrun-03.json.gz": "20673a14e261ad2d6303f41a1d9f23a37e3ca40610bb855a9455be690fe3ca22",
+    "orange-step6-worker.json.gz": "89f5f22338095f6d7a2ec1a0322633944c8bb7dbcf75d582c81b579d8a93584c",
+    "orange-seta-onepass.json.gz": "b6cc2cf8ad66fbdfb1823866f63e82b1db5dbd12ca44611305e68a1cf3563716"
+  }
+}

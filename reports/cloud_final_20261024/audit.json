@@ -1,0 +1,27 @@
+{
+  "expected": 400,
+  "returned": 400,
+  "issues": [],
+  "overview": {
+    "step6": {
+      "returned": 200,
+      "valid": 200,
+      "mlu_target_met": 180,
+      "full_lex_optimal": 0,
+      "termination": {
+        "SEARCH_WALL_LIMIT": 119,
+        "TIME_LIMIT": 81
+      }
+    },
+    "step9": {
+      "returned": 200,
+      "valid": 200,
+      "mlu_target_met": 170,
+      "full_lex_optimal": 0,
+      "termination": {
+        "TIME_LIMIT": 92,
+        "SEARCH_WALL_LIMIT": 108
+      }
+    }
+  }
+}
