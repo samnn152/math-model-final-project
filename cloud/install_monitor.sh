@@ -12,10 +12,10 @@ TimeoutStartSec=60
 UNIT
 cat > /etc/systemd/system/orange-monitor.timer <<'UNIT'
 [Unit]
-Description=Summarize Orange batch every three hours
+Description=Summarize Orange batch hourly
 [Timer]
-OnActiveSec=3h
-OnUnitActiveSec=3h
+OnActiveSec=1h
+OnUnitActiveSec=1h
 AccuracySec=1min
 [Install]
 WantedBy=timers.target

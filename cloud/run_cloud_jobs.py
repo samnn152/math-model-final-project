@@ -12,7 +12,6 @@ import statistics
 import subprocess
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from threading import Event
 
 
 def write_json(path, value):
@@ -80,14 +79,13 @@ def terminate_group(child):
         child.wait()
 
 
-def execute_job(source, root, job, rss_gib, stop):
+def execute_job(source, root, job, rss_gib, attempt=1):
     stage,instance,limit,run=job
     name=f'step{stage}_setA-{instance:02d}_run-{run:02d}'
     directory=root/name;directory.mkdir(parents=True,exist_ok=True)
     metadata=directory/'supervisor.json'
     if metadata.exists() and json.loads(metadata.read_text()).get('completed'):
         return json.loads(metadata.read_text())
-    if stop.is_set():return dict(job=name,completed=False,reason='queue_stopped')
     private=root/'workers'/name
     if not private.exists():
         shutil.copytree(source,private,ignore=shutil.ignore_patterns('results','output','.git','__pycache__'))
@@ -98,14 +96,14 @@ def execute_job(source, root, job, rss_gib, stop):
     started=time.monotonic();peak=0;hwm=0;reason=None
     with (directory/'console.log').open('a') as log,(directory/'memory.jsonl').open('a') as samples:
         child=subprocess.Popen(command,cwd=private,env=env,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
+        started=time.monotonic()  # Exclude admission-queue waiting from execution time.
         while child.poll() is None:
             measurement=linux_memory(child.pid);elapsed=time.monotonic()-started
             peak=max(peak,measurement['tree_rss_bytes']);hwm=max(hwm,measurement['process_peak_rss_bytes'])
             samples.write(json.dumps(dict(elapsed_seconds=elapsed,**measurement))+'\n');samples.flush()
-            if stop.is_set():reason='another_job_failed'
-            elif measurement['tree_rss_bytes']>rss_gib*1024**3:reason='RSS_GUARD'
+            if measurement['tree_rss_bytes']>rss_gib*1024**3:reason='RSS_GUARD'
             elif measurement['available_bytes']<3*1024**3:reason='LOW_SYSTEM_MEMORY'
-            elif elapsed>(limit*2.25+600 if stage==9 else limit*1.25+300):reason='EXTERNAL_WALL_LIMIT'
+            elif elapsed>(max(21600,limit*4+1800) if stage==9 else limit*1.25+300):reason='EXTERNAL_WALL_LIMIT'
             if reason:
                 terminate_group(child);break
             time.sleep(2)
@@ -114,14 +112,45 @@ def execute_job(source, root, job, rss_gib, stop):
     row=json.loads(row_file.read_text()) if row_file.exists() else {}
     completed=code==0 and reason is None and row.get('validated') is True and not row.get('error')
     completed=completed and row.get('termination') not in ['ERROR','MODEL_SIZE_LIMIT']
+    previous_attempts=[]
+    if metadata.exists():
+        try:
+            previous_attempts=json.loads(metadata.read_text()).get('attempts', [])
+        except (OSError, json.JSONDecodeError):
+            previous_attempts=[]
+    attempt_record=dict(attempt=attempt,completed=completed,returncode=code,reason=reason,
+                        termination=row.get('termination'),wall_seconds=time.monotonic()-started)
     summary=dict(job=name,stage=stage,instance=instance,run=run,seed=1000+run,limit_seconds=limit,completed=completed,
                  returncode=code,reason=reason,termination=row.get('termination'),
-                 wall_seconds=time.monotonic()-started,sampled_tree_peak_rss_bytes=peak,
+                 attempt_number=attempt,attempts=previous_attempts+[attempt_record],
+                 wall_seconds=attempt_record['wall_seconds'],sampled_tree_peak_rss_bytes=peak,
                  observed_process_hwm_bytes=hwm,command=command,result_file=str(row_file))
     write_json(metadata,summary)
     print(json.dumps(summary),flush=True)
-    if not completed:stop.set()
     return summary
+
+
+def run_job_attempt(source, root, job, rss_gib, attempt=1):
+    """Record ordinary per-job exceptions so the dispatcher can continue."""
+    name=f'step{job[0]}_setA-{job[1]:02d}_run-{job[3]:02d}'
+    try:
+        return execute_job(source,root,job,rss_gib,attempt)
+    except Exception as error:
+        directory=root/name
+        directory.mkdir(parents=True,exist_ok=True)
+        metadata=directory/'supervisor.json'
+        previous=[]
+        if metadata.exists():
+            try:previous=json.loads(metadata.read_text()).get('attempts',[])
+            except (OSError,json.JSONDecodeError):pass
+        detail=f'{type(error).__name__}: {error}'
+        record=dict(attempt=attempt,completed=False,reason='SUPERVISOR_EXCEPTION',error=detail)
+        summary=dict(job=name,stage=job[0],instance=job[1],run=job[3],completed=False,
+                     returncode=None,reason='SUPERVISOR_EXCEPTION',error=detail,
+                     attempt_number=attempt,attempts=previous+[record])
+        write_json(metadata,summary)
+        print(json.dumps(summary),flush=True)
+        return summary
 
 
 def collect_results(root):
@@ -156,6 +185,8 @@ def main():
     parser.add_argument('--source',type=Path,default=Path(__file__).resolve().parents[1])
     parser.add_argument('--output',type=Path,default=Path('/opt/orange/results/one_pass'))
     parser.add_argument('--mode',choices=['pilot','batch'],default='pilot')
+    parser.add_argument('--stages',type=int,nargs='+',choices=(6,9),
+                        help='Restrict a batch to selected stages; defaults to Step 9 then Step 6')
     parser.add_argument('--runs',type=int,default=10)
     parser.add_argument('--shards',type=int,default=1)
     parser.add_argument('--shard-index',type=int,default=0)
@@ -168,14 +199,18 @@ def main():
     parser.add_argument('--run',action='store_true')
     args=parser.parse_args()
     if args.runs<1 or args.shards<1 or not 0<=args.shard_index<args.shards:parser.error('Invalid runs/shard')
+    selected_stages=args.stages or [9,6]
+    if len(set(selected_stages))!=len(selected_stages):parser.error('Stages must not repeat')
     all_jobs=tasks(args.mode,args.runs)
+    if args.mode=='batch':all_jobs=[job for job in all_jobs if job[0] in selected_stages]
     jobs=[job for index,job in enumerate(all_jobs) if index%args.shards==args.shard_index]
     stage_workers={6:args.step6_workers or args.workers,9:args.step9_workers or args.workers}
     stage_rss={6:args.step6_rss_gib or args.rss_gib,9:args.step9_rss_gib or args.rss_gib}
     if any(stage_workers[s]*stage_rss[s]>50 for s in (6,9)):parser.error('Each phase must allow at most 50 GiB aggregate RSS')
     plan=dict(mode=args.mode,jobs=len(jobs),workers=args.workers,rss_gib=args.rss_gib,
               optimize_allowance_hours=sum(job[2] for job in jobs)/3600,execute=args.run,
-              stage_workers=stage_workers,stage_rss_gib=stage_rss,runs=args.runs,shard_index=args.shard_index,shards=args.shards,campaign_jobs=len(all_jobs))
+              stage_workers=stage_workers,stage_rss_gib=stage_rss,runs=args.runs,stages=selected_stages,
+              shard_index=args.shard_index,shards=args.shards,campaign_jobs=len(all_jobs))
     print(json.dumps(plan,indent=2),flush=True)
     if not args.run:return
     if platform.system()!='Linux':parser.error('--run is Linux-only; no solver starts on the Mac')
@@ -196,20 +231,32 @@ def main():
                 saved_plan[field]={int(stage):value for stage,value in saved_plan[field].items()}
         if saved_config!=config:
             parser.error('Source/config changed; use a new output directory')
-    write_json(config_file,config);stop=Event();observations=[]
+    write_json(config_file,config);observations_by_job={};retry_jobs=[]
     try:
-        for stage in (9,6):
+        for stage in selected_stages:
             phase=[job for job in jobs if job[0]==stage]
-            if not phase or stop.is_set():continue
+            if not phase:continue
             print(json.dumps(dict(phase=stage,workers=stage_workers[stage],rss_gib=stage_rss[stage])),flush=True)
             with ThreadPoolExecutor(max_workers=stage_workers[stage]) as pool:
-                futures=[pool.submit(execute_job,source,root,job,stage_rss[stage],stop) for job in phase]
+                futures=[pool.submit(run_job_attempt,source,root,job,stage_rss[stage]) for job in phase]
                 for future in as_completed(futures):
-                    observations.append(future.result());collect_results(root)
-                    write_json(root/'queue-status.json',observations)
+                    row=future.result();observations_by_job[row['job']]=row
+                    if not row['completed']:retry_jobs.append(next(job for job in phase
+                        if f'step{job[0]}_setA-{job[1]:02d}_run-{job[3]:02d}'==row['job']))
+                    collect_results(root)
+                    write_json(root/'queue-status.json',list(observations_by_job.values()))
+        # Retry isolated failures after all first-attempt work. A failed job
+        # therefore does not block the next job or the other experiment stage.
+        for job in retry_jobs:
+            name=f'step{job[0]}_setA-{job[1]:02d}_run-{job[3]:02d}'
+            print(json.dumps(dict(retry=name,attempt=2,workers=1)),flush=True)
+            row=run_job_attempt(source,root,job,stage_rss[job[0]],attempt=2)
+            observations_by_job[name]=row
+            collect_results(root)
+            write_json(root/'queue-status.json',list(observations_by_job.values()))
     finally:
-        stop.set();collect_results(root)
-    if any(not row['completed'] for row in observations):raise SystemExit(1)
+        collect_results(root)
+    if any(not row['completed'] for row in observations_by_job.values()):raise SystemExit(1)
 
 
 if __name__=='__main__':main()

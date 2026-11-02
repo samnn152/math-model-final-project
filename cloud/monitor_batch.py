@@ -121,6 +121,52 @@ def analyze_results(completed, failed, active, terminal):
             tables[f'results{stage}_{part+1}']='\n'.join(lines[part*10:(part+1)*10]) or 'Chưa có kết quả.'
     return dict(results=rows, current_quality=current, interpretation=' '.join(notes), eta=eta, **tables)
 
+def dataset_run_progress(completed, failed):
+    """Count runner-finished, failed, and pending runs for each SetA instance."""
+    planned = planned_jobs()
+    completed_jobs = {item.get('job') for item in completed}
+    failed_jobs = {item.get('job') for item in failed}
+    counts = {}
+    for item in planned:
+        key = (item['stage'], item['instance'])
+        entry = counts.setdefault(key, {'total': 0, 'done': 0, 'failed': 0})
+        entry['total'] += 1
+        if item['job'] in completed_jobs:
+            entry['done'] += 1
+        elif item['job'] in failed_jobs:
+            entry['failed'] += 1
+
+    details = {}
+    for stage in (6, 9):
+        entries = []
+        for instance in range(1, 21):
+            entry = counts.get((stage, instance), {'total': 0, 'done': 0, 'failed': 0})
+            pending = entry['total'] - entry['done'] - entry['failed']
+            entries.append({
+                'dataset': f'SetA-{instance:02d}',
+                'done_runs': entry['done'],
+                'failed_runs': entry['failed'],
+                'pending_runs': pending,
+                'total_runs': entry['total'],
+            })
+        details[str(stage)] = entries
+    return details
+
+def format_dataset_run_progress(details):
+    lines = []
+    for stage in (6, 9):
+        entries = details[str(stage)]
+        if not any(item['total_runs'] for item in entries):
+            lines.append(f"Step {stage}: không thuộc shard này.")
+            continue
+        values = [
+            f"{item['dataset']} {item['done_runs']}/{item['total_runs']} xong"
+            + (f", {item['failed_runs']} lỗi" if item['failed_runs'] else '')
+            for item in entries if item['total_runs']
+        ]
+        lines.append(f"Step {stage} — số lượt đã xong theo instance: " + '; '.join(values))
+    return '\n'.join(lines)
+
 def main():
     final = '--final' in sys.argv
     state = subprocess.run(['systemctl', 'is-active', 'orange-batch.service'], capture_output=True, text=True).stdout.strip()
@@ -143,11 +189,13 @@ def main():
                   step9_completed=sum(x.get('stage') == 9 for x in completed),
                   active=[] if terminal else active,
                   failures=[{k: x.get(k) for k in ('job', 'reason', 'returncode', 'termination')} for x in failed])
+    report['dataset_run_progress'] = dataset_run_progress(completed, failed)
+    report['dataset_run_progress_text'] = format_dataset_run_progress(report['dataset_run_progress'])
     report.update(analyze_results(completed, failed, report['active'], terminal))
     REPORTS.mkdir(parents=True, exist_ok=True)
     active_text = ', '.join(x['job'] for x in report['active']) or 'none'
     ram_text = ', '.join(f"{x['job']}: {x.get('tree_rss_bytes', 0) / 1024**3:.2f} GiB" for x in report['active']) or 'not active'
-    report['summary'] = (f"{report['timestamp']} | {outcome} | service={state} | "
+    report['summary'] = (f"INFO | {report['timestamp']} | {outcome} | service={state} | "
                          f"vm={report['vm']} completed={len(completed)}/{expected} (Step6={report['step6_completed']}, Step9={report['step9_completed']}) | "
                          f"active={active_text} | RAM={ram_text} | failed={len(failed)}")
     report['active_analysis'] = '; '.join(
@@ -176,7 +224,7 @@ def main():
             credentials.refresh(Request())
             entry = dict(logName='projects/gen-lang-client-0358915784/logs/orange-batch-monitor',
                          resource={'type': 'global', 'labels': {'project_id': 'gen-lang-client-0358915784'}},
-                         entries=[{'jsonPayload': report, 'severity': 'NOTICE', 'timestamp': report['timestamp']}])
+                         entries=[{'jsonPayload': report, 'severity': 'INFO', 'timestamp': report['timestamp']}])
             request = urllib.request.Request('https://logging.googleapis.com/v2/entries:write',
                 data=json.dumps(entry).encode(),
                 headers={'Authorization': 'Bearer ' + credentials.token, 'Content-Type': 'application/json'})

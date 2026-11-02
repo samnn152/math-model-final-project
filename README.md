@@ -1,6 +1,6 @@
 # Challenge Orange attempt
 
-Julia / Pluto coursework implementation of the Orange ROADEF 2026 challenge. The current implementation covers Data and the time-0 lexicographic model. **HiGHS is the default**, with SCIP retained for comparison. Automatic route columns reduce allocation for larger instances; validated MLU quality is reported against a global bound, with a requested gap ≤ 10%. Full lexicographic optimality is reported separately.
+Julia / Pluto implementation of the Orange ROADEF 2026 challenge, including single-period routing and joint two-period routing with a reconfiguration Budget. **HiGHS is the default**, with SCIP retained for comparison. Route generation reduces allocation for larger instances; global MLU bounds and full lexicographic certification are reported separately.
 
 See [REFERENCE_AUDIT.md](REFERENCE_AUDIT.md) for the official-example comparison, independently exact optimum and known SCIP warm-start failure.
 
@@ -35,7 +35,7 @@ Recommended on this Mac, with an isolated worker and deadline/memory supervision
 python3 scripts/run_guarded_highs.py --instance 20 --time-limit 1800 --target-gap 0.10 --output results/highs_ecmp_20_guarded
 ```
 
-Use a new output directory. Read `guarded_result.json` and `experiment/` within it. See [EXPERIMENTS.md](EXPERIMENTS.md) for normal CLI runs, logs, resume and full coursework settings. No full batch has been run.
+Use a new output directory. Read `guarded_result.json` and `experiment/` within it. See [EXPERIMENTS.md](EXPERIMENTS.md) for CLI runs, logs, resume and experiment settings. The [archived campaign](reports/cloud_final_20261024/README.md) contains 200 single-period and 200 two-period results.
 
 The routing default is next-hop **ECMP**, matching the original challenge; `--splitting uniform_paths` retains the calculation handout's alternative. Keep these conventions in separate directories. The time budget covers optimize calls only; setup and algorithm wall time are additional. Meeting the MLU threshold does not certify the full lexicographic vector.
 

@@ -130,3 +130,21 @@ The bounded paired audit passed 89 assertions; the combined time-1 regression ad
 The official checker accepted both exported solutions and agreed with the recomputed Budget and every load to within 1e-9 (the checker's output precision). Both runs correctly ended TIME_LIMIT / Not Optimal. The MLU bound is tight numerically, but the short search has not completed the lexicographic vector. This does not establish a speedup over the exhaustive reference implementation.
 
 A separate one-second SetA-01 CLI workflow check returned a checker-valid incumbent, Budget 0/51, and exercised 47 demand pricing calls. It did not certify a lexicographic stage. Identical-config resume reused the completed row. No longer original-instance experiment or cloud resource was started. Pluto executed 226 cells without errors after adding the decomposition section.
+
+## SetA-05 stall/memory regression (23 October)
+
+The bounded seed-1002 pilot and stress-test artifacts are in [reports/paired_stall_memory_fix_20261023](reports/paired_stall_memory_fix_20261023/README.md). There were 440 passing local assertions, followed by 388 on the cloud Linux host with the staged notebook. SetA-05 retains validated MLU 0.20498587519516004, Budget 0/1 and one certified stage out of 792; it is not fully optimal. Short-run search wall time was 74.909 s (explicit local wall guard 60 s, including a model-construction overshoot); optimize time was 13.671 s and process peak RSS 1.641 GiB. Production 3600-second optimize budgets and existing wall/memory guards were not shortened. Existing completed cloud runs are retained; timings from old and new implementation revisions must be identified separately in subsequent reports.
+
+### 24 October: local route/certificate investigation
+
+See [the local verification report](reports/route_certificate_local_20261024/README.md).
+Only original SetA-05 is being tested locally for both steps. The experimental
+integer-bound helper keeps the original lexicographic objective and uses the
+proved common-route reduction only for Budget 0 or 1. Per-rank global bounds,
+native logs, certified locks and independently validated routes are saved.
+The report distinguishes individual rank proofs from a complete Optimal result.
+No cloud batch was restarted or updated for this investigation.
+
+### 24 October: optimize-budget-only policy and separate Step6 rerun
+
+See [the policy audit](reports/optimize_budget_policy_20261024/README.md) for local proofs and paired/reference differences. New time-0/paired defaults do not truncate a run at an implicit multiple of the optimize budget. An explicit wall guard remains available for local diagnostics. The separately authorized Step6 rerun is a new 200-job cohort (`step6v2`, seeds 1001–1010), not a replacement of the old 200 raw records. The 11 active Step9 processes retain loaded legacy code and are not restarted to inject methods. These execution policies must not be silently mixed in statistical tables.

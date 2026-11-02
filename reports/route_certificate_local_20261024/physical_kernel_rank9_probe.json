@@ -1,0 +1,29 @@
+{
+  "proof": {
+    "stage_number": 9,
+    "k": 9,
+    "upper": 1.0248806238506845,
+    "lower": 1.0248806238506847,
+    "seconds": 42.930808125,
+    "status": "OPTIMAL",
+    "nodes": 1,
+    "variables": 46737
+  },
+  "input_sha256": {
+    "net": "a22f35db0b9b36b6ad6d27ee74ae804f36516ee046f27d8bc3ef1b5ea8132751",
+    "tm": "573e3dbba52d8a5dc726f8d501ee9a6599a1d038557ec889ea54e2a2a74d04b4",
+    "scenario": "caa35de31ae8fb7f6401b32a395550c636c7078c59bb86ec395dd36d5700d938"
+  },
+  "source_solution_sha256": "43eeef280272a72448bf5aedba6ebbdb827d74bb0ad3f4cfa86e225e68fd9b07",
+  "prior_top_k_locks": [
+    0.20498597519516004,
+    0.3205097197736447,
+    0.42903143142925115,
+    0.536656173077373,
+    0.6404574550522962,
+    0.7385663368774982,
+    0.836519661410414,
+    0.9338349863684092
+  ],
+  "scope": "global physical lower bound matched to original validated SR upper bound; diagnostic proof import, not an independent run"
+}

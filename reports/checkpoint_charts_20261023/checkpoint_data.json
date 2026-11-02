@@ -1,0 +1,2924 @@
+{
+  "seta": {
+    "captured": 1792721851.6773708,
+    "rows": [
+      {
+        "job": "step9_setA-15_run-05",
+        "stage": 9,
+        "instance": 15,
+        "run": 5,
+        "completed": true,
+        "reason": null,
+        "ended": 1792717530.3961122,
+        "wall_seconds": 4840.085501736998
+      },
+      {
+        "job": "step9_setA-20_run-04",
+        "stage": 9,
+        "instance": 20,
+        "run": 4,
+        "completed": true,
+        "reason": null,
+        "ended": 1792686837.2020602,
+        "wall_seconds": 7776.077753320998
+      },
+      {
+        "job": "step9_setA-19_run-09",
+        "stage": 9,
+        "instance": 19,
+        "run": 9,
+        "completed": true,
+        "reason": null,
+        "ended": 1792696512.0876153,
+        "wall_seconds": 4892.913330822001
+      },
+      {
+        "job": "step9_setA-19_run-06",
+        "stage": 9,
+        "instance": 19,
+        "run": 6,
+        "completed": true,
+        "reason": null,
+        "ended": 1792691619.1388168,
+        "wall_seconds": 4775.918926827999
+      },
+      {
+        "job": "step9_setA-15_run-02",
+        "stage": 9,
+        "instance": 15,
+        "run": 2,
+        "completed": true,
+        "reason": null,
+        "ended": 1792715814.3022525,
+        "wall_seconds": 4797.898781046002
+      },
+      {
+        "job": "step9_setA-17_run-07",
+        "stage": 9,
+        "instance": 17,
+        "run": 7,
+        "completed": true,
+        "reason": null,
+        "ended": 1792705056.968939,
+        "wall_seconds": 4561.781175926
+      },
+      {
+        "job": "step9_setA-16_run-03",
+        "stage": 9,
+        "instance": 16,
+        "run": 3,
+        "completed": true,
+        "reason": null,
+        "ended": 1792711016.3768446,
+        "wall_seconds": 7630.938779267999
+      },
+      {
+        "job": "step9_setA-18_run-08",
+        "stage": 9,
+        "instance": 18,
+        "run": 8,
+        "completed": true,
+        "reason": null,
+        "ended": 1792700495.1581383,
+        "wall_seconds": 4370.422115264002
+      },
+      {
+        "job": "step9_setA-16_run-06",
+        "stage": 9,
+        "instance": 16,
+        "run": 6,
+        "completed": true,
+        "reason": null,
+        "ended": 1792712690.2831926,
+        "wall_seconds": 7633.290939220002
+      },
+      {
+        "job": "step9_setA-20_run-10",
+        "stage": 9,
+        "instance": 20,
+        "run": 10,
+        "completed": true,
+        "reason": null,
+        "ended": 1792694539.842235,
+        "wall_seconds": 7702.6082876619985
+      },
+      {
+        "job": "step9_setA-17_run-10",
+        "stage": 9,
+        "instance": 17,
+        "run": 10,
+        "completed": true,
+        "reason": null,
+        "ended": 1792705538.7625046,
+        "wall_seconds": 4586.325544110005
+      },
+      {
+        "job": "step9_setA-20_run-07",
+        "stage": 9,
+        "instance": 20,
+        "run": 7,
+        "completed": true,
+        "reason": null,
+        "ended": 1792686843.1985266,
+        "wall_seconds": 7782.072063046999
+      },
+      {
+        "job": "step9_setA-18_run-05",
+        "stage": 9,
+        "instance": 18,
+        "run": 5,
+        "completed": true,
+        "reason": null,
+        "ended": 1792698916.1910367,
+        "wall_seconds": 4376.321672883998
+      },
+      {
+        "job": "step9_setA-19_run-03",
+        "stage": 9,
+        "instance": 19,
+        "run": 3,
+        "completed": true,
+        "reason": null,
+        "ended": 1792691673.727076,
+        "wall_seconds": 4834.736037101
+      },
+      {
+        "job": "step9_setA-15_run-08",
+        "stage": 9,
+        "instance": 15,
+        "run": 8,
+        "completed": true,
+        "reason": null,
+        "ended": 1792718024.3306577,
+        "wall_seconds": 4862.517322754
+      },
+      {
+        "job": "step9_setA-20_run-01",
+        "stage": 9,
+        "instance": 20,
+        "run": 1,
+        "completed": true,
+        "reason": null,
+        "ended": 1792686838.9701977,
+        "wall_seconds": 7777.8467136750005
+      },
+      {
+        "job": "step9_setA-17_run-01",
+        "stage": 9,
+        "instance": 17,
+        "run": 1,
+        "completed": true,
+        "reason": null,
+        "ended": 1792700952.409554,
+        "wall_seconds": 4440.300869726998
+      },
+      {
+        "job": "step9_setA-18_run-02",
+        "stage": 9,
+        "instance": 18,
+        "run": 2,
+        "completed": true,
+        "reason": null,
+        "ended": 1792696124.7134511,
+        "wall_seconds": 4450.966953016003
+      },
+      {
+        "job": "step9_setA-17_run-04",
+        "stage": 9,
+        "instance": 17,
+        "run": 4,
+        "completed": true,
+        "reason": null,
+        "ended": 1792703385.4187121,
+        "wall_seconds": 4469.205735083
+      },
+      {
+        "job": "step9_setA-16_run-09",
+        "stage": 9,
+        "instance": 16,
+        "run": 9,
+        "completed": true,
+        "reason": null,
+        "ended": 1792713161.787884,
+        "wall_seconds": 7623.004910671007
+      },
+      {
+        "job": "step9_setA-15_run-05",
+        "stage": 9,
+        "instance": 15,
+        "run": 5,
+        "completed": true,
+        "reason": null,
+        "ended": 1792664485.2520008,
+        "wall_seconds": 4968.035143274
+      },
+      {
+        "job": "step9_setA-20_run-04",
+        "stage": 9,
+        "instance": 20,
+        "run": 4,
+        "completed": true,
+        "reason": null,
+        "ended": 1792642598.457463,
+        "wall_seconds": 7677.356405107001
+      },
+      {
+        "job": "step9_setA-19_run-09",
+        "stage": 9,
+        "instance": 19,
+        "run": 9,
+        "completed": true,
+        "reason": null,
+        "ended": 1792644007.3593209,
+        "wall_seconds": 4493.839977704
+      },
+      {
+        "job": "step9_setA-14_run-04",
+        "stage": 9,
+        "instance": 14,
+        "run": 4,
+        "completed": false,
+        "reason": "RSS_GUARD",
+        "ended": 1792673504.554945,
+        "wall_seconds": 6043.8287601
+      },
+      {
+        "job": "step9_setA-14_run-07",
+        "stage": 9,
+        "instance": 14,
+        "run": 7,
+        "completed": false,
+        "reason": "another_job_failed",
+        "ended": 1792673508.9792883,
+        "wall_seconds": 6048.257867204001
+      },
+      {
+        "job": "step9_setA-19_run-06",
+        "stage": 9,
+        "instance": 19,
+        "run": 6,
+        "completed": true,
+        "reason": null,
+        "ended": 1792639513.485612,
+        "wall_seconds": 4592.3552360270005
+      },
+      {
+        "job": "step9_setA-15_run-02",
+        "stage": 9,
+        "instance": 15,
+        "run": 2,
+        "completed": true,
+        "reason": null,
+        "ended": 1792652023.2950215,
+        "wall_seconds": 4827.694544497999
+      },
+      {
+        "job": "step9_setA-17_run-07",
+        "stage": 9,
+        "instance": 17,
+        "run": 7,
+        "completed": true,
+        "reason": null,
+        "ended": 1792648410.3598647,
+        "wall_seconds": 4402.940107086
+      },
+      {
+        "job": "step9_setA-16_run-03",
+        "stage": 9,
+        "instance": 16,
+        "run": 3,
+        "completed": true,
+        "reason": null,
+        "ended": 1792667459.7709432,
+        "wall_seconds": 7942.566879929001
+      },
+      {
+        "job": "step9_setA-18_run-08",
+        "stage": 9,
+        "instance": 18,
+        "run": 8,
+        "completed": true,
+        "reason": null,
+        "ended": 1792646974.1175947,
+        "wall_seconds": 4433.651595718
+      },
+      {
+        "job": "step9_setA-14_run-10",
+        "stage": 9,
+        "instance": 14,
+        "run": 10,
+        "completed": false,
+        "reason": "another_job_failed",
+        "ended": 1792673507.6791875,
+        "wall_seconds": 4171.774848254001
+      },
+      {
+        "job": "step9_setA-16_run-06",
+        "stage": 9,
+        "instance": 16,
+        "run": 6,
+        "completed": true,
+        "reason": null,
+        "ended": 1792667460.551002,
+        "wall_seconds": 7943.335860939999
+      },
+      {
+        "job": "step9_setA-20_run-10",
+        "stage": 9,
+        "instance": 20,
+        "run": 10,
+        "completed": true,
+        "reason": null,
+        "ended": 1792642593.6134634,
+        "wall_seconds": 7672.505103711001
+      },
+      {
+        "job": "step9_setA-17_run-10",
+        "stage": 9,
+        "instance": 17,
+        "run": 10,
+        "completed": true,
+        "reason": null,
+        "ended": 1792648549.623665,
+        "wall_seconds": 4518.241907796
+      },
+      {
+        "job": "step9_setA-20_run-07",
+        "stage": 9,
+        "instance": 20,
+        "run": 7,
+        "completed": true,
+        "reason": null,
+        "ended": 1792642540.4134586,
+        "wall_seconds": 7619.310594941999
+      },
+      {
+        "job": "step9_setA-18_run-05",
+        "stage": 9,
+        "instance": 18,
+        "run": 5,
+        "completed": true,
+        "reason": null,
+        "ended": 1792646922.2416365,
+        "wall_seconds": 4384.569987203
+      },
+      {
+        "job": "step9_setA-19_run-03",
+        "stage": 9,
+        "instance": 19,
+        "run": 3,
+        "completed": true,
+        "reason": null,
+        "ended": 1792639554.3294783,
+        "wall_seconds": 4633.227527789999
+      },
+      {
+        "job": "step9_setA-14_run-01",
+        "stage": 9,
+        "instance": 14,
+        "run": 1,
+        "completed": false,
+        "reason": "another_job_failed",
+        "ended": 1792673508.163225,
+        "wall_seconds": 6048.390666806
+      },
+      {
+        "job": "step9_setA-15_run-08",
+        "stage": 9,
+        "instance": 15,
+        "run": 8,
+        "completed": true,
+        "reason": null,
+        "ended": 1792669335.8257935,
+        "wall_seconds": 4850.568843241
+      },
+      {
+        "job": "step9_setA-20_run-01",
+        "stage": 9,
+        "instance": 20,
+        "run": 1,
+        "completed": true,
+        "reason": null,
+        "ended": 1792642537.613458,
+        "wall_seconds": 7616.507334508
+      },
+      {
+        "job": "step9_setA-17_run-01",
+        "stage": 9,
+        "instance": 17,
+        "run": 1,
+        "completed": true,
+        "reason": null,
+        "ended": 1792647040.197538,
+        "wall_seconds": 4446.54685074
+      },
+      {
+        "job": "step9_setA-18_run-02",
+        "stage": 9,
+        "instance": 18,
+        "run": 2,
+        "completed": true,
+        "reason": null,
+        "ended": 1792644031.335369,
+        "wall_seconds": 4476.972443069
+      },
+      {
+        "job": "step9_setA-17_run-04",
+        "stage": 9,
+        "instance": 17,
+        "run": 4,
+        "completed": true,
+        "reason": null,
+        "ended": 1792647195.5373905,
+        "wall_seconds": 4597.042254698999
+      },
+      {
+        "job": "step9_setA-16_run-09",
+        "stage": 9,
+        "instance": 16,
+        "run": 9,
+        "completed": true,
+        "reason": null,
+        "ended": 1792667460.4549947,
+        "wall_seconds": 7943.240055421999
+      }
+    ],
+    "active": [
+      {
+        "job": "step9_setA-14_run-01",
+        "path": "/opt/orange/results/tenrun_20261022_seta_step9_resume/step9_setA-14_run-01/experiment"
+      },
+      {
+        "job": "step9_setA-14_run-04",
+        "path": "/opt/orange/results/tenrun_20261022_seta_step9_resume/step9_setA-14_run-04/experiment"
+      },
+      {
+        "job": "step9_setA-14_run-07",
+        "path": "/opt/orange/results/tenrun_20261022_seta_step9_resume/step9_setA-14_run-07/experiment"
+      }
+    ],
+    "curves": [
+      {
+        "job": "step9_setA-14_run-01",
+        "file": "setA-14_run-01_cycles.csv",
+        "rows": [
+          {
+            "objective": 0.5721036687983844,
+            "global_bound": 0.5176213000498148,
+            "gap": 0.09523163671192914,
+            "cumulative_optimize_seconds": 1.6033085040000006
+          },
+          {
+            "objective": 0.5721036687983844,
+            "global_bound": 0.5176213000498148,
+            "gap": 0.09523163671192914,
+            "cumulative_optimize_seconds": 608.6666511030013
+          }
+        ],
+        "columns": [
+          "stage",
+          "cycle",
+          "objective",
+          "global_bound",
+          "gap",
+          "globally_certified",
+          "pair_columns",
+          "new_columns",
+          "pricing_demands",
+          "pricing_lp_closed",
+          "restricted_integer_bound",
+          "budget_used",
+          "lp_seconds",
+          "pricing_seconds",
+          "mip_seconds",
+          "mip_status",
+          "master_nodes",
+          "pricing_nodes",
+          "cumulative_optimize_seconds"
+        ]
+      }
+    ]
+  },
+  "step6": {
+    "captured": 1792721851.7156858,
+    "rows": [
+      {
+        "job": "step6_setA-17_run-09",
+        "stage": 6,
+        "instance": 17,
+        "run": 9,
+        "completed": true,
+        "reason": null,
+        "ended": 1792684086.6073666,
+        "wall_seconds": 2128.8659774869993
+      },
+      {
+        "job": "step6_setA-20_run-02",
+        "stage": 6,
+        "instance": 20,
+        "run": 2,
+        "completed": true,
+        "reason": null,
+        "ended": 1792671301.9419985,
+        "wall_seconds": 2176.418378468
+      },
+      {
+        "job": "step6_setA-11_run-08",
+        "stage": 6,
+        "instance": 11,
+        "run": 8,
+        "completed": true,
+        "reason": null,
+        "ended": 1792704567.2203314,
+        "wall_seconds": 2012.2604371689958
+      },
+      {
+        "job": "step6_setA-15_run-04",
+        "stage": 6,
+        "instance": 15,
+        "run": 4,
+        "completed": true,
+        "reason": null,
+        "ended": 1792688448.7383132,
+        "wall_seconds": 2100.0657348739987
+      },
+      {
+        "job": "step6_setA-17_run-03",
+        "stage": 6,
+        "instance": 17,
+        "run": 3,
+        "completed": true,
+        "reason": null,
+        "ended": 1792681960.989505,
+        "wall_seconds": 2164.373670944
+      },
+      {
+        "job": "step6_setA-14_run-07",
+        "stage": 6,
+        "instance": 14,
+        "run": 7,
+        "completed": true,
+        "reason": null,
+        "ended": 1792694236.734524,
+        "wall_seconds": 2065.911098335
+      },
+      {
+        "job": "step6_setA-11_run-05",
+        "stage": 6,
+        "instance": 11,
+        "run": 5,
+        "completed": true,
+        "reason": null,
+        "ended": 1792702782.290676,
+        "wall_seconds": 2040.5161507529992
+      },
+      {
+        "job": "step6_setA-18_run-06",
+        "stage": 6,
+        "instance": 18,
+        "run": 6,
+        "completed": true,
+        "reason": null,
+        "ended": 1792679752.0350287,
+        "wall_seconds": 2080.0210134830013
+      },
+      {
+        "job": "step6_setA-08_run-03",
+        "stage": 6,
+        "instance": 8,
+        "run": 3,
+        "completed": true,
+        "reason": null,
+        "ended": 1792712928.7688515,
+        "wall_seconds": 2073.810364942001
+      },
+      {
+        "job": "step6_setA-10_run-09",
+        "stage": 6,
+        "instance": 10,
+        "run": 9,
+        "completed": true,
+        "reason": null,
+        "ended": 1792708467.1668923,
+        "wall_seconds": 1993.5831372339962
+      },
+      {
+        "job": "step6_setA-10_run-05",
+        "stage": 6,
+        "instance": 10,
+        "run": 5,
+        "completed": true,
+        "reason": null,
+        "ended": 1792706649.077402,
+        "wall_seconds": 1953.5161369739944
+      },
+      {
+        "job": "step6_setA-08_run-10",
+        "stage": 6,
+        "instance": 8,
+        "run": 10,
+        "completed": true,
+        "reason": null,
+        "ended": 1792715077.1380033,
+        "wall_seconds": 2075.8728569499945
+      },
+      {
+        "job": "step6_setA-19_run-04",
+        "stage": 6,
+        "instance": 19,
+        "run": 4,
+        "completed": true,
+        "reason": null,
+        "ended": 1792675611.4661217,
+        "wall_seconds": 2155.5513565170004
+      },
+      {
+        "job": "step6_setA-11_run-01",
+        "stage": 6,
+        "instance": 11,
+        "run": 1,
+        "completed": true,
+        "reason": null,
+        "ended": 1792702468.8471103,
+        "wall_seconds": 2050.096256787001
+      },
+      {
+        "job": "step6_setA-14_run-08",
+        "stage": 6,
+        "instance": 14,
+        "run": 8,
+        "completed": true,
+        "reason": null,
+        "ended": 1792694407.8982959,
+        "wall_seconds": 2055.8219812240022
+      },
+      {
+        "job": "step6_setA-16_run-02",
+        "stage": 6,
+        "instance": 16,
+        "run": 2,
+        "completed": true,
+        "reason": null,
+        "ended": 1792684251.9590867,
+        "wall_seconds": 2104.657732484
+      },
+      {
+        "job": "step6_setA-07_run-07",
+        "stage": 6,
+        "instance": 7,
+        "run": 7,
+        "completed": true,
+        "reason": null,
+        "ended": 1792717255.9629061,
+        "wall_seconds": 2112.3091686080006
+      },
+      {
+        "job": "step6_setA-18_run-09",
+        "stage": 6,
+        "instance": 18,
+        "run": 9,
+        "completed": true,
+        "reason": null,
+        "ended": 1792679856.922756,
+        "wall_seconds": 2077.1302760980016
+      },
+      {
+        "job": "step6_setA-19_run-03",
+        "stage": 6,
+        "instance": 19,
+        "run": 3,
+        "completed": true,
+        "reason": null,
+        "ended": 1792675478.7264724,
+        "wall_seconds": 2066.2196263200003
+      },
+      {
+        "job": "step6_setA-15_run-06",
+        "stage": 6,
+        "instance": 15,
+        "run": 6,
+        "completed": true,
+        "reason": null,
+        "ended": 1792690281.7837305,
+        "wall_seconds": 2092.993115278001
+      },
+      {
+        "job": "step6_setA-14_run-04",
+        "stage": 6,
+        "instance": 14,
+        "run": 4,
+        "completed": true,
+        "reason": null,
+        "ended": 1792692441.752848,
+        "wall_seconds": 2062.0722058209976
+      },
+      {
+        "job": "step6_setA-06_run-07",
+        "stage": 6,
+        "instance": 6,
+        "run": 7,
+        "completed": true,
+        "reason": null,
+        "ended": 1792721315.3214188,
+        "wall_seconds": 2107.5808630419997
+      },
+      {
+        "job": "step6_setA-20_run-04",
+        "stage": 6,
+        "instance": 20,
+        "run": 4,
+        "completed": true,
+        "reason": null,
+        "ended": 1792671351.6858916,
+        "wall_seconds": 2226.098579255
+      },
+      {
+        "job": "step6_setA-09_run-03",
+        "stage": 6,
+        "instance": 9,
+        "run": 3,
+        "completed": true,
+        "reason": null,
+        "ended": 1792708871.3623352,
+        "wall_seconds": 2083.7324637089987
+      },
+      {
+        "job": "step6_setA-09_run-06",
+        "stage": 6,
+        "instance": 9,
+        "run": 6,
+        "completed": true,
+        "reason": null,
+        "ended": 1792710614.1360896,
+        "wall_seconds": 2084.2165329810014
+      },
+      {
+        "job": "step6_setA-13_run-10",
+        "stage": 6,
+        "instance": 13,
+        "run": 10,
+        "completed": true,
+        "reason": null,
+        "ended": 1792698420.796688,
+        "wall_seconds": 2032.154140423998
+      },
+      {
+        "job": "step6_setA-12_run-06",
+        "stage": 6,
+        "instance": 12,
+        "run": 6,
+        "completed": true,
+        "reason": null,
+        "ended": 1792700525.045819,
+        "wall_seconds": 2104.219876542
+      },
+      {
+        "job": "step6_setA-09_run-02",
+        "stage": 6,
+        "instance": 9,
+        "run": 2,
+        "completed": true,
+        "reason": null,
+        "ended": 1792708807.0464237,
+        "wall_seconds": 2081.1144115770003
+      },
+      {
+        "job": "step6_setA-09_run-09",
+        "stage": 6,
+        "instance": 9,
+        "run": 9,
+        "completed": true,
+        "reason": null,
+        "ended": 1792710963.5236247,
+        "wall_seconds": 2092.1387438320016
+      },
+      {
+        "job": "step6_setA-08_run-05",
+        "stage": 6,
+        "instance": 8,
+        "run": 5,
+        "completed": true,
+        "reason": null,
+        "ended": 1792713055.5406773,
+        "wall_seconds": 2091.987544315998
+      },
+      {
+        "job": "step6_setA-20_run-08",
+        "stage": 6,
+        "instance": 20,
+        "run": 8,
+        "completed": true,
+        "reason": null,
+        "ended": 1792673455.8801286,
+        "wall_seconds": 2164.979967065
+      },
+      {
+        "job": "step6_setA-13_run-02",
+        "stage": 6,
+        "instance": 13,
+        "run": 2,
+        "completed": true,
+        "reason": null,
+        "ended": 1792694669.7099462,
+        "wall_seconds": 2031.5417883280024
+      },
+      {
+        "job": "step6_setA-18_run-04",
+        "stage": 6,
+        "instance": 18,
+        "run": 4,
+        "completed": true,
+        "reason": null,
+        "ended": 1792677807.9001124,
+        "wall_seconds": 2105.035516512001
+      },
+      {
+        "job": "step6_setA-20_run-05",
+        "stage": 6,
+        "instance": 20,
+        "run": 5,
+        "completed": true,
+        "reason": null,
+        "ended": 1792671333.0779314,
+        "wall_seconds": 2207.527621505
+      },
+      {
+        "job": "step6_setA-17_run-08",
+        "stage": 6,
+        "instance": 17,
+        "run": 8,
+        "completed": true,
+        "reason": null,
+        "ended": 1792684029.2234604,
+        "wall_seconds": 2149.026946545
+      },
+      {
+        "job": "step6_setA-18_run-01",
+        "stage": 6,
+        "instance": 18,
+        "run": 1,
+        "completed": true,
+        "reason": null,
+        "ended": 1792677671.984474,
+        "wall_seconds": 2060.4935015479996
+      },
+      {
+        "job": "step6_setA-15_run-05",
+        "stage": 6,
+        "instance": 15,
+        "run": 5,
+        "completed": true,
+        "reason": null,
+        "ended": 1792690110.5079732,
+        "wall_seconds": 2092.921357973002
+      },
+      {
+        "job": "step6_setA-20_run-03",
+        "stage": 6,
+        "instance": 20,
+        "run": 3,
+        "completed": true,
+        "reason": null,
+        "ended": 1792671285.3820345,
+        "wall_seconds": 2159.822822304
+      },
+      {
+        "job": "step6_setA-08_run-01",
+        "stage": 6,
+        "instance": 8,
+        "run": 1,
+        "completed": true,
+        "reason": null,
+        "ended": 1792712606.9732952,
+        "wall_seconds": 2063.7749974820035
+      },
+      {
+        "job": "step6_setA-12_run-05",
+        "stage": 6,
+        "instance": 12,
+        "run": 5,
+        "completed": true,
+        "reason": null,
+        "ended": 1792700418.7219646,
+        "wall_seconds": 2080.7624961479996
+      },
+      {
+        "job": "step6_setA-19_run-08",
+        "stage": 6,
+        "instance": 19,
+        "run": 8,
+        "completed": true,
+        "reason": null,
+        "ended": 1792675702.837884,
+        "wall_seconds": 2164.5167465759996
+      },
+      {
+        "job": "step6_setA-07_run-02",
+        "stage": 6,
+        "instance": 7,
+        "run": 2,
+        "completed": true,
+        "reason": null,
+        "ended": 1792715237.657787,
+        "wall_seconds": 2070.538825542004
+      },
+      {
+        "job": "step6_setA-08_run-08",
+        "stage": 6,
+        "instance": 8,
+        "run": 8,
+        "completed": true,
+        "reason": null,
+        "ended": 1792714767.6704197,
+        "wall_seconds": 2103.8708101110024
+      },
+      {
+        "job": "step6_setA-19_run-06",
+        "stage": 6,
+        "instance": 19,
+        "run": 6,
+        "completed": true,
+        "reason": null,
+        "ended": 1792675656.954003,
+        "wall_seconds": 2148.198136156
+      },
+      {
+        "job": "step6_setA-12_run-10",
+        "stage": 6,
+        "instance": 12,
+        "run": 10,
+        "completed": true,
+        "reason": null,
+        "ended": 1792700903.8053007,
+        "wall_seconds": 2118.3679712250014
+      },
+      {
+        "job": "step6_setA-18_run-02",
+        "stage": 6,
+        "instance": 18,
+        "run": 2,
+        "completed": true,
+        "reason": null,
+        "ended": 1792677747.364273,
+        "wall_seconds": 2090.3785193779995
+      },
+      {
+        "job": "step6_setA-18_run-08",
+        "stage": 6,
+        "instance": 18,
+        "run": 8,
+        "completed": true,
+        "reason": null,
+        "ended": 1792679839.8748002,
+        "wall_seconds": 2092.4826877369997
+      },
+      {
+        "job": "step6_setA-13_run-04",
+        "stage": 6,
+        "instance": 13,
+        "run": 4,
+        "completed": true,
+        "reason": null,
+        "ended": 1792696417.60746,
+        "wall_seconds": 2009.6852677300012
+      },
+      {
+        "job": "step6_setA-20_run-01",
+        "stage": 6,
+        "instance": 20,
+        "run": 1,
+        "completed": true,
+        "reason": null,
+        "ended": 1792671290.8740225,
+        "wall_seconds": 2165.3022996199998
+      },
+      {
+        "job": "step6_setA-09_run-07",
+        "stage": 6,
+        "instance": 9,
+        "run": 7,
+        "completed": true,
+        "reason": null,
+        "ended": 1792710854.9317694,
+        "wall_seconds": 2092.1447667460016
+      },
+      {
+        "job": "step6_setA-15_run-07",
+        "stage": 6,
+        "instance": 15,
+        "run": 7,
+        "completed": true,
+        "reason": null,
+        "ended": 1792690379.651592,
+        "wall_seconds": 2121.166349682
+      },
+      {
+        "job": "step6_setA-10_run-06",
+        "stage": 6,
+        "instance": 10,
+        "run": 6,
+        "completed": true,
+        "reason": null,
+        "ended": 1792706725.9052956,
+        "wall_seconds": 1955.3637095640006
+      },
+      {
+        "job": "step6_setA-11_run-07",
+        "stage": 6,
+        "instance": 11,
+        "run": 7,
+        "completed": true,
+        "reason": null,
+        "ended": 1792704493.3884308,
+        "wall_seconds": 2024.508526687001
+      },
+      {
+        "job": "step6_setA-12_run-01",
+        "stage": 6,
+        "instance": 12,
+        "run": 1,
+        "completed": true,
+        "reason": null,
+        "ended": 1792698512.3405619,
+        "wall_seconds": 2094.7059527139972
+      },
+      {
+        "job": "step6_setA-07_run-05",
+        "stage": 6,
+        "instance": 7,
+        "run": 5,
+        "completed": true,
+        "reason": null,
+        "ended": 1792717118.3550966,
+        "wall_seconds": 2093.624305997
+      },
+      {
+        "job": "step6_setA-06_run-02",
+        "stage": 6,
+        "instance": 6,
+        "run": 2,
+        "completed": true,
+        "reason": null,
+        "ended": 1792719249.168208,
+        "wall_seconds": 2093.111683592004
+      },
+      {
+        "job": "step6_setA-17_run-05",
+        "stage": 6,
+        "instance": 17,
+        "run": 5,
+        "completed": true,
+        "reason": null,
+        "ended": 1792682061.6372497,
+        "wall_seconds": 2204.6838494210006
+      },
+      {
+        "job": "step6_setA-15_run-02",
+        "stage": 6,
+        "instance": 15,
+        "run": 2,
+        "completed": true,
+        "reason": null,
+        "ended": 1792688262.6585748,
+        "wall_seconds": 2110.233569526001
+      },
+      {
+        "job": "step6_setA-07_run-08",
+        "stage": 6,
+        "instance": 7,
+        "run": 8,
+        "completed": true,
+        "reason": null,
+        "ended": 1792717316.0588229,
+        "wall_seconds": 2078.3718050690004
+      },
+      {
+        "job": "step6_setA-09_run-08",
+        "stage": 6,
+        "instance": 9,
+        "run": 8,
+        "completed": true,
+        "reason": null,
+        "ended": 1792710925.4036753,
+        "wall_seconds": 2118.3300158809943
+      },
+      {
+        "job": "step6_setA-10_run-08",
+        "stage": 6,
+        "instance": 10,
+        "run": 8,
+        "completed": true,
+        "reason": null,
+        "ended": 1792706883.865077,
+        "wall_seconds": 1986.3781595070031
+      },
+      {
+        "job": "step6_setA-07_run-01",
+        "stage": 6,
+        "instance": 7,
+        "run": 1,
+        "completed": true,
+        "reason": null,
+        "ended": 1792715143.6299138,
+        "wall_seconds": 2088.060425827003
+      },
+      {
+        "job": "step6_setA-14_run-03",
+        "stage": 6,
+        "instance": 14,
+        "run": 3,
+        "completed": true,
+        "reason": null,
+        "ended": 1792692387.5449224,
+        "wall_seconds": 2019.729409776999
+      },
+      {
+        "job": "step6_setA-16_run-09",
+        "stage": 6,
+        "instance": 16,
+        "run": 9,
+        "completed": true,
+        "reason": null,
+        "ended": 1792688017.562917,
+        "wall_seconds": 2041.589526513002
+      },
+      {
+        "job": "step6_setA-19_run-01",
+        "stage": 6,
+        "instance": 19,
+        "run": 1,
+        "completed": true,
+        "reason": null,
+        "ended": 1792673518.519967,
+        "wall_seconds": 2174.989384746
+      },
+      {
+        "job": "step6_setA-08_run-02",
+        "stage": 6,
+        "instance": 8,
+        "run": 2,
+        "completed": true,
+        "reason": null,
+        "ended": 1792712663.7692168,
+        "wall_seconds": 2049.606238061002
+      },
+      {
+        "job": "step6_setA-16_run-01",
+        "stage": 6,
+        "instance": 16,
+        "run": 1,
+        "completed": true,
+        "reason": null,
+        "ended": 1792684125.9393013,
+        "wall_seconds": 2064.274138396
+      },
+      {
+        "job": "step6_setA-14_run-05",
+        "stage": 6,
+        "instance": 14,
+        "run": 5,
+        "completed": true,
+        "reason": null,
+        "ended": 1792692429.4608648,
+        "wall_seconds": 2027.713503498002
+      },
+      {
+        "job": "step6_setA-11_run-04",
+        "stage": 6,
+        "instance": 11,
+        "run": 4,
+        "completed": true,
+        "reason": null,
+        "ended": 1792702746.4747257,
+        "wall_seconds": 2038.708946887
+      },
+      {
+        "job": "step6_setA-06_run-03",
+        "stage": 6,
+        "instance": 6,
+        "run": 3,
+        "completed": true,
+        "reason": null,
+        "ended": 1792719333.2160933,
+        "wall_seconds": 2077.2280631739995
+      },
+      {
+        "job": "step6_setA-09_run-05",
+        "stage": 6,
+        "instance": 9,
+        "run": 5,
+        "completed": true,
+        "reason": null,
+        "ended": 1792710543.1721838,
+        "wall_seconds": 2075.982722529996
+      },
+      {
+        "job": "step6_setA-06_run-08",
+        "stage": 6,
+        "instance": 6,
+        "run": 8,
+        "completed": true,
+        "reason": null,
+        "ended": 1792721349.721372,
+        "wall_seconds": 2100.525593767001
+      },
+      {
+        "job": "step6_setA-10_run-10",
+        "stage": 6,
+        "instance": 10,
+        "run": 10,
+        "completed": true,
+        "reason": null,
+        "ended": 1792708529.8988059,
+        "wall_seconds": 1983.5009658779964
+      },
+      {
+        "job": "step6_setA-15_run-08",
+        "stage": 6,
+        "instance": 15,
+        "run": 8,
+        "completed": true,
+        "reason": null,
+        "ended": 1792690367.7876089,
+        "wall_seconds": 2105.100434849999
+      },
+      {
+        "job": "step6_setA-16_run-05",
+        "stage": 6,
+        "instance": 16,
+        "run": 5,
+        "completed": true,
+        "reason": null,
+        "ended": 1792686106.717427,
+        "wall_seconds": 2020.0840049559993
+      },
+      {
+        "job": "step6_setA-20_run-07",
+        "stage": 6,
+        "instance": 20,
+        "run": 7,
+        "completed": true,
+        "reason": null,
+        "ended": 1792673498.640018,
+        "wall_seconds": 2213.2113208790006
+      },
+      {
+        "job": "step6_setA-16_run-06",
+        "stage": 6,
+        "instance": 16,
+        "run": 6,
+        "completed": true,
+        "reason": null,
+        "ended": 1792686152.3933666,
+        "wall_seconds": 2038.2238817980015
+      },
+      {
+        "job": "step6_setA-15_run-09",
+        "stage": 6,
+        "instance": 15,
+        "run": 9,
+        "completed": true,
+        "reason": null,
+        "ended": 1792690401.7195609,
+        "wall_seconds": 2084.877177877999
+      },
+      {
+        "job": "step6_setA-06_run-04",
+        "stage": 6,
+        "instance": 6,
+        "run": 4,
+        "completed": true,
+        "reason": null,
+        "ended": 1792719388.5560176,
+        "wall_seconds": 2072.4732907880025
+      },
+      {
+        "job": "step6_setA-06_run-09",
+        "stage": 6,
+        "instance": 6,
+        "run": 9,
+        "completed": true,
+        "reason": null,
+        "ended": 1792721417.8292794,
+        "wall_seconds": 2084.587152515007
+      },
+      {
+        "job": "step6_setA-17_run-10",
+        "stage": 6,
+        "instance": 17,
+        "run": 10,
+        "completed": true,
+        "reason": null,
+        "ended": 1792684114.1393209,
+        "wall_seconds": 2153.124858569001
+      },
+      {
+        "job": "step6_setA-13_run-09",
+        "stage": 6,
+        "instance": 13,
+        "run": 9,
+        "completed": true,
+        "reason": null,
+        "ended": 1792698337.9368021,
+        "wall_seconds": 2045.1568381940015
+      },
+      {
+        "job": "step6_setA-14_run-02",
+        "stage": 6,
+        "instance": 14,
+        "run": 2,
+        "completed": true,
+        "reason": null,
+        "ended": 1792692352.0489712,
+        "wall_seconds": 2070.238191348999
+      },
+      {
+        "job": "step6_setA-08_run-09",
+        "stage": 6,
+        "instance": 8,
+        "run": 9,
+        "completed": true,
+        "reason": null,
+        "ended": 1792715024.686074,
+        "wall_seconds": 2095.887504956001
+      },
+      {
+        "job": "step6_setA-19_run-10",
+        "stage": 6,
+        "instance": 19,
+        "run": 10,
+        "completed": true,
+        "reason": null,
+        "ended": 1792677681.352449,
+        "wall_seconds": 2134.612534131
+      },
+      {
+        "job": "step6_setA-20_run-06",
+        "stage": 6,
+        "instance": 20,
+        "run": 6,
+        "completed": true,
+        "reason": null,
+        "ended": 1792671343.505909,
+        "wall_seconds": 2217.9683684350002
+      },
+      {
+        "job": "step6_setA-14_run-09",
+        "stage": 6,
+        "instance": 14,
+        "run": 9,
+        "completed": true,
+        "reason": null,
+        "ended": 1792694409.0862944,
+        "wall_seconds": 2021.516742775002
+      },
+      {
+        "job": "step6_setA-13_run-06",
+        "stage": 6,
+        "instance": 13,
+        "run": 6,
+        "completed": true,
+        "reason": null,
+        "ended": 1792696502.9793422,
+        "wall_seconds": 2051.6055778049995
+      },
+      {
+        "job": "step6_setA-19_run-02",
+        "stage": 6,
+        "instance": 19,
+        "run": 2,
+        "completed": true,
+        "reason": null,
+        "ended": 1792673508.7039921,
+        "wall_seconds": 2156.991393629
+      },
+      {
+        "job": "step6_setA-18_run-10",
+        "stage": 6,
+        "instance": 18,
+        "run": 10,
+        "completed": true,
+        "reason": null,
+        "ended": 1792679930.738564,
+        "wall_seconds": 2122.8107660940004
+      },
+      {
+        "job": "step6_setA-17_run-04",
+        "stage": 6,
+        "instance": 17,
+        "run": 4,
+        "completed": true,
+        "reason": null,
+        "ended": 1792681957.7175133,
+        "wall_seconds": 2117.817879783999
+      },
+      {
+        "job": "step6_setA-18_run-05",
+        "stage": 6,
+        "instance": 18,
+        "run": 5,
+        "completed": true,
+        "reason": null,
+        "ended": 1792679634.0513356,
+        "wall_seconds": 2097.954424304002
+      },
+      {
+        "job": "step6_setA-07_run-06",
+        "stage": 6,
+        "instance": 7,
+        "run": 6,
+        "completed": true,
+        "reason": null,
+        "ended": 1792717156.0350444,
+        "wall_seconds": 2078.867915499999
+      },
+      {
+        "job": "step6_setA-07_run-04",
+        "stage": 6,
+        "instance": 7,
+        "run": 4,
+        "completed": true,
+        "reason": null,
+        "ended": 1792716884.5674207,
+        "wall_seconds": 2116.8744061609978
+      },
+      {
+        "job": "step6_setA-11_run-06",
+        "stage": 6,
+        "instance": 11,
+        "run": 6,
+        "completed": true,
+        "reason": null,
+        "ended": 1792702915.9544911,
+        "wall_seconds": 2012.1206865929962
+      },
+      {
+        "job": "step6_setA-09_run-01",
+        "stage": 6,
+        "instance": 9,
+        "run": 1,
+        "completed": true,
+        "reason": null,
+        "ended": 1792708762.7624848,
+        "wall_seconds": 2113.6568387119987
+      },
+      {
+        "job": "step6_setA-12_run-02",
+        "stage": 6,
+        "instance": 12,
+        "run": 2,
+        "completed": true,
+        "reason": null,
+        "ended": 1792698589.476456,
+        "wall_seconds": 2086.4693038139994
+      },
+      {
+        "job": "step6_setA-13_run-07",
+        "stage": 6,
+        "instance": 13,
+        "run": 7,
+        "completed": true,
+        "reason": null,
+        "ended": 1792696533.8232996,
+        "wall_seconds": 2056.5933156339997
+      },
+      {
+        "job": "step6_setA-13_run-08",
+        "stage": 6,
+        "instance": 13,
+        "run": 8,
+        "completed": true,
+        "reason": null,
+        "ended": 1792696696.3030758,
+        "wall_seconds": 2026.5645359650007
+      },
+      {
+        "job": "step6_setA-14_run-10",
+        "stage": 6,
+        "instance": 14,
+        "run": 10,
+        "completed": true,
+        "reason": null,
+        "ended": 1792694477.1982036,
+        "wall_seconds": 2047.706170816
+      },
+      {
+        "job": "step6_setA-16_run-10",
+        "stage": 6,
+        "instance": 16,
+        "run": 10,
+        "completed": true,
+        "reason": null,
+        "ended": 1792688188.7666783,
+        "wall_seconds": 2082.0213576470014
+      },
+      {
+        "job": "step6_setA-19_run-09",
+        "stage": 6,
+        "instance": 19,
+        "run": 9,
+        "completed": true,
+        "reason": null,
+        "ended": 1792677536.0688386,
+        "wall_seconds": 2057.317920029999
+      },
+      {
+        "job": "step6_setA-12_run-08",
+        "stage": 6,
+        "instance": 12,
+        "run": 8,
+        "completed": true,
+        "reason": null,
+        "ended": 1792700707.737569,
+        "wall_seconds": 2118.234489249
+      },
+      {
+        "job": "step6_setA-06_run-06",
+        "stage": 6,
+        "instance": 6,
+        "run": 6,
+        "completed": true,
+        "reason": null,
+        "ended": 1792721099.8777115,
+        "wall_seconds": 2084.0638018809987
+      },
+      {
+        "job": "step6_setA-14_run-06",
+        "stage": 6,
+        "instance": 14,
+        "run": 6,
+        "completed": true,
+        "reason": null,
+        "ended": 1792692638.1365776,
+        "wall_seconds": 2061.9767317660007
+      },
+      {
+        "job": "step6_setA-07_run-09",
+        "stage": 6,
+        "instance": 7,
+        "run": 9,
+        "completed": true,
+        "reason": null,
+        "ended": 1792718918.2766595,
+        "wall_seconds": 2132.661829000004
+      },
+      {
+        "job": "step6_setA-13_run-01",
+        "stage": 6,
+        "instance": 13,
+        "run": 1,
+        "completed": true,
+        "reason": null,
+        "ended": 1792694451.346238,
+        "wall_seconds": 2009.563672960001
+      },
+      {
+        "job": "step6_setA-08_run-06",
+        "stage": 6,
+        "instance": 8,
+        "run": 6,
+        "completed": true,
+        "reason": null,
+        "ended": 1792713167.092524,
+        "wall_seconds": 2073.731165484998
+      },
+      {
+        "job": "step6_setA-11_run-10",
+        "stage": 6,
+        "instance": 11,
+        "run": 10,
+        "completed": true,
+        "reason": null,
+        "ended": 1792704823.5479853,
+        "wall_seconds": 2077.034618767
+      },
+      {
+        "job": "step6_setA-08_run-04",
+        "stage": 6,
+        "instance": 8,
+        "run": 4,
+        "completed": true,
+        "reason": null,
+        "ended": 1792713001.2407517,
+        "wall_seconds": 2075.8114740380042
+      },
+      {
+        "job": "step6_setA-09_run-10",
+        "stage": 6,
+        "instance": 9,
+        "run": 10,
+        "completed": true,
+        "reason": null,
+        "ended": 1792711093.3314512,
+        "wall_seconds": 2102.257145924006
+      },
+      {
+        "job": "step6_setA-20_run-10",
+        "stage": 6,
+        "instance": 20,
+        "run": 10,
+        "completed": true,
+        "reason": null,
+        "ended": 1792673538.2919166,
+        "wall_seconds": 2205.191378637
+      },
+      {
+        "job": "step6_setA-15_run-10",
+        "stage": 6,
+        "instance": 15,
+        "run": 10,
+        "completed": true,
+        "reason": null,
+        "ended": 1792690576.1393137,
+        "wall_seconds": 2127.3700114759995
+      },
+      {
+        "job": "step6_setA-11_run-09",
+        "stage": 6,
+        "instance": 11,
+        "run": 9,
+        "completed": true,
+        "reason": null,
+        "ended": 1792704695.5321584,
+        "wall_seconds": 2049.037382923001
+      },
+      {
+        "job": "step6_setA-06_run-10",
+        "stage": 6,
+        "instance": 6,
+        "run": 10,
+        "completed": true,
+        "reason": null,
+        "ended": 1792721489.261182,
+        "wall_seconds": 2100.623518223001
+      },
+      {
+        "job": "step6_setA-10_run-07",
+        "stage": 6,
+        "instance": 10,
+        "run": 7,
+        "completed": true,
+        "reason": null,
+        "ended": 1792706787.5972102,
+        "wall_seconds": 1964.0184780440031
+      },
+      {
+        "job": "step6_setA-16_run-03",
+        "stage": 6,
+        "instance": 16,
+        "run": 3,
+        "completed": true,
+        "reason": null,
+        "ended": 1792685975.9455962,
+        "wall_seconds": 2096.8658735140016
+      },
+      {
+        "job": "step6_setA-19_run-07",
+        "stage": 6,
+        "instance": 19,
+        "run": 7,
+        "completed": true,
+        "reason": null,
+        "ended": 1792675675.2339554,
+        "wall_seconds": 2156.683511407
+      },
+      {
+        "job": "step6_setA-16_run-08",
+        "stage": 6,
+        "instance": 16,
+        "run": 8,
+        "completed": true,
+        "reason": null,
+        "ended": 1792686348.645101,
+        "wall_seconds": 2096.659678673999
+      },
+      {
+        "job": "step6_setA-11_run-03",
+        "stage": 6,
+        "instance": 11,
+        "run": 3,
+        "completed": true,
+        "reason": null,
+        "ended": 1792702646.470864,
+        "wall_seconds": 2027.8731360560014
+      },
+      {
+        "job": "step6_setA-16_run-04",
+        "stage": 6,
+        "instance": 16,
+        "run": 4,
+        "completed": true,
+        "reason": null,
+        "ended": 1792686130.0413961,
+        "wall_seconds": 2100.7878657750025
+      },
+      {
+        "job": "step6_setA-20_run-09",
+        "stage": 6,
+        "instance": 20,
+        "run": 9,
+        "completed": true,
+        "reason": null,
+        "ended": 1792673412.4762423,
+        "wall_seconds": 2110.508244525
+      },
+      {
+        "job": "step6_setA-17_run-02",
+        "stage": 6,
+        "instance": 17,
+        "run": 2,
+        "completed": true,
+        "reason": null,
+        "ended": 1792681880.1697097,
+        "wall_seconds": 2128.093528891999
+      },
+      {
+        "job": "step6_setA-13_run-05",
+        "stage": 6,
+        "instance": 13,
+        "run": 5,
+        "completed": true,
+        "reason": null,
+        "ended": 1792696388.6115,
+        "wall_seconds": 1979.5076342630018
+      },
+      {
+        "job": "step6_setA-12_run-03",
+        "stage": 6,
+        "instance": 12,
+        "run": 3,
+        "completed": true,
+        "reason": null,
+        "ended": 1792698641.636384,
+        "wall_seconds": 2107.775858003999
+      },
+      {
+        "job": "step6_setA-10_run-03",
+        "stage": 6,
+        "instance": 10,
+        "run": 3,
+        "completed": true,
+        "reason": null,
+        "ended": 1792706473.5536458,
+        "wall_seconds": 1980.1358971290028
+      },
+      {
+        "job": "step6_setA-17_run-07",
+        "stage": 6,
+        "instance": 17,
+        "run": 7,
+        "completed": true,
+        "reason": null,
+        "ended": 1792683879.0476959,
+        "wall_seconds": 2157.0540485499987
+      },
+      {
+        "job": "step6_setA-12_run-09",
+        "stage": 6,
+        "instance": 12,
+        "run": 9,
+        "completed": true,
+        "reason": null,
+        "ended": 1792700741.7495224,
+        "wall_seconds": 2100.0836225989988
+      },
+      {
+        "job": "step6_setA-14_run-01",
+        "stage": 6,
+        "instance": 14,
+        "run": 1,
+        "completed": true,
+        "reason": null,
+        "ended": 1792692170.7972193,
+        "wall_seconds": 2060.258267606001
+      },
+      {
+        "job": "step6_setA-09_run-04",
+        "stage": 6,
+        "instance": 9,
+        "run": 4,
+        "completed": true,
+        "reason": null,
+        "ended": 1792708991.0461702,
+        "wall_seconds": 2107.1525931989963
+      },
+      {
+        "job": "step6_setA-10_run-01",
+        "stage": 6,
+        "instance": 10,
+        "run": 1,
+        "completed": true,
+        "reason": null,
+        "ended": 1792704770.492057,
+        "wall_seconds": 1988.175402589004
+      },
+      {
+        "job": "step6_setA-08_run-07",
+        "stage": 6,
+        "instance": 8,
+        "run": 7,
+        "completed": true,
+        "reason": null,
+        "ended": 1792714688.6545258,
+        "wall_seconds": 2081.6511483020004
+      },
+      {
+        "job": "step6_setA-10_run-04",
+        "stage": 6,
+        "instance": 10,
+        "run": 4,
+        "completed": true,
+        "reason": null,
+        "ended": 1792706546.3695447,
+        "wall_seconds": 1979.1163926000008
+      },
+      {
+        "job": "step6_setA-15_run-03",
+        "stage": 6,
+        "instance": 15,
+        "run": 3,
+        "completed": true,
+        "reason": null,
+        "ended": 1792688316.8224988,
+        "wall_seconds": 2098.0726896199994
+      },
+      {
+        "job": "step6_setA-11_run-02",
+        "stage": 6,
+        "instance": 11,
+        "run": 2,
+        "completed": true,
+        "reason": null,
+        "ended": 1792702554.934991,
+        "wall_seconds": 2029.8621180229966
+      },
+      {
+        "job": "step6_setA-12_run-07",
+        "stage": 6,
+        "instance": 12,
+        "run": 7,
+        "completed": true,
+        "reason": null,
+        "ended": 1792700618.5736911,
+        "wall_seconds": 2106.2021862809997
+      },
+      {
+        "job": "step6_setA-13_run-03",
+        "stage": 6,
+        "instance": 13,
+        "run": 3,
+        "completed": true,
+        "reason": null,
+        "ended": 1792696292.7476325,
+        "wall_seconds": 2055.985944477001
+      },
+      {
+        "job": "step6_setA-18_run-07",
+        "stage": 6,
+        "instance": 18,
+        "run": 7,
+        "completed": true,
+        "reason": null,
+        "ended": 1792679796.5909128,
+        "wall_seconds": 2115.2105846190007
+      },
+      {
+        "job": "step6_setA-12_run-04",
+        "stage": 6,
+        "instance": 12,
+        "run": 4,
+        "completed": true,
+        "reason": null,
+        "ended": 1792698785.4081862,
+        "wall_seconds": 2089.0426033210024
+      },
+      {
+        "job": "step6_setA-17_run-01",
+        "stage": 6,
+        "instance": 17,
+        "run": 1,
+        "completed": true,
+        "reason": null,
+        "ended": 1792681721.9661093,
+        "wall_seconds": 2087.885233489
+      },
+      {
+        "job": "step6_setA-07_run-10",
+        "stage": 6,
+        "instance": 7,
+        "run": 10,
+        "completed": true,
+        "reason": null,
+        "ended": 1792719015.7685263,
+        "wall_seconds": 2131.1771741549965
+      },
+      {
+        "job": "step6_setA-06_run-05",
+        "stage": 6,
+        "instance": 6,
+        "run": 5,
+        "completed": true,
+        "reason": null,
+        "ended": 1792721007.3298373,
+        "wall_seconds": 2088.993097038998
+      },
+      {
+        "job": "step6_setA-06_run-01",
+        "stage": 6,
+        "instance": 6,
+        "run": 1,
+        "completed": true,
+        "reason": null,
+        "ended": 1792719207.6762645,
+        "wall_seconds": 2089.278998837006
+      },
+      {
+        "job": "step6_setA-18_run-03",
+        "stage": 6,
+        "instance": 18,
+        "run": 3,
+        "completed": true,
+        "reason": null,
+        "ended": 1792677779.748187,
+        "wall_seconds": 2104.4873266680006
+      },
+      {
+        "job": "step6_setA-15_run-01",
+        "stage": 6,
+        "instance": 15,
+        "run": 1,
+        "completed": true,
+        "reason": null,
+        "ended": 1792688258.4625807,
+        "wall_seconds": 2128.386358357002
+      },
+      {
+        "job": "step6_setA-07_run-03",
+        "stage": 6,
+        "instance": 7,
+        "run": 3,
+        "completed": true,
+        "reason": null,
+        "ended": 1792716785.5915585,
+        "wall_seconds": 2096.915413572002
+      },
+      {
+        "job": "step6_setA-10_run-02",
+        "stage": 6,
+        "instance": 10,
+        "run": 2,
+        "completed": true,
+        "reason": null,
+        "ended": 1792704897.4558854,
+        "wall_seconds": 1981.476713269003
+      },
+      {
+        "job": "step6_setA-16_run-07",
+        "stage": 6,
+        "instance": 16,
+        "run": 7,
+        "completed": true,
+        "reason": null,
+        "ended": 1792686218.721278,
+        "wall_seconds": 2092.757571801998
+      },
+      {
+        "job": "step6_setA-17_run-06",
+        "stage": 6,
+        "instance": 17,
+        "run": 6,
+        "completed": true,
+        "reason": null,
+        "ended": 1792682147.2690322,
+        "wall_seconds": 2216.486829610001
+      },
+      {
+        "job": "step6_setA-19_run-05",
+        "stage": 6,
+        "instance": 19,
+        "run": 5,
+        "completed": true,
+        "reason": null,
+        "ended": 1792675546.714292,
+        "wall_seconds": 2048.04627455
+      }
+    ],
+    "active": [
+      {
+        "job": "step6_setA-05_run-01",
+        "path": "/opt/orange/results/step6_tenrun_20261022/step6_setA-05_run-01/experiment"
+      },
+      {
+        "job": "step6_setA-05_run-02",
+        "path": "/opt/orange/results/step6_tenrun_20261022/step6_setA-05_run-02/experiment"
+      },
+      {
+        "job": "step6_setA-05_run-03",
+        "path": "/opt/orange/results/step6_tenrun_20261022/step6_setA-05_run-03/experiment"
+      },
+      {
+        "job": "step6_setA-05_run-04",
+        "path": "/opt/orange/results/step6_tenrun_20261022/step6_setA-05_run-04/experiment"
+      },
+      {
+        "job": "step6_setA-05_run-05",
+        "path": "/opt/orange/results/step6_tenrun_20261022/step6_setA-05_run-05/experiment"
+      },
+      {
+        "job": "step6_setA-05_run-06",
+        "path": "/opt/orange/results/step6_tenrun_20261022/step6_setA-05_run-06/experiment"
+      }
+    ],
+    "curves": []
+  },
+  "02": {
+    "captured": 1792721851.6277316,
+    "rows": [
+      {
+        "job": "step9_setA-11_run-05",
+        "stage": 9,
+        "instance": 11,
+        "run": 5,
+        "completed": false,
+        "reason": "RSS_GUARD",
+        "ended": 1792710730.543957,
+        "wall_seconds": 5340.815106870999
+      },
+      {
+        "job": "step9_setA-10_run-07",
+        "stage": 9,
+        "instance": 10,
+        "run": 7,
+        "completed": true,
+        "reason": null,
+        "ended": 1792720782.5589228,
+        "wall_seconds": 7577.989858603003
+      },
+      {
+        "job": "step9_setA-10_run-04",
+        "stage": 9,
+        "instance": 10,
+        "run": 4,
+        "completed": true,
+        "reason": null,
+        "ended": 1792718308.5808892,
+        "wall_seconds": 7577.996023722997
+      },
+      {
+        "job": "step9_setA-20_run-02",
+        "stage": 9,
+        "instance": 20,
+        "run": 2,
+        "completed": true,
+        "reason": null,
+        "ended": 1792642782.6176796,
+        "wall_seconds": 7623.217703067
+      },
+      {
+        "job": "step9_setA-16_run-07",
+        "stage": 9,
+        "instance": 16,
+        "run": 7,
+        "completed": true,
+        "reason": null,
+        "ended": 1792654751.0320773,
+        "wall_seconds": 7615.609211806999
+      },
+      {
+        "job": "step9_setA-16_run-04",
+        "stage": 9,
+        "instance": 16,
+        "run": 4,
+        "completed": true,
+        "reason": null,
+        "ended": 1792652823.2808588,
+        "wall_seconds": 7591.648672962001
+      },
+      {
+        "job": "step9_setA-12_run-03",
+        "stage": 9,
+        "instance": 12,
+        "run": 3,
+        "completed": true,
+        "reason": null,
+        "ended": 1792705389.6954494,
+        "wall_seconds": 5013.597806997001
+      },
+      {
+        "job": "step9_setA-13_run-01",
+        "stage": 9,
+        "instance": 13,
+        "run": 1,
+        "completed": true,
+        "reason": null,
+        "ended": 1792671429.9205215,
+        "wall_seconds": 3973.6822568380003
+      },
+      {
+        "job": "step9_setA-13_run-04",
+        "stage": 9,
+        "instance": 13,
+        "run": 4,
+        "completed": true,
+        "reason": null,
+        "ended": 1792700376.0782378,
+        "wall_seconds": 3962.3045016120013
+      },
+      {
+        "job": "step9_setA-18_run-03",
+        "stage": 9,
+        "instance": 18,
+        "run": 3,
+        "completed": true,
+        "reason": null,
+        "ended": 1792644684.441963,
+        "wall_seconds": 4411.946406849001
+      },
+      {
+        "job": "step9_setA-13_run-07",
+        "stage": 9,
+        "instance": 13,
+        "run": 7,
+        "completed": true,
+        "reason": null,
+        "ended": 1792700436.6661074,
+        "wall_seconds": 3986.0020054829984
+      },
+      {
+        "job": "step9_setA-18_run-06",
+        "stage": 9,
+        "instance": 18,
+        "run": 6,
+        "completed": true,
+        "reason": null,
+        "ended": 1792644864.6778274,
+        "wall_seconds": 4476.245256954001
+      },
+      {
+        "job": "step9_setA-19_run-07",
+        "stage": 9,
+        "instance": 19,
+        "run": 7,
+        "completed": true,
+        "reason": null,
+        "ended": 1792640095.0913618,
+        "wall_seconds": 4935.603481399
+      },
+      {
+        "job": "step9_setA-20_run-08",
+        "stage": 9,
+        "instance": 20,
+        "run": 8,
+        "completed": true,
+        "reason": null,
+        "ended": 1792642832.3215194,
+        "wall_seconds": 7672.836218552
+      },
+      {
+        "job": "step9_setA-19_run-10",
+        "stage": 9,
+        "instance": 19,
+        "run": 10,
+        "completed": true,
+        "reason": null,
+        "ended": 1792645231.5817337,
+        "wall_seconds": 5136.456035941999
+      },
+      {
+        "job": "step9_setA-14_run-08",
+        "stage": 9,
+        "instance": 14,
+        "run": 8,
+        "completed": false,
+        "reason": "RSS_GUARD",
+        "ended": 1792696450.614684,
+        "wall_seconds": 6698.7803210070015
+      },
+      {
+        "job": "step9_setA-10_run-01",
+        "stage": 9,
+        "instance": 10,
+        "run": 1,
+        "completed": true,
+        "reason": null,
+        "ended": 1792716681.1841855,
+        "wall_seconds": 6673.299291324001
+      },
+      {
+        "job": "step9_setA-12_run-09",
+        "stage": 9,
+        "instance": 12,
+        "run": 9,
+        "completed": true,
+        "reason": null,
+        "ended": 1792708200.7494006,
+        "wall_seconds": 7476.018497434001
+      },
+      {
+        "job": "step9_setA-11_run-08",
+        "stage": 9,
+        "instance": 11,
+        "run": 8,
+        "completed": false,
+        "reason": "RSS_GUARD",
+        "ended": 1792713204.5111315,
+        "wall_seconds": 5003.729475244996
+      },
+      {
+        "job": "step9_setA-19_run-01",
+        "stage": 9,
+        "instance": 19,
+        "run": 1,
+        "completed": true,
+        "reason": null,
+        "ended": 1792640272.467768,
+        "wall_seconds": 5113.008418523001
+      },
+      {
+        "job": "step9_setA-14_run-05",
+        "stage": 9,
+        "instance": 14,
+        "run": 5,
+        "completed": false,
+        "reason": "RSS_GUARD",
+        "ended": 1792696413.7707632,
+        "wall_seconds": 6661.937688843998
+      },
+      {
+        "job": "step9_setA-15_run-06",
+        "stage": 9,
+        "instance": 15,
+        "run": 6,
+        "completed": true,
+        "reason": null,
+        "ended": 1792654098.160313,
+        "wall_seconds": 4920.474291723001
+      },
+      {
+        "job": "step9_setA-17_run-02",
+        "stage": 9,
+        "instance": 17,
+        "run": 2,
+        "completed": true,
+        "reason": null,
+        "ended": 1792647334.1439342,
+        "wall_seconds": 4501.7549810460005
+      },
+      {
+        "job": "step9_setA-15_run-03",
+        "stage": 9,
+        "instance": 15,
+        "run": 3,
+        "completed": true,
+        "reason": null,
+        "ended": 1792652271.4571347,
+        "wall_seconds": 4834.048580389999
+      },
+      {
+        "job": "step9_setA-15_run-09",
+        "stage": 9,
+        "instance": 15,
+        "run": 9,
+        "completed": true,
+        "reason": null,
+        "ended": 1792664216.9278083,
+        "wall_seconds": 4699.795530363001
+      },
+      {
+        "job": "step9_setA-12_run-06",
+        "stage": 9,
+        "instance": 12,
+        "run": 6,
+        "completed": true,
+        "reason": null,
+        "ended": 1792704994.9202988,
+        "wall_seconds": 4558.23070778
+      },
+      {
+        "job": "step9_setA-17_run-05",
+        "stage": 9,
+        "instance": 17,
+        "run": 5,
+        "completed": true,
+        "reason": null,
+        "ended": 1792647437.359913,
+        "wall_seconds": 4604.177734915002
+      },
+      {
+        "job": "step9_setA-20_run-05",
+        "stage": 9,
+        "instance": 20,
+        "run": 5,
+        "completed": true,
+        "reason": null,
+        "ended": 1792642833.121517,
+        "wall_seconds": 7673.673170634999
+      },
+      {
+        "job": "step9_setA-17_run-08",
+        "stage": 9,
+        "instance": 17,
+        "run": 8,
+        "completed": true,
+        "reason": null,
+        "ended": 1792649177.6347415,
+        "wall_seconds": 4493.1494473269995
+      },
+      {
+        "job": "step9_setA-16_run-01",
+        "stage": 9,
+        "instance": 16,
+        "run": 1,
+        "completed": true,
+        "reason": null,
+        "ended": 1792652449.00904,
+        "wall_seconds": 7584.270437914
+      },
+      {
+        "job": "step9_setA-18_run-09",
+        "stage": 9,
+        "instance": 18,
+        "run": 9,
+        "completed": true,
+        "reason": null,
+        "ended": 1792647135.3519886,
+        "wall_seconds": 4352.678223125
+      },
+      {
+        "job": "step9_setA-13_run-10",
+        "stage": 9,
+        "instance": 13,
+        "run": 10,
+        "completed": true,
+        "reason": null,
+        "ended": 1792700724.7014875,
+        "wall_seconds": 3972.77715111
+      },
+      {
+        "job": "step9_setA-11_run-02",
+        "stage": 9,
+        "instance": 11,
+        "run": 2,
+        "completed": false,
+        "reason": "RSS_GUARD",
+        "ended": 1792710007.857512,
+        "wall_seconds": 5012.8681749960015
+      },
+      {
+        "job": "step9_setA-14_run-02",
+        "stage": 9,
+        "instance": 14,
+        "run": 2,
+        "completed": false,
+        "reason": "RSS_GUARD",
+        "ended": 1792696751.898036,
+        "wall_seconds": 7000.067062123002
+      },
+      {
+        "job": "step9_setA-16_run-10",
+        "stage": 9,
+        "instance": 16,
+        "run": 10,
+        "completed": true,
+        "reason": null,
+        "ended": 1792654946.324002,
+        "wall_seconds": 7612.1350741530005
+      },
+      {
+        "job": "step9_setA-19_run-04",
+        "stage": 9,
+        "instance": 19,
+        "run": 4,
+        "completed": true,
+        "reason": null,
+        "ended": 1792640388.398258,
+        "wall_seconds": 5228.95071339
+      }
+    ],
+    "active": [
+      {
+        "job": "step9_setA-10_run-10",
+        "path": "/opt/orange/results/tenrun_20261022/step9_setA-10_run-10/experiment"
+      },
+      {
+        "job": "step9_setA-09_run-03",
+        "path": "/opt/orange/results/tenrun_20261022/step9_setA-09_run-03/experiment"
+      },
+      {
+        "job": "step9_setA-09_run-06",
+        "path": "/opt/orange/results/tenrun_20261022/step9_setA-09_run-06/experiment"
+      }
+    ],
+    "curves": [
+      {
+        "job": "step9_setA-10_run-10",
+        "file": "setA-10_run-10_cycles.csv",
+        "rows": [
+          {
+            "objective": 0.11304348,
+            "global_bound": 0.06956513304347596,
+            "gap": 0.3846161402366951,
+            "cumulative_optimize_seconds": 1.985474537
+          },
+          {
+            "objective": 0.10217391999999999,
+            "global_bound": 0.06956513304347596,
+            "gap": 0.3191498080579078,
+            "cumulative_optimize_seconds": 2.076639326
+          },
+          {
+            "objective": 0.09347828,
+            "global_bound": 0.06956513304347596,
+            "gap": 0.25581500811230196,
+            "cumulative_optimize_seconds": 2.226954079
+          },
+          {
+            "objective": 0.09130438,
+            "global_bound": 0.06956513304347596,
+            "gap": 0.23809643038509265,
+            "cumulative_optimize_seconds": 2.319217026
+          },
+          {
+            "objective": 0.08695655,
+            "global_bound": 0.06956513304347596,
+            "gap": 0.20000122999962666,
+            "cumulative_optimize_seconds": 3.0077716789999998
+          },
+          {
+            "objective": 0.07173916,
+            "global_bound": 0.06956513304347596,
+            "gap": 0.030304605692679343,
+            "cumulative_optimize_seconds": 4.821100938
+          },
+          {
+            "objective": 0.07173916,
+            "global_bound": 0.06956513304347596,
+            "gap": 0.030304605692679343,
+            "cumulative_optimize_seconds": 2509.9576399760035
+          }
+        ],
+        "columns": [
+          "stage",
+          "cycle",
+          "objective",
+          "global_bound",
+          "gap",
+          "globally_certified",
+          "pair_columns",
+          "new_columns",
+          "pricing_demands",
+          "pricing_lp_closed",
+          "restricted_integer_bound",
+          "budget_used",
+          "lp_seconds",
+          "pricing_seconds",
+          "mip_seconds",
+          "mip_status",
+          "master_nodes",
+          "pricing_nodes",
+          "cumulative_optimize_seconds"
+        ]
+      }
+    ]
+  },
+  "03": {
+    "captured": 1792721851.6720314,
+    "rows": [
+      {
+        "job": "step9_setA-14_run-06",
+        "stage": 9,
+        "instance": 14,
+        "run": 6,
+        "completed": false,
+        "reason": "RSS_GUARD",
+        "ended": 1792697098.4792824,
+        "wall_seconds": 7327.726585496002
+      },
+      {
+        "job": "step9_setA-20_run-06",
+        "stage": 9,
+        "instance": 20,
+        "run": 6,
+        "completed": true,
+        "reason": null,
+        "ended": 1792642828.7643712,
+        "wall_seconds": 7667.741818385999
+      },
+      {
+        "job": "step9_setA-17_run-03",
+        "stage": 9,
+        "instance": 17,
+        "run": 3,
+        "completed": true,
+        "reason": null,
+        "ended": 1792647284.1447139,
+        "wall_seconds": 4455.337479252001
+      },
+      {
+        "job": "step9_setA-11_run-03",
+        "stage": 9,
+        "instance": 11,
+        "run": 3,
+        "completed": false,
+        "reason": "RSS_GUARD",
+        "ended": 1792712429.5110958,
+        "wall_seconds": 5109.616393031007
+      },
+      {
+        "job": "step9_setA-14_run-03",
+        "stage": 9,
+        "instance": 14,
+        "run": 3,
+        "completed": false,
+        "reason": "RSS_GUARD",
+        "ended": 1792695313.9479284,
+        "wall_seconds": 5543.1959462039995
+      },
+      {
+        "job": "step9_setA-12_run-04",
+        "stage": 9,
+        "instance": 12,
+        "run": 4,
+        "completed": false,
+        "reason": "RSS_GUARD",
+        "ended": 1792707319.853274,
+        "wall_seconds": 7311.422957649
+      },
+      {
+        "job": "step9_setA-11_run-06",
+        "stage": 9,
+        "instance": 11,
+        "run": 6,
+        "completed": false,
+        "reason": "RSS_GUARD",
+        "ended": 1792713416.3603733,
+        "wall_seconds": 5063.690861322997
+      },
+      {
+        "job": "step9_setA-10_run-05",
+        "stage": 9,
+        "instance": 10,
+        "run": 5,
+        "completed": true,
+        "reason": null,
+        "ended": 1792720995.1930468,
+        "wall_seconds": 7578.800929860001
+      },
+      {
+        "job": "step9_setA-12_run-10",
+        "stage": 9,
+        "instance": 12,
+        "run": 10,
+        "completed": false,
+        "reason": "RSS_GUARD",
+        "ended": 1792711722.9570727,
+        "wall_seconds": 6883.087807477001
+      },
+      {
+        "job": "step9_setA-12_run-07",
+        "stage": 9,
+        "instance": 12,
+        "run": 7,
+        "completed": false,
+        "reason": "RSS_GUARD",
+        "ended": 1792708352.6186302,
+        "wall_seconds": 7265.536114404007
+      },
+      {
+        "job": "step9_setA-13_run-08",
+        "stage": 9,
+        "instance": 13,
+        "run": 8,
+        "completed": true,
+        "reason": null,
+        "ended": 1792701087.0532289,
+        "wall_seconds": 3988.4611474699996
+      },
+      {
+        "job": "step9_setA-18_run-04",
+        "stage": 9,
+        "instance": 18,
+        "run": 4,
+        "completed": true,
+        "reason": null,
+        "ended": 1792644561.5918221,
+        "wall_seconds": 4291.3073080350005
+      },
+      {
+        "job": "step9_setA-19_run-02",
+        "stage": 9,
+        "instance": 19,
+        "run": 2,
+        "completed": true,
+        "reason": null,
+        "ended": 1792640270.2553294,
+        "wall_seconds": 5109.229608766999
+      },
+      {
+        "job": "step9_setA-10_run-02",
+        "stage": 9,
+        "instance": 10,
+        "run": 2,
+        "completed": true,
+        "reason": null,
+        "ended": 1792720008.5476434,
+        "wall_seconds": 7578.992705151002
+      },
+      {
+        "job": "step9_setA-15_run-10",
+        "stage": 9,
+        "instance": 15,
+        "run": 10,
+        "completed": true,
+        "reason": null,
+        "ended": 1792682917.2884922,
+        "wall_seconds": 4780.646913151
+      },
+      {
+        "job": "step9_setA-11_run-09",
+        "stage": 9,
+        "instance": 11,
+        "run": 9,
+        "completed": false,
+        "reason": "RSS_GUARD",
+        "ended": 1792716932.1036649,
+        "wall_seconds": 5209.092397603003
+      },
+      {
+        "job": "step9_setA-17_run-06",
+        "stage": 9,
+        "instance": 17,
+        "run": 6,
+        "completed": true,
+        "reason": null,
+        "ended": 1792647463.1562812,
+        "wall_seconds": 4633.694850858999
+      },
+      {
+        "job": "step9_setA-15_run-01",
+        "stage": 9,
+        "instance": 15,
+        "run": 1,
+        "completed": true,
+        "reason": null,
+        "ended": 1792652117.1723132,
+        "wall_seconds": 4832.957930002998
+      },
+      {
+        "job": "step9_setA-18_run-10",
+        "stage": 9,
+        "instance": 18,
+        "run": 10,
+        "completed": true,
+        "reason": null,
+        "ended": 1792647209.5288925,
+        "wall_seconds": 4427.561654724999
+      },
+      {
+        "job": "step9_setA-20_run-09",
+        "stage": 9,
+        "instance": 20,
+        "run": 9,
+        "completed": true,
+        "reason": null,
+        "ended": 1792642781.9325175,
+        "wall_seconds": 7620.882368855
+      },
+      {
+        "job": "step9_setA-18_run-07",
+        "stage": 9,
+        "instance": 18,
+        "run": 7,
+        "completed": true,
+        "reason": null,
+        "ended": 1792644778.895289,
+        "wall_seconds": 4302.919739540999
+      },
+      {
+        "job": "step9_setA-16_run-05",
+        "stage": 9,
+        "instance": 16,
+        "run": 5,
+        "completed": true,
+        "reason": null,
+        "ended": 1792652389.2796252,
+        "wall_seconds": 7610.342322256001
+      },
+      {
+        "job": "step9_setA-13_run-02",
+        "stage": 9,
+        "instance": 13,
+        "run": 2,
+        "completed": true,
+        "reason": null,
+        "ended": 1792700008.3959863,
+        "wall_seconds": 4694.444396946998
+      },
+      {
+        "job": "step9_setA-19_run-05",
+        "stage": 9,
+        "instance": 19,
+        "run": 5,
+        "completed": true,
+        "reason": null,
+        "ended": 1792640475.9428794,
+        "wall_seconds": 5314.904217955001
+      },
+      {
+        "job": "step9_setA-15_run-07",
+        "stage": 9,
+        "instance": 15,
+        "run": 7,
+        "completed": true,
+        "reason": null,
+        "ended": 1792653978.4475613,
+        "wall_seconds": 4902.033461570998
+      },
+      {
+        "job": "step9_setA-16_run-02",
+        "stage": 9,
+        "instance": 16,
+        "run": 2,
+        "completed": true,
+        "reason": null,
+        "ended": 1792652171.3441763,
+        "wall_seconds": 7609.709039413001
+      },
+      {
+        "job": "step9_setA-12_run-01",
+        "stage": 9,
+        "instance": 12,
+        "run": 1,
+        "completed": true,
+        "reason": null,
+        "ended": 1792704839.8236227,
+        "wall_seconds": 5125.4423496849995
+      },
+      {
+        "job": "step9_setA-19_run-08",
+        "stage": 9,
+        "instance": 19,
+        "run": 8,
+        "completed": true,
+        "reason": null,
+        "ended": 1792640098.527717,
+        "wall_seconds": 4937.49346321
+      },
+      {
+        "job": "step9_setA-16_run-08",
+        "stage": 9,
+        "instance": 16,
+        "run": 8,
+        "completed": true,
+        "reason": null,
+        "ended": 1792654821.0814128,
+        "wall_seconds": 7611.501243081002
+      },
+      {
+        "job": "step9_setA-13_run-05",
+        "stage": 9,
+        "instance": 13,
+        "run": 5,
+        "completed": true,
+        "reason": null,
+        "ended": 1792699714.3367357,
+        "wall_seconds": 4005.024691691
+      },
+      {
+        "job": "step9_setA-14_run-09",
+        "stage": 9,
+        "instance": 14,
+        "run": 9,
+        "completed": false,
+        "reason": "RSS_GUARD",
+        "ended": 1792695709.3068976,
+        "wall_seconds": 5938.55285434
+      },
+      {
+        "job": "step9_setA-18_run-01",
+        "stage": 9,
+        "instance": 18,
+        "run": 1,
+        "completed": true,
+        "reason": null,
+        "ended": 1792644473.504039,
+        "wall_seconds": 4374.941144261
+      },
+      {
+        "job": "step9_setA-17_run-09",
+        "stage": 9,
+        "instance": 17,
+        "run": 9,
+        "completed": true,
+        "reason": null,
+        "ended": 1792649076.3602078,
+        "wall_seconds": 4602.795733763
+      },
+      {
+        "job": "step9_setA-20_run-03",
+        "stage": 9,
+        "instance": 20,
+        "run": 3,
+        "completed": true,
+        "reason": null,
+        "ended": 1792642829.424369,
+        "wall_seconds": 7668.4571501539995
+      },
+      {
+        "job": "step9_setA-15_run-04",
+        "stage": 9,
+        "instance": 15,
+        "run": 4,
+        "completed": true,
+        "reason": null,
+        "ended": 1792652352.6757178,
+        "wall_seconds": 4889.466046563999
+      }
+    ],
+    "active": [
+      {
+        "job": "step9_setA-10_run-08",
+        "path": "/opt/orange/results/tenrun_20261022/step9_setA-10_run-08/experiment"
+      },
+      {
+        "job": "step9_setA-09_run-01",
+        "path": "/opt/orange/results/tenrun_20261022/step9_setA-09_run-01/experiment"
+      },
+      {
+        "job": "step9_setA-09_run-04",
+        "path": "/opt/orange/results/tenrun_20261022/step9_setA-09_run-04/experiment"
+      }
+    ],
+    "curves": [
+      {
+        "job": "step9_setA-10_run-08",
+        "file": "setA-10_run-08_cycles.csv",
+        "rows": [
+          {
+            "objective": 0.11304348,
+            "global_bound": 0.06956506304348299,
+            "gap": 0.3846167594673926,
+            "cumulative_optimize_seconds": 2.305647059
+          },
+          {
+            "objective": 0.10217391999999999,
+            "global_bound": 0.06956506304348299,
+            "gap": 0.3191504931641753,
+            "cumulative_optimize_seconds": 2.3892596229999996
+          },
+          {
+            "objective": 0.09347832000000002,
+            "global_bound": 0.06956506304348299,
+            "gap": 0.25581607539071116,
+            "cumulative_optimize_seconds": 2.5439393539999995
+          },
+          {
+            "objective": 0.09130438,
+            "global_bound": 0.06956506304348299,
+            "gap": 0.23809719705141208,
+            "cumulative_optimize_seconds": 2.6265933479999997
+          },
+          {
+            "objective": 0.08695655999999999,
+            "global_bound": 0.06956506304348299,
+            "gap": 0.20000212699900966,
+            "cumulative_optimize_seconds": 3.2617158089999996
+          },
+          {
+            "objective": 0.07173916,
+            "global_bound": 0.06956506304348299,
+            "gap": 0.030305581449755037,
+            "cumulative_optimize_seconds": 5.461495604000001
+          },
+          {
+            "objective": 0.07173916,
+            "global_bound": 0.06956506304348299,
+            "gap": 0.030305581449755037,
+            "cumulative_optimize_seconds": 2216.8828160710027
+          }
+        ],
+        "columns": [
+          "stage",
+          "cycle",
+          "objective",
+          "global_bound",
+          "gap",
+          "globally_certified",
+          "pair_columns",
+          "new_columns",
+          "pricing_demands",
+          "pricing_lp_closed",
+          "restricted_integer_bound",
+          "budget_used",
+          "lp_seconds",
+          "pricing_seconds",
+          "mip_seconds",
+          "mip_status",
+          "master_nodes",
+          "pricing_nodes",
+          "cumulative_optimize_seconds"
+        ]
+      }
+    ]
+  }
+}

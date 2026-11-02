@@ -6,7 +6,7 @@ import tarfile
 root=Path(__file__).resolve().parents[1]
 output=root/'results/cloud_deploy';output.mkdir(parents=True,exist_ok=True)
 archive=output/'orange-source.tar.gz'
-paths=['Project_Orange.jl','Project.toml','Manifest.toml','setA','scripts','cloud','warm_starts','test/fixtures/orange_subject_toy']
+paths=['Project_Orange.jl','Project.toml','Manifest.toml','setA','src','scripts','cloud','warm_starts','test']
 with tarfile.open(archive,'w:gz') as bundle:
     for name in paths:
         path=root/name

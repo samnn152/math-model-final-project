@@ -1,0 +1,96 @@
+{
+  "scope": "single-rank certificate diagnostic, not a complete SetA experiment",
+  "instance": "SetA-05",
+  "periods": [
+    0
+  ],
+  "prior_certificates": [
+    {
+      "stage": "1",
+      "upper": "0.11552374457848462",
+      "lower": "0.11552374457848462",
+      "certified": "true",
+      "optimize_seconds": "0.704564",
+      "middle_flow_mode": "binary_deterministic"
+    },
+    {
+      "stage": "2",
+      "upper": "0.2240454562340911",
+      "lower": "0.2240454562340911",
+      "certified": "true",
+      "optimize_seconds": "1.655747666",
+      "middle_flow_mode": "binary_deterministic"
+    },
+    {
+      "stage": "3",
+      "upper": "0.3316701978822131",
+      "lower": "0.331670197882213",
+      "certified": "true",
+      "optimize_seconds": "1.786276542",
+      "middle_flow_mode": "binary_deterministic"
+    },
+    {
+      "stage": "4",
+      "upper": "0.4354714798571363",
+      "lower": "0.43547147985713625",
+      "certified": "true",
+      "optimize_seconds": "1.722243209",
+      "middle_flow_mode": "binary_deterministic"
+    },
+    {
+      "stage": "5",
+      "upper": "0.5327868048151315",
+      "lower": "0.5327868048151315",
+      "certified": "true",
+      "optimize_seconds": "5.679595917",
+      "middle_flow_mode": "binary_deterministic"
+    },
+    {
+      "stage": "6",
+      "upper": "0.6147158307220111",
+      "lower": "0.6147158307220109",
+      "certified": "true",
+      "optimize_seconds": "13.510992208",
+      "middle_flow_mode": "binary_deterministic"
+    },
+    {
+      "stage": "7",
+      "upper": "0.6917985481801671",
+      "lower": "0.6917985481801668",
+      "certified": "true",
+      "optimize_seconds": "11.0082615",
+      "middle_flow_mode": "binary_deterministic"
+    },
+    {
+      "stage": "8",
+      "upper": "0.7657733213312459",
+      "lower": "0.7657733213312456",
+      "certified": "true",
+      "optimize_seconds": "22.477490708",
+      "middle_flow_mode": "binary_deterministic"
+    },
+    {
+      "stage": "9",
+      "upper": "0.8350868440638933",
+      "lower": "0.8350868440638932",
+      "certified": "true",
+      "optimize_seconds": "29.120552042",
+      "middle_flow_mode": "binary_deterministic"
+    }
+  ],
+  "stage10_scip_probe": {
+    "k": 10,
+    "upper": 0.9041448625192338,
+    "lower": 0.9041448577571081,
+    "seconds": 46.263974917,
+    "status": "OPTIMAL",
+    "nodes": 847
+  },
+  "prior_lock_tolerance": 1e-07,
+  "proof_tolerance": 1e-07,
+  "source_sha256": {
+    "net": "a22f35db0b9b36b6ad6d27ee74ae804f36516ee046f27d8bc3ef1b5ea8132751",
+    "tm": "573e3dbba52d8a5dc726f8d501ee9a6599a1d038557ec889ea54e2a2a74d04b4",
+    "scenario": "caa35de31ae8fb7f6401b32a395550c636c7078c59bb86ec395dd36d5700d938"
+  }
+}

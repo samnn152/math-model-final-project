@@ -16,7 +16,7 @@ The Linux dispatcher defaults to planning only. `--run` rejects non-Linux system
 
 `orange-pilot.service` runs only a 60-optimize-second Step 9 SetA-20 pilot. It samples process-tree RSS, observed kernel VmHWM and system available memory every two seconds. A 48-GiB RSS guard, 3-GiB available-memory floor, external process wall guard and a 56-GiB systemd memory ceiling bound the workload. The VM powers off automatically when the service completes or fails. Source and logs stay on its boot disk.
 
-After a completed, validated pilot, `cloud/start_batch.sh` selects two workers if the observed peak is at most 20 GiB; otherwise it selects one. Two workers each have a 24-GiB RSS guard; one has 48 GiB. Short-run measurements cannot prove a long-run memory bound, so the guards remain active. On an error or resource stop, the dispatcher stops admitting jobs and cancels the other active job rather than consuming the rest of the credit blindly.
+After a completed, validated pilot, `cloud/start_batch.sh` selects two workers if the observed peak is at most 20 GiB; otherwise it selects one. Two workers each have a 24-GiB RSS guard; one has 48 GiB. Short-run measurements cannot prove a long-run memory bound, so the guards remain active. A job-level solver, validation, or resource failure is recorded and isolated: the worker slot moves on to the next queued job, both stages continue, and failed jobs receive one serial retry after the first-pass queue drains. A job that still fails remains marked failed and causes a nonzero final service result; it does not cancel other jobs. VM-wide shutdown, service termination, or loss of the machine can still stop the whole campaign.
 
 The batch service is detached from SSH, has a 35-hour service limit, and powers off the VM when finished or failed. The independent GCP 36-hour runtime limit is retained. The queue schedules joint Step 9 tasks before Step 6, larger instance IDs first; the experiments have no dependency on completing Step 6 first. With two workers, 30 aggregate optimize-hours suggest roughly 15 hours plus overhead, but this is not a completion/quality guarantee. With one worker, allowance is 30 hours plus overhead and the service limit may leave unfinished jobs.
 
@@ -63,15 +63,17 @@ sudo tail -f /opt/orange/results/one_pass/step9_setA-20/console.log
 
 Ctrl+C exits log viewing without stopping the batch. Disconnecting SSH or switching off the local Mac also leaves the systemd batch running. The journal may be quiet until a job finishes; detailed solver output is in each job's console and experiment directories. The service shuts the VM down on completion or failure, so a stopped VM alone is not proof of successful completion. Inspect the saved supervisor and queue records after restarting the VM to retrieve results.
 
-## Cloud-only three-hour email monitor
+## Cloud-only hourly progress monitor
 
-The local Codex automation is paused. `orange-monitor.timer` runs `cloud/monitor_batch.py` directly on the VM every three hours and once when installed. It reads supervisor records and the last 8 KiB of memory logs, writes local JSON reports and serial output, then sends one structured entry to Cloud Logging. Two log-based Monitoring policies deliver progress and terminal notifications through an email notification channel. No model inference, local Mac uptime or SMTP account is required.
+The local Codex automation is paused. `orange-monitor.timer` runs `cloud/monitor_batch.py` directly on the VM every hour and once when installed. It reads supervisor records and the last 8 KiB of memory logs, writes local JSON reports and serial output, then sends one structured `INFO` entry to Cloud Logging. Two log-based Monitoring policies deliver progress and terminal notifications through an email notification channel. No model inference, local Mac uptime or SMTP account is required.
 
-The batch service shutdown hook records and submits the final state before powering off. The timer stops on terminal outcome. If the VM loses power abruptly or is forcibly stopped, the final hook cannot run; this on-VM monitor cannot report that event while the VM is off. Results and previous reports remain on disk.
+The batch service shutdown hook records and submits the final state before powering off. The timer stops on terminal outcome. If any job remains failed after its retry, the shard is reported as stopped/failed only after the rest of its queue has run. If the VM loses power abruptly or is forcibly stopped, the final hook cannot run; this on-VM monitor cannot report that event while the VM is off. Results and previous reports remain on disk.
 
 A dedicated service-account credential is stored root-only at `/etc/orange-monitor/writer.json`; the account has only `roles/logging.logWriter`, conditionally expiring 48 hours after setup. The local temporary key copy is removed, and the VM copy is deleted after the terminal report. Credentials are not part of Git or the source archive. Key resource cleanup can be performed later by the project owner.
 
-Monitor logs: `sudo journalctl -u orange-monitor.service --no-pager`. Timer: `systemctl list-timers orange-monitor.timer`. Latest local report: `/opt/orange/results/monitor/latest.json`. Cloud Logging log ID: `orange-batch-monitor`. Cloud Monitoring policy names: `Orange batch three-hour progress` and `Orange batch finished or stopped`. Delivery accepted by Logging confirms ingestion, not email receipt; check inbox/spam for the first notification.
+Monitor logs: `sudo journalctl -u orange-monitor.service --no-pager`. Timer: `systemctl list-timers orange-monitor.timer`. Latest local report: `/opt/orange/results/monitor/latest.json`. Cloud Logging log ID: `orange-batch-monitor`. The hourly progress email lists completed, failed, and pending run counts for each SetA instance in Step 6 and Step 9 (for example, `SetA-04 3/10 xong`). “Xong” means the runner process recorded completion; it does not imply a feasible or optimal result. Delivery accepted by Logging confirms ingestion, not email receipt; check inbox/spam for the first notification.
+
+Cloud Monitoring email notifications still use the product's alert/incident wrapper even when the report is informational. The report body and log entry are labeled `INFO`, and the policy is named as an hourly progress report; changing Google's wrapper itself requires replacing the alert-policy delivery path with a direct email sender.
 
 ### Automatic email interpretation
 
@@ -79,7 +81,7 @@ The cloud monitor now reads completed runner JSON files and active validated-sol
 
 ETA uses separate observed median process durations for Step 6 and Step 9, subtracts active elapsed time with a residual floor, and divides remaining work by two configured workers. Unobserved stages use the nominal optimize budget plus a stated 15% overhead assumption. The displayed scenario band (80–130% of the estimate) is not a confidence interval or a completion guarantee. Active checkpoint metrics are provisional, and absent values remain NA. Detailed rows are kept in the monitor JSON and Cloud Logging; email tables are split into groups of ten to keep extracted labels within notification limits.
 
-Deployment replaces only the monitor script and alert-policy documentation/label extraction. The batch service and solver processes are not restarted. An immediate monitor invocation verifies ingestion and sends the updated format; subsequent checks retain their three-hour cadence.
+Deployment replaces only the monitor script and alert-policy documentation/label extraction. The batch service and solver processes are not restarted. An immediate monitor invocation verifies ingestion and sends the updated format; subsequent checks retain their hourly cadence.
 
 ## Second pass resource configuration (2026-10-22)
 

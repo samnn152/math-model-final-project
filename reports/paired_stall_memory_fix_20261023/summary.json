@@ -1,0 +1,34 @@
+{
+  "revision": "stall_memory_v1",
+  "notebook_sha256": "9fcecc8aa0b6abe99ca45ec2eb1a82d18397b95eb645195b4e7ed420e1461608",
+  "instance": "setA-05",
+  "seed": 1002,
+  "local_tests_passed": 440,
+  "linux_tests_passed": 388,
+  "pilot": {
+    "mlu": 0.20498587519516004,
+    "global_mlu_bound": 0.20498587519516004,
+    "validated": true,
+    "budget_used": 0,
+    "budget": 1,
+    "certified_prefix": 1,
+    "total_stages": 792,
+    "status": "Not Optimal",
+    "termination": "SEARCH_WALL_LIMIT",
+    "peak_process_rss_gib": 1.6409149169921875,
+    "process_wall_seconds": 100.74037491600029,
+    "search_wall_seconds": 74.90928196907043,
+    "optimize_seconds": 13.670727252,
+    "optimize_budget": 20,
+    "explicit_local_wall_guard": 60,
+    "stage_2_objective": 0.33013116980731055,
+    "stage_2_bound": 0.3205095800429426,
+    "master_cycles": 3,
+    "unchanged_pool_master_rebuilds": 0
+  },
+  "churn": {
+    "models": 400,
+    "first_sample_rss_gib": 1.069244384765625,
+    "last_sample_rss_gib": 1.06939697265625
+  }
+}

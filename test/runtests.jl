@@ -63,3 +63,9 @@ include("reference.jl")
 include("time01.jl")
 
 include("paired_pricing.jl")
+
+include("paired_stall.jl")
+
+include("optimize_budget.jl")
+
+include("adaptive_integer_certificate.jl")

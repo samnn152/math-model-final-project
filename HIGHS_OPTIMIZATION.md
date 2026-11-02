@@ -1,6 +1,17 @@
 # HiGHS implementation and measured pilots
 
-The current target is a validated time-0 solution with **MLU gap ≤ 10%**, while retaining the original decreasing-load lexicographic objective. This is a quality target, not a guarantee for every instance. Later periods and reconfiguration budgets are not implemented.
+## 24 October: experimental full-domain integer certificates
+
+The local route/certificate investigation is documented in
+[the verification report](reports/route_certificate_local_20261024/README.md).
+It adds generated complete routes and an adaptive integer lower-bound model,
+including a guarded sparse physical-flow relaxation for deterministic routing.
+HiGHS remains the batch default; SCIP is being tested as the local certificate
+backend for difficult ranks. No full-vector Optimal claim or cloud deployment
+follows from MLU gap zero. These diagnostic results are separate from experimental
+repetitions and do not modify the general Budget model.
+
+The reporting target is a validated solution with **MLU gap ≤ 10%**, while retaining the original decreasing-load lexicographic objective. This target does not stop later-rank optimization or certify the full vector. The notebook also implements the joint time-0–1 model with Budget; individual certificate reductions have the narrower scope stated below.
 
 ## Original model and equivalent route representation
 
@@ -139,3 +150,13 @@ See [REFERENCE_AUDIT.md](REFERENCE_AUDIT.md). Both current HiGHS formulations ex
 ## Joint two-period decomposition
 
 Time 0 alone retains the preceding implementation. For periods 0 and 1, `solve_time01` now defaults to paired-demand master–pricing, with exact Budget coefficients and demand-specific hop-indexed pricing MILPs. Master LP, pricing and master MIP optimize times share the same total budget. Native restricted MIP bounds are not global integer certificates; conservative corrected LP bounds govern lexicographic advancement. See `docs/TIME01.md` for equations, logs, regression results and the remaining root-only integrality limitation.
+
+## Paired-search stagnation and native memory cleanup (23 October)
+
+Revision `stall_memory_v1` removes repeated unchanged-pool master rebuilds, tightens the existing walk bound at actual traffic ratios, enables unrestricted/excluded demand pricing on stalled dynamic searches, and immediately finalizes disposable HiGHS instances. Original Budget, admissible routes, integrality and lexicographic objectives are unchanged. A warm-started bounded SetA-05 local check peaked at 1.6409 GiB and retained its valid MLU and first-stage certificate; 400 disposable SetA-05 masters stayed near 1.069 GiB. See [evidence and rollout limits](reports/paired_stall_memory_fix_20261023/README.md). This is not a proof of a universal memory cap or full lexicographic convergence.
+
+### Optimize-call budget policy, 24 October
+
+`experiment_wall_deadline` returns infinity by default. Route-based time0, paired time0–1 and the separate reference no longer stop at an implicit wall multiple of the solver-call budget. Explicit diagnostic wall guards still report SEARCH_WALL_LIMIT. Gap MLU zero does not stop subsequent lexicographic stages. See `reports/optimize_budget_policy_20261024/README.md` for exact local results: nontrivial time0 reaches 4/4; paired original toy reaches only 8/44 within 30 optimize seconds; the existing full-enumeration temporal reference reaches 44/44. The latter is a reference verification, not a replacement production algorithm or a certificate for the paired run.
+
+The new 200-run Step6 cohort has separate IDs, claims and output directories and uses the corrected notebook. Four 50-job shards were prepared; the cross-dispatcher gate limits each VM to four actual Julia processes while preserving the 11 existing Step9 PIDs. An initial dispatcher-signature mismatch failed before Julia launch; the caller was corrected to support the deployed mandatory stop event, and only those pre-launch failures can be reclaimed with CAS. Audit after correction: 16 actual workers = 11 old Step9 + 5 new Step6; 200 unique new assignments, no duplicate actual job IDs. Existing Step9 private notebooks remain on their loaded execution policy, so they may still stop at the legacy internal wall guard. Hourly reports now label the new Step6 cohort separately from old completion totals.

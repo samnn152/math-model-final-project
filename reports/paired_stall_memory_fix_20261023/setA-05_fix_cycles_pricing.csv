@@ -1,0 +1,10 @@
+stage,cycle,demand_index,demand_id,mode,status,minimum_lower_bound,candidate_reduced_cost,added,optimize_seconds,cumulative_optimize_seconds
+"1","1","0","0","dynamic_all_demands","COMPLETE","0.0",,"false","0.0","0.14887891899999997"
+"2","1","0","0","dynamic_all_demands","COMPLETE","0.0",,"true","0.0","0.15356716899999998"
+"2","2","0","0","dynamic_all_demands","COMPLETE","0.0",,"false","0.0","0.18205808599999998"
+"2","2","1","0","stall_exact","OPTIMAL","0.0","0.0","false","2.303499542","2.503745919"
+"2","2","1","0","stall_diversify","TIME_LIMIT",,,"false","2.305322625","4.8090685440000005"
+"2","2","2","1","stall_exact","OPTIMAL","0.0","0.0","false","2.3360705","7.145139044"
+"2","2","2","1","stall_diversify","INTERRUPTED",,,"false","2.023955375","9.169094419"
+"2","2","3","2","stall_exact","OPTIMAL","0.0","0.0","false","2.356324333","11.525418752"
+"2","2","3","2","stall_diversify","TIME_LIMIT",,,"false","2.1453085","13.670727252"
