@@ -263,30 +263,14 @@ end
 
 # ╔═╡ 2cdaf3dd-0a25-4ce2-9da9-4ee017ca9a1b
 md"""
-# Project Orange
+# Segment Routing Optimization
 
-## Network: JSON file → Graphs.jl graph
-
-The network section is based on `json_to_graph_pluto_v2.jl`.
-This notebook will contain the project model and verification.
-
-The network reader accepts a JSON file with the same structure as
-`setA-09-net.json` and converts it into a `Graphs.jl` graph.
-
-Expected JSON structure:
-
-- `directed`: `true` or `false`
-- `multigraph`: must be `false`
-- `nodes`: objects containing `id` and `name`
-- `links`: objects containing `id`, `from`, `to`, `metric`, and `capacity`
-
-The JSON node identifiers may start at 0 (as in the example file). They are
-mapped explicitly to Julia/Graphs.jl vertex numbers `1:n`.
+Models, algorithms, and experiments for single-period and two-period routing.
 """
 
 # ╔═╡ 705b5e90-5ef4-4285-a46a-4ef4fb0dff01
 md"""
-## Data structure
+### Data structure
 
 `graph` is the actual `Graphs.jl` graph.
 
@@ -296,19 +280,14 @@ The other fields keep the information that is not stored by a
 
 # ╔═╡ dda5b3e7-2a6c-4df2-9fdc-e0784b4c3b94
 md"""
-### Function: `edge_key(directed, u, v)`
+#### `edge_key`
 
-**Purpose:** give each link a consistent dictionary key.
-
-**Input:** graph direction and two Julia vertex indices. **Output:** `(u,v)` for a
-directed graph; `(min(u,v),max(u,v))` for an undirected graph. Thus an undirected
-link has the same key in either direction. The graph reader and attribute lookup
-use this key to retrieve the same link.
+Returns an ordered key for directed links and a canonical key for undirected links.
 """
 
 # ╔═╡ ae531c1a-a653-41bf-879c-799723f2a086
 md"""
-## Conversion function
+### Conversion function
 
 The function checks the schema, creates the graph, and preserves the
 node/link attributes.
@@ -316,20 +295,14 @@ node/link attributes.
 
 # ╔═╡ 43d0094d-56ff-4e00-9863-1e590a500fbd
 md"""
-### Function: `json_to_graph(filename)`
+#### `json_to_graph`
 
-**Purpose:** turn the network JSON file into a graph while retaining its attributes.
-
-**Input:** the network file path. **Output:** a `NetworkData` object containing the
-graph, mappings between JSON IDs and Julia vertices, node names, and dictionaries
-of link IDs, metrics, and capacities. It checks required fields, unique IDs,
-known endpoints, and duplicate links. This lecturer-provided converter rejects
-`multigraph=true`; the separate batch loader below checks actual duplicate arcs.
+Validates the network JSON and returns its graph, ID mappings, metrics, and capacities. This converter rejects `multigraph=true`.
 """
 
 # ╔═╡ f09af42c-d81b-4f31-8b7b-9f240c81be6b
 md"""
-## Helper functions
+### Helper functions
 
 `edge_attributes(network,u,v)` returns the JSON attributes of a link,
 where `u` and `v` are Julia vertex numbers.
@@ -340,18 +313,14 @@ be supplied as the distance matrix to shortest-path algorithms.
 
 # ╔═╡ 38301175-d029-4afc-b53e-0daa01a907c7
 md"""
-### Function: `edge_attributes(network, u, v)`
+#### `edge_attributes`
 
-**Purpose:** look up one physical link's attributes.
-
-**Input:** a `NetworkData` object and two Julia vertex indices. **Output:** a named
-tuple containing the link's JSON ID, metric, and capacity. It uses `edge_key` to
-find the correct dictionary entry and reports an error if the link is absent.
+Returns the link ID, metric, and capacity for two Julia vertex indices.
 """
 
 # ╔═╡ b5ec0ef2-7107-4b1c-8baa-ee686077eb0a
 md"""
-### Functions: `attribute_matrix`, `metric_matrix`, `capacity_matrix`
+#### Functions: `attribute_matrix`, `metric_matrix`, `capacity_matrix`
 
 `attribute_matrix(network, attribute)` converts either the `:metric` or
 `:capacity` dictionary into a sparse vertex-by-vertex matrix. Entry `[u,v]`
@@ -365,7 +334,7 @@ sparse matrix. The metric matrix supplies arc lengths to shortest-path algorithm
 
 # ╔═╡ 63d45e27-6c5c-4755-9b94-4a7531c85599
 md"""
-## Read a file
+### Read a file
 
 Put the JSON file in the same directory as this notebook and change only
 the filename below when needed.
@@ -373,7 +342,7 @@ the filename below when needed.
 
 # ╔═╡ ee9d2d3e-6d88-4bf0-8038-1e0f9a2cdbee
 md"""
-## Examples
+### Examples
 
 The JSON node ID `0` is not a Graphs.jl vertex number. Use
 `network.id_to_vertex` to convert JSON IDs to Julia vertices.
@@ -381,13 +350,9 @@ The JSON node ID `0` is not a Graphs.jl vertex number. Use
 
 # ╔═╡ 2ca6ec67-4e36-4426-aa29-072d06b57cda
 md"""
-### Function: `edge_attributes(network, u, v)`
+#### Link lookup example
 
-**Purpose:** look up one physical link's attributes.
-
-**Input:** a `NetworkData` object and two Julia vertex indices. **Output:** a named
-tuple containing the link's JSON ID, metric, and capacity. It uses `edge_key` to
-find the correct dictionary entry and reports an error if the link is absent.
+Convert JSON node IDs before looking up a link.
 """
 
 # ╔═╡ 670cc8d4-0867-4838-a7a3-321eab3ce633
@@ -405,7 +370,7 @@ to Julia vertex `v`.
 
 # ╔═╡ ae4b5be8-dc73-4f32-9009-900a20ddf276
 md"""
-# Data
+### Data
 
 This section reads the three JSON files for the network
 selected above and calculates the model parameters at time 0. Each numbered step
@@ -418,7 +383,7 @@ The routing array uses time index `0`, matching the mathematical notation.
 
 # ╔═╡ 07fc53b5-d72d-4135-ac04-ddd147c641df
 md"""
-## Data structure
+### Data structure
 
 `RoutingRatios` stores routing fractions sparsely with access as `r[i,j,a,t]`.
 Vertices and arcs use indices starting at 1. Pair `(i,j)` is stored at matrix
@@ -431,7 +396,7 @@ implement that period.
 
 # ╔═╡ 5d0089ff-b7cd-449a-8b90-dfb0bed95170
 md"""
-### Array methods: `size`, `axes`, `getindex`, `setindex!`
+#### Array methods: `size`, `axes`, `getindex`, `setindex!`
 
 These methods let the sparse storage behave like the mathematical array.
 `size(r)` returns `(n,n,m,1)`; `axes(r,4)` returns `0:0`, the actual time label.
@@ -443,14 +408,14 @@ store and retrieve coefficients; they do not calculate routing paths.
 
 # ╔═╡ 60d722a6-4a74-478a-9a0c-0c8ee621c30a
 md"""
-## Helper functions
+### Helper functions
 
 These definitions are reused by the numbered calculations below.
 """
 
 # ╔═╡ 3fb349a8-71d0-4824-b6eb-d5ba20c6de4e
 md"""
-### Function: `decimal_rational(x)`
+#### Function: `decimal_rational(x)`
 
 **Purpose:** express a metric's displayed decimal representation as an exact fraction.
 
@@ -475,7 +440,7 @@ end
 
 # ╔═╡ f70e64a7-360f-4c04-ace3-cbef7b206201
 md"""
-### Function: `integer_metric_matrix(arcs, metric, n)`
+#### Function: `integer_metric_matrix(arcs, metric, n)`
 
 **Purpose:** build shortest-path weights that support exact equality checks.
 
@@ -500,7 +465,7 @@ end
 
 # ╔═╡ 666bb559-ace9-46c3-9e73-a2cf9e8cf27b
 md"""
-### Function: `all_pairs_shortest_data(g, weights)`
+#### Function: `all_pairs_shortest_data(g, weights)`
 
 **Purpose:** obtain the distances and path counts needed for the routing formula.
 
@@ -528,7 +493,7 @@ end
 
 # ╔═╡ fffc1e57-fe39-423e-9816-a157cc62bcc3
 md"""
-### Function: `ratios_from_shortest_data(g, weights, arcs, distances, counts)`
+#### Function: `ratios_from_shortest_data(g, weights, arcs, distances, counts)`
 
 **Purpose:** calculate the four-index coefficients `r[i,j,a,t]` from previously
 computed shortest-path information, without running Dijkstra again.
@@ -582,7 +547,7 @@ end
 
 # ╔═╡ 6122b1a4-46f5-4e0a-b4f3-cfa91dd7dbf8
 md"""
-### Function: `routing_ratios(g, weights, arcs)`
+#### Function: `routing_ratios(g, weights, arcs)`
 
 **Purpose:** provide a convenience call when shortest-path data has not yet been computed.
 
@@ -602,7 +567,7 @@ end
 
 # ╔═╡ 76bae8ac-9d90-45cf-a106-b2b89f257141
 md"""
-### Batch-loading helper
+#### Batch-loading helper
 
 `load_data` combines the same operations for later SetA experiments. The worked
 Data section below executes each operation in its own cell instead of hiding
@@ -611,20 +576,9 @@ the whole calculation behind this function.
 
 # ╔═╡ 134cd3a7-b362-4faf-91c7-f7505987a468
 md"""
-### Function: `load_data(prefix)`
+#### `load_data`
 
-**Purpose:** prepare one complete instance in a single call for batch experiments.
-
-**Input:** a prefix such as `joinpath(@__DIR__, "setA", "setA-01")`; optional
-`splitting` defaults to `:ecmp`, the original challenge convention. It reads the corresponding `-net.json`,
-`-tm.json`, and `-scenario.json` files, validates the graph and demands, calculates
-routing fractions, and identifies reachable candidate segments.
-
-**Output:** a named tuple containing the graph, ID mappings, arc metrics,
-capacities `.c`, demand endpoints, initial volumes `.v`, `.MaxSeg`, `.r`,
-distances, counts, and reachable `.segments`. It prepares only time 0.
-This function is for repeated experiments; the numbered Data cells below perform
-the operations explicitly so their intermediate results remain visible.
+Reads the three instance files and returns nominal routing fractions, demand volumes, capacities, IDs, and reachable segments.
 """
 
 # ╔═╡ 3ec9a21c-de5f-4d98-914f-1f8a52a0fe14
@@ -708,7 +662,7 @@ end
 
 # ╔═╡ 639dd9b5-2c73-4976-a91d-0ca342e9a730
 md"""
-## 1. Read the three JSON files
+### 1. Read the three JSON files
 
 The network path is `json_file`, selected in the lecturer's section above.
 The other two files must have the same instance prefix.
@@ -736,7 +690,7 @@ end
 
 # ╔═╡ 0a74323a-829b-4252-abf4-74e2eb4d378b
 md"""
-## 2. Network parameters and capacities
+### 2. Network parameters and capacities
 
 Reuse the graph `g` and node mapping `network.id_to_vertex` built above.
 Arc indices follow JSON list order, while `arc_ids` retains the original IDs.
@@ -770,7 +724,7 @@ end
 
 # ╔═╡ 6619e810-da86-474f-ba23-eace1ea0e41c
 md"""
-## 3. Shortest-path distances and counts
+### 3. Shortest-path distances and counts
 
 Metrics determine shortest paths. Integer scaling avoids rounding errors when
 checking equal path lengths. All metrics use the same positive scale, so the
@@ -792,10 +746,9 @@ shortest_distances = [
 
 # ╔═╡ 4d947c2c-0b50-466d-9531-11ae949b7475
 md"""
-## 4. Calculate r[i,j,a,t] at time 0
+### 4. Calculate r[i,j,a,t] at time 0
 
-The default calculation implements the shortest-path counting formula in
-`calculating_r.pdf`, Section 2. Let the nominal directed network be
+The handout uses uniform complete-path splitting; the active calculation uses ECMP. For the handout formula, let
 
 ```math
 G(0) = (V,A(0)).
@@ -834,7 +787,7 @@ counts. The common positive weight scale preserves the distance equality.
 
 This displayed path-count formula is retained to explain the lecturer's handout and is selected only by `:uniform_paths`.
 
-The active Data calculation uses the original subject's `:ecmp` convention. For target j, let N_j(u) contain the outgoing shortest-path arcs from u. Starting with one unit at i, process vertices in decreasing distance to j and distribute the incoming flow f_u equally:
+The active Data calculation uses the original subject's `:ecmp` convention. For target ``j``, let ``N_j(u)`` contain the outgoing shortest-path arcs from ``u``. Starting with one unit at ``i``, process vertices in decreasing distance to j and distribute the incoming flow ``f_u`` equally:
 
 ```math
 r(i,j,(u,v),0)=f_u/|N_j(u)|,\quad (u,v)\in N_j(u),
@@ -858,7 +811,7 @@ r = ratios_from_shortest_data(g, routing_weights, arcs, scaled_distances, sigma;
 
 # ╔═╡ 42025609-6da1-4f30-b179-2834cfda5f84
 md"""
-## 5. Initial demand volumes
+### 5. Initial demand volumes
 
 ```math
 \nu(d,0)=\texttt{tm.demands[d].v[1]}.
@@ -886,7 +839,7 @@ end
 
 # ╔═╡ 8285c789-4544-4e0b-ab93-06d50117a7fe
 md"""
-## 6. Maximum number of segments
+### 6. Maximum number of segments
 
 ```math
 \mathrm{MaxSeg}=\texttt{scenario.max\_segments}.
@@ -905,7 +858,7 @@ end
 
 # ╔═╡ 57a38ca7-5918-4ddf-b7b3-cb9f162b7e06
 md"""
-## 7. Display routing coefficients for the first demand
+### 7. Display routing coefficients for the first demand
 
 For the direct segment between its source and target, display every used arc.
 `fraction` is `r[i,j,a,0]`; `traffic` is its product with the initial demand
@@ -933,7 +886,7 @@ end
 
 # ╔═╡ 23b5c53d-1c91-4827-891c-5ffe3278746a
 md"""
-## 8. Verify a fraction by hand
+### 8. Verify a fraction by hand
 
 Consider four vertices with unit-weight arcs `(1,2)`, `(1,3)`, `(2,4)`, `(3,4)`.
 There are exactly two shortest paths from 1 to 4: `1 → 2 → 4` and `1 → 3 → 4`.
@@ -971,7 +924,7 @@ end
 
 # ╔═╡ f72ae162-d95f-493b-9b6f-6df649fd1c7b
 md"""
-## Model-ready Data
+### Model-ready Data
 
 The fields below collect the parameters already computed in the preceding cells.
 `segments` excludes unreachable pairs and pairs with identical endpoints.
@@ -997,11 +950,10 @@ model_data = (
 
 # ╔═╡ 01d94b4b-9344-40bc-a6d5-9a606214527a
 md"""
-# Mathematical model: time 0
+### Mathematical model: time 0
 
-This model uses the Data prepared above. Let V be the vertices, A the physical
-arcs, D the demands, and S the reachable ordered pairs of distinct vertices.
-A segment is a pair in S, not necessarily a physical arc. Define
+This model uses the Data prepared above. Let ``V`` be the nodes, ``A`` the physical arcs, ``D`` the demands, and ``S`` the reachable ordered node pairs.
+A segment is a pair in ``S``, not necessarily a physical arc. Define
 
 ```math
 x_{ij}^{d,0}\in\{0,1\},\qquad
@@ -1043,9 +995,9 @@ minimize that vector lexicographically:
 
 # ╔═╡ 1dbfe41e-f2c5-48e9-ba14-0d3dfbac8953
 md"""
-## Sequential formulation of the lexicographic objective
+### Sequential formulation of the lexicographic objective
 
-Let the sum of the k largest loads be
+Let the sum of the ``k`` largest loads be
 
 ```math
 F_k(\lambda)=\sum_{h=1}^{k}\lambda_{(h)}.
@@ -1054,7 +1006,7 @@ F_k(\lambda)=\sum_{h=1}^{k}\lambda_{(h)}.
 Lexicographically minimizing the sorted loads is equivalent to minimizing
 F1, then F2 while holding F1 optimal, and so on. At the first differing position,
 the earlier partial sums agree, so both comparisons give the same ordering.
-For each k, the following linear epigraph represents the top-k sum:
+For each ``k``, the following linear epigraph represents the top-k sum:
 
 ```math
 F_k(\lambda)=\min_{\theta_k\ge0,\ e_{ak}\ge0}
@@ -1062,15 +1014,15 @@ F_k(\lambda)=\min_{\theta_k\ge0,\ e_{ak}\ge0}
 \qquad e_{ak}\ge\lambda_a-\theta_k.
 ```
 
-Stage 1 uses the simpler equivalent constraints lambda_a <= z and minimizes z.
+Stage 1 uses the simpler equivalent constraints ``\lambda_a\le z`` and minimizes ``z``.
 The final stage minimizes the sum of all loads. The other stages use this epigraph.
-After proving stage k optimal, retain the constraint
+After proving stage ``k`` optimal, retain the constraint
 
 ```math
 k\theta_k+\sum_{a\in A}e_{ak}\le F_k^*+\varepsilon.
 ```
 
-The exact mathematical model has epsilon = 0. The implementation records a
+The exact mathematical model has ``\varepsilon=0``. The implementation records a
 numerical lock tolerance (default 1e-7), alongside the selected solver's feasibility and objective
 tolerances. Results are optimal within those tolerances, not symbolic exact arithmetic.
 This uses sequential objectives, not a weighted approximation to the load vector.
@@ -1080,16 +1032,16 @@ The procedure stops at the first stage that is not certified optimal.
 
 # ╔═╡ 7fa918df-698f-4109-a3f1-f3610ff0089d
 md"""
-### Function: `build_time0_model` — Build the time-0 routing model
+#### `build_time0_model`
 
-Receives prepared Data, solver settings, and a model-size limit. Returns the JuMP model, segment-choice variables, load expressions, and waypoint positions. It adds the constraints written above and supplies direct routing as a feasible initial solution. Only reachable segments are created. The size check runs before allocating the binary variables. Segment incidence lists are built in one pass, and sparse routing rows use an integer lookup array. Automatic JuMP string names are disabled to avoid allocating a name for every variable and constraint; Julia references such as `x[d,s]` remain available. These changes preserve variable order, coefficients, constraints, warm starts, solver settings, and lexicographic stages. They do not reduce the number of mathematical variables.
+Builds the compact single-period model with reachable segments, degree limits, and MTZ ordering. Checks allocation size before creating binaries.
 """
 
 # ╔═╡ 3a0b9ef2-b4da-4d67-9774-a7f6dd0be497
 md"""
-### Function: `orange_solver_version`
+#### `orange_solver_version`
 
-Returns the native SCIP or HiGHS version, rather than the Julia wrapper version. Saved with each run, stage, solution, config, environment record and summary so comparisons identify the actual engine.
+Records the native solver version.
 """
 
 # ╔═╡ 6a30c8cc-722c-4d0e-8f52-708b285aa477
@@ -1101,7 +1053,7 @@ end
 
 # ╔═╡ 883a391a-2e6e-4b9f-b03c-3416b8e13482
 md"""
-### HiGHS search profiles and deadline monitoring
+#### HiGHS search profiles and deadline monitoring
 
 `highs_search_options(profile)` returns native parameter changes only. `:default` keeps HiGHS defaults; `:devex` changes dual-simplex edge weights; `:incumbent` increases primal heuristic effort; `:lean` reduces cut-pool retention and turns off symmetry detection and non-root separation. None removes an original model constraint or changes the objective. Profiles require empirical comparison; a smaller cut pool is a soft target, not a RAM cap.
 
@@ -1162,9 +1114,9 @@ end
 
 # ╔═╡ ad946052-f7b2-4283-af1e-6c1a5e9adc76
 md"""
-### Function: `create_time0_optimizer`
+#### Function: `create_time0_optimizer`
 
-Creates the selected direct JuMP backend. HiGHS is the public solve default; SCIP remains selectable. Applies the requested seed, thread limits, zero relative objective gap, absolute gap 1e-8 and feasibility tolerance 1e-7 with solver-specific parameter names. SCIP uses randomization/randomseedshift, limits/gap and limits/absgap; HiGHS uses random_seed, mip_rel_gap and mip_abs_gap. The model equations are unchanged. Ordinary SCIP.jl optimize! uses SCIPsolve, not concurrent SCIPsolveConcurrent: thread options are caps on available SCIP/LP threading, not a promise of parallel branch-and-bound. Default single-thread runs make the initial comparison reproducible.
+Creates the selected direct JuMP backend. HiGHS is the public solve default; SCIP remains selectable. Applies the requested seed, thread limits, zero relative objective gap, absolute gap 1e-8 and feasibility tolerance 1e-7 with solver-specific parameter names. SCIP uses randomization/randomseedshift, limits/gap and limits/absgap; HiGHS uses `random_seed`, `mip_rel_gap` and `mip_abs_gap`. The model equations are unchanged. Ordinary SCIP.jl optimize! uses SCIPsolve, not concurrent SCIPsolveConcurrent: thread options are caps on available SCIP/LP threading, not a promise of parallel branch-and-bound. Default single-thread runs make the initial comparison reproducible.
 """
 
 # ╔═╡ 62e7cb29-8eb2-4f7e-80e2-e3a5e4c59685
@@ -1201,9 +1153,9 @@ end
 
 # ╔═╡ 572e721a-0b40-483d-9cca-699697e967b8
 md"""
-### Function: `set_stage_log!`
+#### Function: `set_stage_log!`
 
-Starts a fresh native solver log for one lexicographic stage. SCIP uses its message-handler logfile API and separately suppresses console output; setting display verbosity to zero would also erase useful file output. HiGHS uses its log_file option. Both retain progress, bounds and termination information even when console=false.
+Starts a fresh native solver log for one lexicographic stage. SCIP uses its message-handler logfile API and separately suppresses console output; setting display verbosity to zero would also erase useful file output. HiGHS uses its `log_file` option. Both retain progress, bounds and termination information even when console=false.
 """
 
 # ╔═╡ 34cb53e6-9d18-4e01-bb93-87d4b00b6191
@@ -1226,7 +1178,7 @@ end
 
 # ╔═╡ 1935636c-86ae-4568-b106-eb860a63b493
 md"""
-### Function: `close_stage_log!`
+#### Function: `close_stage_log!`
 
 Closes and flushes the native log after optimize! so the final stage log is immediately readable. Log setup and closing lie outside the optimize! timer.
 """
@@ -1243,7 +1195,7 @@ end
 
 # ╔═╡ b562a1eb-49cd-480b-8a74-9d445145a150
 md"""
-### Function: `set_stage_time_limit!`
+#### Function: `set_stage_time_limit!`
 
 Sets the solver-specific clock limit for the remaining wall-time budget. HiGHS receives remaining seconds directly. For incremental SCIP solves, its current solving-clock origin is added to the remaining allowance. The external sum of optimize! wall times remains the authoritative shared budget, so the budget is never restarted at 1800 seconds for a new stage.
 """
@@ -1339,7 +1291,7 @@ end
 
 # ╔═╡ 919891f0-8ace-459b-a20b-af51bfc1a72b
 md"""
-### Function: `validate_time0_solution` — Independently check an incumbent
+#### Function: `validate_time0_solution` — Independently check an incumbent
 
 Receives Data and a solved formulation. Reads selected segment variables, reconstructs each demand route, and checks integrality, endpoints, segment limits, repeated waypoints, branching, and disconnected cycles. It recomputes physical arc loads from the selected routes and Data coefficients. Returns the routes, selected segments, load vector, and maximum load; a failed check raises an error.
 """
@@ -1392,9 +1344,9 @@ end
 
 # ╔═╡ 8feaf3ce-4168-4e1f-b74a-28c2629331ed
 md"""
-### Function: `add_lexicographic_stage!` — Set one lexicographic objective
+#### `add_lexicographic_stage!`
 
-Receives a formulation and stage index k. Stage 1 minimizes z. Intermediate stages add a threshold and excess variables for the sum of the k largest arc loads. The last stage minimizes the sum of all loads directly. Returns the objective expression and any new variables. It modifies the existing model so earlier locks remain in force.
+Builds the current top-k objective while retaining earlier locks. The first stage minimizes maximum load; the last minimizes total load.
 """
 
 # ╔═╡ c72df640-0622-495a-bb90-e25dabf05398
@@ -1421,9 +1373,9 @@ end
 
 # ╔═╡ 0de9cc87-9690-4d83-9801-79895e5c17df
 md"""
-### Function: `warm_start_lexicographic!` — Reuse the preceding feasible routing
+#### `warm_start_lexicographic!`
 
-Receives Data, the formulation, a validated route, and all stage definitions. Sets initial values for segment choices, waypoint positions, z, and threshold/excess variables using that route. This supplies a feasible starting candidate for the next stage; it does not replace optimization or certify optimality.
+Initializes route and objective variables from a validated incumbent.
 """
 
 # ╔═╡ 882f34a4-64c8-4f50-81e3-216f3a682ae6
@@ -1460,9 +1412,9 @@ end
 
 # ╔═╡ 509862d6-b196-4c68-9b78-095105ade572
 md"""
-### Function: `experiment_gap` — Calculate a scalar bound gap
+#### Function: `experiment_gap` — Calculate a scalar bound gap
 
-Receives an incumbent U and a lower bound L. Returns 1-L/U, or missing if either value is absent. When both are zero within numerical tolerance, returns zero. A materially inconsistent bound raises an error. This helper applies to a scalar stage or to the separately reported MLU; it does not define a gap for an entire lexicographic vector.
+Receives an incumbent ``U`` and a lower bound ``L``. Returns ``1-L/U``, or missing if either value is absent. When both are zero within numerical tolerance, returns zero. A materially inconsistent bound raises an error. This helper applies to a scalar stage or to the separately reported MLU; it does not define a gap for an entire lexicographic vector.
 """
 
 # ╔═╡ 9441b09a-b55a-4693-bb71-5fd48be058a5
@@ -1478,7 +1430,7 @@ end
 
 # ╔═╡ 732eb7a7-7aa7-4ca1-8302-05a9d4d6cbda
 md"""
-### Function: `solve_time0_serial` — Solve the complete lexicographic problem
+#### Function: `solve_time0_serial` — Solve the complete lexicographic problem
 
 Receives one instance and run settings. Solves stages in order, locks each certified stage optimum, and stops at the first unfinished stage or when the shared optimize! budget is exhausted. Each call to optimize! is timed separately; reading, construction, and validation are excluded. Validates every available incumbent and preserves the latest validated route if a later solve finds none. Returns one result row and writes stage logs and the solution when paths are supplied. Optimal means all stages finished, within the recorded solver and lock tolerances.
 
@@ -1487,7 +1439,7 @@ An optional `stage_observer(model, solver, stage, log_path)` may read native sta
 
 # ╔═╡ 4ad642fe-2c86-4d74-979a-b48d657f2917
 md"""
-## Execute a small lexicographic example
+### Execute a small lexicographic example
 
 Direct routing gives sorted loads `(1, 0.8, 0, 0)`. An intermediate waypoint
 changes this to `(1, 0.5, 0.5, 0)`. Both have MLU 1, but the second vector is
@@ -1498,7 +1450,7 @@ status, number of completed stages, and time spent inside optimize!.
 
 # ╔═╡ 78a0ae6d-a64b-4f25-abb2-40bd06ab6e26
 md"""
-### Function: `time0_demo_data`
+#### Function: `time0_demo_data`
 
 Returns Data for two demands on a five-node graph. One demand forces a maximum load of 1. The other can use a direct link with load 0.8 or two links with loads 0.5 each. The lexicographic optimum is therefore the sorted vector (1,0.5,0.5,0). This example distinguishes the full objective from MLU alone.
 """
@@ -1524,7 +1476,7 @@ lex_demo_data = time0_demo_data()
 
 # ╔═╡ ae31ff5d-31d1-4080-bd5e-a1ad45d11609
 md"""
-# Numerical experiments and logs
+### Numerical experiments and logs
 
 For one repetition, the shared solve-time budget is
 
@@ -1551,7 +1503,7 @@ of scalar bounds without confusing them:
 `objective`, `lower_bound`, and `gap` refer to the MLU component (stage 1).
 `stage_objective`, `stage_lower_bound`, and `stage_gap` refer to the last attempted
 stage. `sorted_loads_json` stores the full objective vector. `Optimal` requires
-all m stages to finish. A zero MLU gap can coexist with `Not Optimal` when later
+all ``m`` stages to finish. A zero MLU gap can coexist with `Not Optimal` when later
 lexicographic stages remain unfinished. State this distinction in the report.
 A missing incumbent gives missing objective and gap; it is not called Infeasible.
 
@@ -1570,9 +1522,9 @@ A full 20-instance, ten-repeat run has up to 100 hours of solve-time allowance.
 
 # ╔═╡ c0816744-3cf8-4925-a207-e993582610b8
 md"""
-### Function: `csv_field` — Encode one CSV value
+#### `csv_field`
 
-Receives a scalar value and returns a quoted CSV field, escaping embedded quotes. Missing values become empty fields rather than artificial zeros.
+Escapes CSV values; missing values remain empty.
 """
 
 # ╔═╡ a48c15c8-a4b1-4d69-982f-81ffbb19ac45
@@ -1584,9 +1536,9 @@ end
 
 # ╔═╡ 065dba25-0a7a-4aeb-9197-d26db9c9a5a8
 md"""
-### Function: `append_result_csv` — Save one result immediately
+#### `append_result_csv`
 
-Receives a CSV path and a named tuple. Writes column names for a new file, appends the row, flushes it, and closes the stream. Returns the absolute path. It is used for both individual runs and stage traces.
+Appends and flushes each result immediately.
 """
 
 # ╔═╡ e15dae4c-6fd7-4423-9b4c-307a0f9fe300
@@ -1605,7 +1557,7 @@ end
 
 # ╔═╡ 0f630d76-c12e-4d83-a7a8-95a2eace1262
 md"""
-### Atomic checkpoints and solve events
+#### Atomic checkpoints and solve events
 
 `write_solution_checkpoint` persists an already validated feasible routing and its global bounds. `write_solve_event` marks the beginning/end of an optimize! call for an external process supervisor. These writes are outside measured solve time. A supervisor may kill an overdue process, but a saved incumbent remains a partial result, never an optimality certificate.
 """
@@ -1798,9 +1750,9 @@ end
 
 # ╔═╡ b45ba371-ec46-460d-8ab7-982ce5e4d2a7
 md"""
-### Function: `result_mean` — Average available observations
+#### `result_mean`
 
-Receives result rows and a field name. Returns the arithmetic mean of available values, or missing if none exists. Missing objectives, gaps, or node counts never contribute a zero to an average.
+Averages available observations without replacing missing values by zero.
 """
 
 # ╔═╡ 8ddca20c-9671-45d8-b147-8cb1d55e1b25
@@ -1812,9 +1764,9 @@ end
 
 # ╔═╡ eaa7dc15-b400-42a2-8260-d1a19ebdf54f
 md"""
-### Function: `summarize_experiments` — Build the report table
+#### `summarize_experiments`
 
-Receives all completed/checkpointed rows and a summary path. Groups runs by solver and instance, computes averages, and reports executed, feasible, optimal, infeasible, and failed run counts along with sample counts. Returns summary rows and writes summary.csv. The objective and gap columns refer specifically to MLU; full lexicographic progress is reported separately.
+Groups runs by solver and instance, reporting metric averages and sample counts.
 """
 
 # ╔═╡ eedc2106-b9c7-46fc-9baf-75eec4ca5b5e
@@ -1850,9 +1802,9 @@ end
 
 # ╔═╡ b46c8f86-0c41-465a-93cf-ad5eaf2df9cc
 md"""
-### Function: `experiment_error_row` — Record an unexecuted or failed solve honestly
+#### `experiment_error_row`
 
-Receives instance dimensions, settings, and an error message. Returns a result row with missing objective, gap, and solve time. MODEL_SIZE_LIMIT denotes a model rejected before optimization. ERROR denotes another failure. Both appear as Not Optimal and are excluded from executed-run averages; neither is a proof of infeasibility.
+Records failures with missing objectives and explicit error status.
 """
 
 # ╔═╡ 557949d4-6725-42ac-a286-14bb31703e54
@@ -1879,24 +1831,21 @@ end
 
 # ╔═╡ a6127bd7-6dee-4aba-a02a-c5d884b92e76
 md"""
-### Function: `run_seta_experiments` — Run and checkpoint the SetA experiment batch
+#### `run_seta_experiments`
 
-Receives the solver (`:highs` by default), instance IDs, repeat count, time budget, output directory, seeds, threads, routing convention, and size limit. Loads Data once per instance and solves each requested repetition. Saves every run immediately, rebuilds summary tables, and records software/hardware information. Reusing the same directory with identical settings resumes checkpointed runs; different settings require a new directory. Interruptions propagate so Ctrl+C stops the batch without deleting completed runs.
+Runs selected instances and seeds, saves checkpoints, and resumes matching completed runs.
 """
 
 # ╔═╡ 470d4950-7398-46a8-998e-c8ca22eeca08
 md"""
-### Function: `warm_up_solver(solver; threads=1)`
+#### `warm_up_solver`
 
-Executes the four-stage tiny example using the selected backend before a batch.
-Checks its known objective vector and status. These initialization and compilation
-costs are excluded from measured SetA solves. Each comparison backend receives its
-own warm-up; it does not depend on which backend was used in the visible demo.
+Runs a small verification problem before measured experiments.
 """
 
 # ╔═╡ 71c8035c-d61c-411e-8414-2a24724ca8c7
 md"""
-## Small solver comparison
+### Small solver comparison
 
 Both backends solve the same example with the same seed, single-thread setting,
 and lexicographic tolerance. The vector must agree with `(1, 0.5, 0.5, 0)`.
@@ -1906,7 +1855,7 @@ Use repeated SetA experiments for a performance comparison.
 
 # ╔═╡ 920564d7-f90e-4001-989c-3b134e4d9978
 md"""
-## Configure and run in Pluto
+### Configure and run in Pluto
 
 HiGHS is the default backend. Keep `solver=:highs` in `experiment_settings`, or
 select `solver=:scip` and a different output directory for comparison. Solver
@@ -1927,7 +1876,7 @@ Do not edit model cells while a batch is running.
 
 The direct MILP has `length(data.v) * length(data.segments)` binary variables.
 SetA-20 alone has 957,600,000 of them. A configurable two-million-variable guard
-rejects oversized models before allocation and records MODEL_SIZE_LIMIT. Such a
+rejects oversized models before allocation and records `MODEL_SIZE_LIMIT`. Such a
 row is unexecuted, not an infeasibility result. Increasing the guard does not
 remove the memory cost. The automatic route formulation avoids allocating those compact variables.
 
@@ -1952,7 +1901,7 @@ run_full_experiments = false
 
 # ╔═╡ 9857c7d8-057c-45fa-aa32-4a8306052ec7
 md"""
-## Run from Terminal and inspect the files
+### Run from Terminal and inspect the files
 
 From the project directory, install the locked environment once:
 
@@ -1998,7 +1947,7 @@ Each output directory contains:
 - `setA-01_run-01_stage-001.log`, etc.: the selected solver's log for each attempted stage.
 - `setA-01_run-01_solution.json`: waypoint lists, physical arc loads, and the full sorted vector.
 
-Rows with MODEL_SIZE_LIMIT or ERROR have no solve time or objective and are counted
+Rows with `MODEL_SIZE_LIMIT` or ERROR have no solve time or objective and are counted
 separately from executed runs. The largest-instance limitation is explicit in the
 summary; those experiments still need a scalable solution method.
 
@@ -2006,12 +1955,9 @@ summary; those experiments still need a scalable solution method.
 
 # ╔═╡ 51d7e27f-cac3-4a78-953f-1f2152174673
 md"""
-### Function: `experiment_summary_table(summary)`
+#### `experiment_summary_table`
 
-Receives the summary rows returned by the batch runner. Returns a Markdown table
-for display in Pluto, with means, valid objective sample counts, optimal-run counts,
-and lexicographic stage progress. Missing values are displayed as `NA`. It does
-not solve a model or change the saved numerical results.
+Displays saved summary rows without rerunning optimization.
 """
 
 # ╔═╡ 7a3fa790-8a45-4ef3-9634-22990d4b691c
@@ -2034,7 +1980,7 @@ end
 
 # ╔═╡ 7c4e16b6-a893-48da-98af-6e1fa7d2c271
 md"""
-### Function: `solve_time0(data; settings...)`
+#### Function: `solve_time0(data; settings...)`
 
 This public entry point defaults to `solver=:highs`; pass `solver=:scip` for
 comparison. It serializes the notebook's solver calls with a lock and calls
@@ -2047,9 +1993,9 @@ identical for both backends.
 
 # ╔═╡ 469bf80a-c389-4ea0-8187-1a8fc6e8037a
 md"""
-# Memory-efficient time-0 formulation: route columns
+### Memory-efficient time-0 formulation: route columns
 
-The original segment equations above remain the reference. For demand d, let P_d contain every valid source-to-target segment path with at most K segments. A column p is a complete path, not a physical shortest path. Its physical flows still follow the same r[i,j,a,0] and ECMP convention.
+The original segment equations above remain the reference. For demand ``d``, let ``P_d`` contain every valid source-to-target segment path with at most ``K`` segments. A column ``p`` is a complete path, not a physical shortest path. Its physical flows still follow the same `r[i,j,a,0]` and ECMP convention.
 
 ```math
 \sum_{p\in P_d}y_{dp}=1,\quad y_{dp}\in\{0,1\},\qquad
@@ -2061,16 +2007,16 @@ A chosen column already satisfies source/target flow conservation and MaxSeg. Co
 
 The master keeps the same sequential top-k load objectives and earlier locks. A small column pool alone is a restricted model: its integer bound is **not** a global bound for Orange.
 
-### Pricing and a global lower bound
+#### Pricing and a global lower bound
 
-Let alpha_d be the dual multiplier of a demand selection equality, and beta_a=-dual(load_row_a) >= 0. The minimum reduced cost over all routes of d is
+Let ``\alpha_d`` be the dual multiplier of a demand selection equality, and let ``\beta_a\ge0`` be the negative dual multiplier of the physical-load constraint for arc ``a``. The minimum reduced cost over all routes of demand ``d`` is
 
 ```math
 \rho_d=\min_{p\in P_d}\left(\nu(d,0)\sum_{(i,j)\in p}\sum_a
 \frac{\beta_a r(i,j,a,0)}{c(a)}-\alpha_d\right).
 ```
 
-A nonnegative weighted segment cost permits dynamic programming with at most K segments. All targets are covered; only a completed pricing sweep supplies a bound. If D_R is the restricted LP dual value, lowering each alpha_d by max(0,-rho_d) makes its missing-column inequalities feasible, giving
+A nonnegative weighted segment cost permits dynamic programming with at most ``K`` segments. All targets are covered; only a completed pricing sweep supplies a bound. If ``D_R`` is the restricted LP dual value, lowering each ``\alpha_d`` by ``\max(0,-\rho_d)`` makes its missing-column inequalities feasible, giving
 
 ```math
 LB=D_R+\sum_d\min(0,\rho_d)\le z^*_{LP}\le z^*_{IP}.
@@ -2080,22 +2026,22 @@ A numerical safety buffer is subtracted. Duals are taken from the entire master,
 
 Only equality of a validated incumbent and this **global** bound within the recorded absolute proof tolerance certifies a stage. Otherwise, the solver expands the route pool and retries the same unfinished stage while budget remains; it never promotes a restricted-master OPTIMAL status to global OPTIMAL. This is not full Branch-and-Price, and a remaining integrality gap may prevent certification.
 
-### Continued search at an unfinished stage
+#### Continued search at an unfinished stage
 
 A completed restricted MIP does not end the run merely because its global gap remains positive. The solver retains the incumbent and strongest global bound, expands the route pool with additional valid simple waypoint sequences, reruns LP pricing and solves the restricted MIP in slices of at most 60 seconds. The initial per-demand pool cap grows on retries; the global variable guard remains active. Cycles are logged separately. Only global certification advances k. A solve budget, an explicit wall safeguard or the route allocation guard can stop an incomplete run; reaching the 10% MLU reporting threshold cannot.
 
 Enumeration can require exponentially many candidates and this is still not full branch-and-price. The model is unchanged. Pure route work is outside optimize! timing; a wall safeguard bounds the overall search routine by the solve budget plus max(30 seconds, 10% of that budget), checked between cycles. The external supervisor may stop sooner according to its own allowances.
 
-### Feasible initialization and quality
+#### Feasible initialization and quality
 
 A bounded greedy search considers two-segment waypoint alternatives, accepting improvements of the sorted physical-load vector. It supplies columns and a feasible warm start only; all valid routes remain eligible for pricing. Every final route is independently reconstructed and its loads recomputed from r.
 
-The requested MLU target is gap <= 10%. It is a reported quality target, not a relaxed lexicographic lock. TARGET_NOT_MET means the request has not been achieved for that instance. Small compact models remain available for differential verification.
+The requested MLU target is gap <= 10%. It is a reported quality target, not a relaxed lexicographic lock. `TARGET_NOT_MET` means the request has not been achieved for that instance. Small compact models remain available for differential verification.
 """
 
 # ╔═╡ c3ed0cf3-8514-47da-9930-6c719844eb6a
 md"""
-### `OrangeRouteColumn`
+#### `OrangeRouteColumn`
 
 Stores one demand, its complete waypoint path and sparse normalized physical-load contributions.
 """
@@ -2109,7 +2055,7 @@ end
 
 # ╔═╡ b9b4c5be-a1f0-4a58-b88f-b6ca02da8616
 md"""
-### `OrangeRoutePool`
+#### `OrangeRoutePool`
 
 Stores generated columns, per-demand lookup and transposed sparse routing ratios; does not allocate all compact segment variables.
 """
@@ -2124,7 +2070,7 @@ end
 
 # ╔═╡ f72de83e-7527-456c-a302-cfa339323893
 md"""
-### `add_route_column!`
+#### `add_route_column!`
 
 Checks route endpoints, reachability, simplicity and MaxSeg before adding a nonduplicate sparse column within the pool limit.
 """
@@ -2160,7 +2106,7 @@ end
 
 # ╔═╡ 2e4328cc-785e-44ed-b548-4f4b920e7f7b
 md"""
-### `initial_route_pool`
+#### `initial_route_pool`
 
 Initializes one direct source-to-target segment per demand.
 """
@@ -2178,7 +2124,7 @@ end
 
 # ╔═╡ 478f3c47-d0a9-4075-935f-0d122c393cb5
 md"""
-### `minimum_segment_routes`
+#### `minimum_segment_routes`
 
 Prices every demand using nonnegative weighted segment costs and hop-bounded dynamic programming. Returns complete=false if interrupted before all targets finish.
 """
@@ -2235,7 +2181,7 @@ end
 
 # ╔═╡ 48e92439-c8b4-4dc7-bc07-588959337922
 md"""
-### `build_route_master`
+#### `build_route_master`
 
 Builds an LP or restricted binary route master with convexity, physical loads, top-k objectives and certified prior locks.
 """
@@ -2281,7 +2227,7 @@ end
 
 # ╔═╡ 74d13c6e-0d13-4c34-868f-b9a485687a80
 md"""
-### `append_priced_variable!`
+#### `append_priced_variable!`
 
 Adds one continuous route variable and its coefficients to the existing restricted LP.
 """
@@ -2301,7 +2247,7 @@ end
 
 # ╔═╡ 68d3cd68-1300-4f1f-ae75-a6d82dab0e58
 md"""
-### `validate_route_selection`
+#### `validate_route_selection`
 
 Independently checks each selected route and recomputes every physical arc load directly from r.
 """
@@ -2335,7 +2281,7 @@ end
 
 # ╔═╡ a5aab9a2-4359-40a7-85f4-22a4f4715d11
 md"""
-### `start_route_master!`
+#### `start_route_master!`
 
 Sets a complete feasible incumbent for route choices, loads and top-k epigraph variables.
 """
@@ -2366,7 +2312,7 @@ end
 
 # ╔═╡ ecb8cc09-f4f3-40c9-a104-fcb8760fadf1
 md"""
-### `sparse_route_loads`
+#### `sparse_route_loads`
 
 Computes one route contribution from sparse routing columns without expanding demand-by-segment tensors.
 """
@@ -2388,7 +2334,7 @@ end
 
 # ╔═╡ 536bfb31-5629-4273-b0ec-0adf06d8bb62
 md"""
-### `lex_loads_improve`
+#### `lex_loads_improve`
 
 Compares sorted load vectors in lexicographic order with a small heuristic comparison tolerance.
 """
@@ -2404,7 +2350,7 @@ end
 
 # ╔═╡ 5e8da978-1cd6-4f7f-b72c-3df3ed413c2f
 md"""
-### `improve_route_pool!`
+#### `improve_route_pool!`
 
 Uses a time-bounded greedy waypoint search to seed better feasible columns; does not certify optimality or prune the original domain.
 """
@@ -2454,7 +2400,7 @@ end
 
 # ╔═╡ 16cb313f-d096-4c3f-a798-3a3974b914a1
 md"""
-### `solve_route_lp!`
+#### `solve_route_lp!`
 
 Solves restricted LPs, prices omitted routes, adds improving columns and records corrected global lower bounds. LP optimize! calls count toward the shared solve budget.
 """
@@ -2530,14 +2476,14 @@ end
 
 # ╔═╡ 8e4569ee-47a2-4cbf-83b2-25cfa73bb5c8
 md"""
-### `route_cut_lower_bound`
+#### `route_cut_lower_bound`
 
 Bounds MLU using total source/sink traffic divided by their outgoing/incoming physical capacity.
 """
 
 # ╔═╡ df89efc2-fa06-43c1-bfdb-c6ea609b28cb
 md"""
-### Endpoint assignment lower bound — retain indivisible demands
+#### Endpoint assignment lower bound — retain indivisible demands
 
 For a source ``s`` and period ``t``, every valid route begins with one segment ``(s,j)``. The vector of physical loads on the active outgoing arcs produced by that first segment is nonnegative and componentwise no greater than the full route load. Keep only these initial contributions, drop Budget and all other physical rows, and let each originating demand select any reachable ``j``:
 
@@ -2623,14 +2569,14 @@ end
 
 # ╔═╡ 82029e20-1987-451e-a27f-bd24c61809c0
 md"""
-### `solve_time0_routes`
+#### `solve_time0_routes`
 
 Coordinates warm start, pricing and restricted integer solves, retaining global bounds and certifying only justified lexicographic stages.
 """
 
 # ╔═╡ 1c462a22-e6f0-4ef7-8c8b-560780682355
 md"""
-### `route_pool_complete`
+#### `route_pool_complete`
 
 Checks whether every valid simple route is already stored, returning false immediately on the first omitted route. Only a complete pool makes its restricted MIP bound a global bound. It is mainly useful for tiny verification examples.
 """
@@ -2657,7 +2603,7 @@ end
 
 # ╔═╡ cf434e7f-4d91-4dc1-8442-fe30f9e6af52
 md"""
-### `expand_route_pool!` — Continue searching beyond an LP-optimal route pool
+#### `expand_route_pool!` — Continue searching beyond an LP-optimal route pool
 
 A persistent enumeration cursor visits simple waypoint sequences in increasing segment count. Each call adds a bounded batch per demand, including routes with nonnegative LP reduced cost that may help an integer solution. Cyclic vertex ordering spreads early alternatives across demands reproducibly. All endpoint, reachability and MaxSeg checks remain active. No route is excluded from the original domain; no upper bound or optimality claim comes from enumeration alone. The cursor uses constant storage per demand rather than storing the exponential path tree.
 """
@@ -2905,7 +2851,7 @@ end
 
 # ╔═╡ 79b800a9-48e4-45a8-b597-9b8076728465
 md"""
-### `normalize_time0_result`
+#### `normalize_time0_result`
 
 Uses the same CSV column order for compact, route-based and failed runs. Missing diagnostics remain missing rather than shifting columns.
 """
@@ -2943,7 +2889,7 @@ end
 
 # ╔═╡ c77ef705-5cf7-4fda-ac94-508bf8193134
 md"""
-## Display the route formulation on the verification example
+### Display the route formulation on the verification example
 
 The route and compact formulations must produce the same sorted vector. This tiny instance has a complete generated pool, so all four stages can be certified. Real instances may stop at a remaining global LP/integer gap.
 """
@@ -3103,19 +3049,19 @@ end
 
 # ╔═╡ bc2aa034-eec5-4be9-8e67-f42e53274e97
 md"""
-# Data at time 1 and the two-period model
+### Data at time 1 and the two-period model
 
-Only directed link IDs listed at time 1 are removed: G(1)=(V,A\q(1)). The reverse link remains available unless its own ID is listed. Original arc IDs and array positions are retained; r[i,j,a,1]=0 on a removed physical arc. Shortest-path distances and ECMP fractions are recomputed, rather than copied from time 0. Traffic uses the second JSON entry v[d,1]; capacities and MaxSeg are unchanged.
+Only directed link IDs listed at time 1 are removed: ``G(1)=(V,A\setminus q(1))``. The reverse link remains available unless its own ID is listed. Original arc IDs and array positions are retained; ``r(i,j,a,1)=0`` on a removed physical arc. Shortest-path distances and ECMP fractions are recomputed, rather than copied from time 0. Traffic uses the second JSON entry `v[d,1]`; capacities and MaxSeg are unchanged.
 
-### Period-indexed Data equations
+#### Period-indexed Data equations
 
-Let F_1 contain the directed arc IDs listed in the time-1 intervention. Retaining the nominal arc index set A in all arrays gives
+Let ``F_1`` contain the directed arc IDs listed in the time-1 intervention. Retaining the nominal arc index set ``A`` in all arrays gives
 
 ```math
 A_0=A,\qquad A_1=A\setminus F_1,\qquad G_t=(V,A_t),\qquad t\in\{0,1\}.
 ```
 
-For a reachable ordered pair i,j with i different from j, define the shortest-path next-hop set using distances computed on G_t:
+For a reachable ordered pair ``(i,j)`` with ``i\ne j``, define the shortest-path next-hop set using distances computed on ``G_t``:
 
 ```math
 N_t(i,j)=\{k:(i,k)\in A_t,\ w_{ik}+\operatorname{dist}_t(k,j)=\operatorname{dist}_t(i,j)\}.
@@ -3129,7 +3075,7 @@ r_{ij a t}=\frac{1}{|N_t(i,j)|}\sum_{k\in N_t(i,j)}
 \left(\mathbf1_{a=(i,k)}+r_{kj a t}\right).
 ```
 
-This recurrence applies to reachable pairs; unreachable segments are excluded from the model. Positive link metrics make the shortest-path recursion acyclic. For every failed physical arc, r[i,j,a,1] is zero. The stored capacity c[a] remains the original capacity, so no division by a zero failed-arc capacity is introduced.
+This recurrence applies to reachable pairs; unreachable segments are excluded from the model. Positive link metrics make the shortest-path recursion acyclic. For every failed physical arc, `r[i,j,a,1]` is zero. The stored capacity `c[a]` remains the original capacity, so no division by a zero failed-arc capacity is introduced.
 
 ```math
 v_{d,0}=\text{tm.demands[d].v[1]},\qquad
@@ -3156,7 +3102,7 @@ end
 
 # ╔═╡ 2b4d01b6-060a-4a1f-a746-b11e7600a3c9
 md"""
-### `period_graph_data` — rebuild one period on stable physical-arc indices
+#### `period_graph_data` — rebuild one period on stable physical-arc indices
 
 Receives nominal Data, failed arc IDs, period traffic and a time label. Calculates routing on the active graph only, then embeds the sparse coefficients back into the original physical-arc columns. It validates that every demand remains reachable. No reverse failure or cumulative failure is inferred.
 """
@@ -3186,7 +3132,7 @@ end
 
 # ╔═╡ 15eb46ca-9e71-4253-88f5-1a27e44cbf30
 md"""
-### `load_time01_data` — prepare both periods from the three original JSON files
+#### `load_time01_data` — prepare both periods from the three original JSON files
 
 Loads nominal Data, validates the second traffic entry, reads the time-1 intervention and integer Budget, and calls the period builder. Missing Budget is rejected. The result exposes `r[i,j,a,t]` and `v[d,t]` with time axis `0:1`, plus both graphs, original IDs and reachability matrices. This function does not solve an optimization model.
 """
@@ -3217,9 +3163,9 @@ end
 
 # ╔═╡ bd9a019c-a5f2-49d6-9866-ffe672b17684
 md"""
-## Budget and original mathematical constraints
+### Budget and original mathematical constraints
 
-For each demand and period, let x[d,i,j,t] indicate whether ordered segment (i,j) is present. The original conservation, segment limit and physical-load equations remain:
+For each demand and period, let ``x_{ij}^{d,t}`` indicate whether ordered segment ``(i,j)`` is present. The original conservation, segment limit and physical-load equations remain:
 
 ```math
 \sum_j x_{ij}^{dt}-\sum_j x_{ji}^{dt}=\mathbf1_{i=s_d}-\mathbf1_{i=t_d},\qquad
@@ -3227,7 +3173,7 @@ For each demand and period, let x[d,i,j,t] indicate whether ordered segment (i,j
 \quad\lambda_{at}\ge\frac{1}{c_a}\sum_d\sum_{i\ne j}v_{dt}r_{ijat}x_{ij}^{dt}.
 ```
 
-Unreachable segments are excluded. Removed physical arcs have load zero. For the single transition, introduce continuous h[d,i,j] in [0,1]:
+Unreachable segments are excluded. Removed physical arcs have load zero. For the single transition, introduce continuous ``h_{ij}^{d}`` in ``[0,1]``:
 
 ```math
 h_{dij}\ge x_{ij}^{d1}-x_{ij}^{d0},\quad
@@ -3235,15 +3181,15 @@ h_{dij}\ge x_{ij}^{d0}-x_{ij}^{d1},\quad
 \sum_d\sum_{i\ne j}h_{dij}\le\kappa(1).
 ```
 
-For binary x, this is exactly the original absolute-difference Budget. A direct segment (s,t) replaced by (s,w),(w,t) costs 3. Reordering waypoints can change the segment set even if the waypoint set stays unchanged.
+For binary ``x``, this is exactly the original absolute-difference Budget. A direct segment ``(s,t)`` replaced by ``(s,w),(w,t)`` costs 3. Reordering waypoints can change the segment set even if the waypoint set stays unchanged.
 
-Sort all 2|A| loads across **both** periods together and minimize that vector lexicographically using the existing sequential top-k objectives. It is not two separate period optimizations. The inactive arc/time entries are canonical zeros and remain in the full vector.
+Sort all ``2|A|`` loads across **both** periods together and minimize that vector lexicographically using the existing sequential top-k objectives. It is not two separate period optimizations. The inactive arc/time entries are canonical zeros and remain in the full vector.
 
-### Column representation and scope
+#### Column representation and scope
 
-One column is a complete connected segment sequence for one demand at one period. It satisfies conservation and MaxSeg by construction. Selecting exactly one column defines the original x as its segment-incidence vector. The Budget is imposed across periods on these incidences, not on column IDs.
+One column is a complete connected segment sequence for one demand at one period. It satisfies conservation and MaxSeg by construction. Selecting exactly one column defines the original ``x`` as its segment-incidence vector. The Budget is imposed across periods on these incidences, not on column IDs.
 
-For the complete valid route domain P_dt, let delta_ijp be 1 precisely when route p contains ordered segment (i,j). The change of variables is
+For the complete valid route domain ``P_{dt}``, let ``\delta_{ijp}`` be 1 precisely when route ``p`` contains ordered segment ``(i,j)``. The change of variables is
 
 ```math
 \sum_{p\in P_{dt}}y_{dpt}=1,\qquad y_{dpt}\in\{0,1\},\qquad
@@ -3252,16 +3198,16 @@ x_{ij}^{dt}=\sum_{p\in P_{dt}}\delta_{ijp}y_{dpt}.
 
 The implementation allocates only generated columns. Accordingly, its current feasible domain can be restricted even though each stored column obeys the original routing constraints; global certification needs the pricing bound or full enumeration.
 
-### Joint lexicographic objective and numerical locks
+#### Joint lexicographic objective and numerical locks
 
-Let M=2|A| and let ell_(1) through ell_(M) denote all physical arc/time loads sorted in nonincreasing order, including failed-arc zeros:
+Let ``M=2|A|`` and let ``\ell_{(1)}`` through ``\ell_{(M)}`` denote all physical arc/time loads sorted in nonincreasing order, including failed-arc zeros:
 
 ```math
 \operatorname{lexmin}\left(\ell_{(1)},\ldots,\ell_{(M)}\right),\qquad
 F_k(\lambda)=\sum_{q=1}^{k}\ell_{(q)}.
 ```
 
-At stage k, minimize F_k while retaining the previously certified F_j values. The epigraph used by `add_lexicographic_stage!` is
+At stage ``k``, minimize ``F_k`` while retaining the previously certified ``F_j`` values. The epigraph used by `add_lexicographic_stage!` is
 
 ```math
 F_k(\lambda)=\min_{\eta\in\mathbb R,\ s\ge0}
@@ -3269,16 +3215,16 @@ F_k(\lambda)=\min_{\eta\in\mathbb R,\ s\ge0}
  s_{at}\ge\lambda_{at}-\eta\right\}.
 ```
 
-The stored loads are nonnegative, so restricting eta to be nonnegative is also valid. In exact arithmetic earlier locks are F_j(lambda) <= F_j*. In the implementation they allow `lock_tolerance`, and stage advancement requires the incumbent top-k value minus a valid global lower bound to be at most `proof_tolerance`. Defaults here are 1e-7 and 2e-6 respectively. Therefore “certified” is a numerical statement at the reported tolerances. A 10% MLU gap is only a reporting target and does not certify the remaining vector or release earlier locks.
+The stored loads are nonnegative, so restricting ``\eta`` to be nonnegative is also valid. In exact arithmetic earlier locks are ``F_j(\lambda)\le F_j^*``. In the implementation they allow `lock_tolerance`, and stage advancement requires the incumbent top-k value minus a valid global lower bound to be at most `proof_tolerance`. Defaults here are 1e-7 and 2e-6 respectively. Therefore “certified” is a numerical statement at the reported tolerances. A 10% MLU gap is only a reporting target and does not certify the remaining vector or release earlier locks.
 
 Unlike the time-0 reduction, repeated waypoints are not automatically deleted here. Columns may revisit a vertex, but cannot repeat the same ordered segment: this retains the original binary-segment load accounting. No MTZ/simple-waypoint restriction is imported from the time-0 model. A generated pool is restricted; its native integer bound is global only when enumeration is complete. This model never labels an incomplete-pool optimal solve globally Optimal.
 """
 
 # ╔═╡ 91725283-c491-4833-8761-f3392001721e
 md"""
-### `segment_change_count` — compute the original reconfiguration cost
+#### `segment_change_count`
 
-Receives two complete vertex sequences including endpoints. Returns the size of the symmetric difference of their ordered segment sets. It is used for independent validation and for Budget examples.
+Counts the symmetric difference of two ordered segment sets.
 """
 
 # ╔═╡ 5cea359a-93dc-484a-b9fa-7506880410cf
@@ -3288,7 +3234,7 @@ end
 
 # ╔═╡ f21f8c26-ef05-420d-9084-f9e19c57ef81
 md"""
-### `add_time01_column!` — validate and store a segment sequence
+#### `add_time01_column!` — validate and store a segment sequence
 
 Checks endpoints, segment count, reachability, distinct consecutive vertices and absence of repeated ordered segments. Stores its physical-load vector and ordered segment-incidence keys. Vertex revisits are permitted; malformed/disconnected routes are not.
 """
@@ -3318,7 +3264,7 @@ end
 
 # ╔═╡ 58534b35-038a-4589-8911-c9266655d42c
 md"""
-### `expand_time01_columns!` — enumerate further valid columns with a persistent cursor
+#### `expand_time01_columns!` — enumerate further valid columns with a persistent cursor
 
 Visits waypoint sequences in increasing length, including vertex revisits, without storing an exponential search tree. A completed cursor establishes that the whole route domain was enumerated. The small official example is enumerated completely; large instances receive bounded batches and remain uncertified unless a global bound closes.
 """
@@ -3354,9 +3300,9 @@ end
 
 # ╔═╡ 7003ce69-5a05-4db5-b8ca-a71b15ab0061
 md"""
-### `build_time01_master` — select routes with the original cross-period Budget
+#### `build_time01_master`
 
-Builds a fresh LP or binary master. Demand/period equalities select one route; physical rows recompute both-period loads. Sparse change variables and two absolute-value inequalities per used demand/segment enforce Budget. Previously certified global top-k locks are retained. No demand-by-all-segments tensor is allocated.
+Selects one route per demand and period. Auxiliary change variables enforce Budget; load rows and locks preserve the joint objective.
 """
 
 # ╔═╡ c86c4c6c-6816-4b47-abe1-9d4f53ee102f
@@ -3406,9 +3352,9 @@ end
 
 # ╔═╡ 728107f3-38e8-49eb-82cd-ac3556a23c02
 md"""
-### `validate_time01_selection` — independently check routes, loads and Budget
+#### `validate_time01_selection`
 
-Recomputes each physical load directly from r, reconstructs original-ID waypoint output for both periods and computes the actual symmetric-difference transition cost. Saved pool coefficients and solver change-variable values are not trusted. A feasible incumbent must satisfy the original Budget exactly as an integer count.
+Recomputes physical loads from routing fractions and checks the exact integer Budget cost.
 """
 
 # ╔═╡ 266dfd3f-b287-49d7-9a3a-65892b36c770
@@ -3437,9 +3383,9 @@ end
 
 # ╔═╡ 824855af-6248-4b15-9578-ba9b06881abe
 md"""
-### `start_time01_master!` — submit a validated feasible warm start
+#### `start_time01_master!`
 
-Sets selected route binaries, exact physical loads and MLU. Epigraph starts may be completed by the solver. Change-variable starts equal the selected segment-set differences. Each master is fresh, avoiding repeated partial-start accumulation in incremental SCIP solves.
+Initializes route choices, loads, changes, and top-k variables from a validated solution.
 """
 
 # ╔═╡ 1958d2c4-f17f-4dfc-8905-a4ea32570430
@@ -3462,7 +3408,7 @@ end
 
 # ╔═╡ 77eb45a4-a033-4906-afac-c5eedf0618bf
 md"""
-### `temporal_pricing_bound` — certify a global LP bound, not a pool bound
+#### `temporal_pricing_bound` — certify a global LP bound, not a pool bound
 
 Uses the restricted LP's demand/period and physical-load duals. Signed dual prices from the absolute-value Budget rows contribute to segment costs. Hop-bounded dynamic programming prices a relaxation allowing repeated ordered segments; its minimum is no larger than the minimum over valid binary-segment columns, so it yields a conservative missing-column correction even if its minimizing walk is inadmissible. Only a full completed sweep supplies a bound. A valid priced sequence can be added to the pool; an invalid walk is never installed as a route.
 
@@ -3533,7 +3479,7 @@ end
 
 # ╔═╡ 73bd06cb-46f4-4575-bf95-df966b1249dc
 md"""
-### `solve_time01_separate` — reference formulation with separate period columns
+#### `solve_time01_separate` — reference formulation with separate period columns
 
 Defaults to HiGHS and rebuilds a sparse route master for each stage/cycle. Small official fixtures enumerate their full connected, no-repeated-segment domain; larger instances use bounded enumeration and valid priced columns. The first LP gives a corrected global bound; native MIP bounds are global only for a complete pool. Only a globally certified stage is locked. A positive gap keeps the current stage active while budget and wall safeguards permit expansion. The 10% reporting target never relaxes Budget, constraints or lexicographic locks. The allocation guard can reject an oversized selected master; this is not a proof of infeasibility.
 """
@@ -3651,9 +3597,9 @@ end
 
 # ╔═╡ 12515315-5f71-4eb4-b405-5ca901ebffcb
 md"""
-## Worked Data and solve: the official Orange example
+### Worked Data and solve: the official Orange example
 
-The next cells show both graphs, failed IDs, traffic, recomputed r and Budget. The solve is a short correctness demonstration, not a SetA benchmark or Step 9 batch. Its objective combines all 44 physical arc/time entries.
+The next cells show both graphs, failed IDs, traffic, recomputed r and Budget. The solve is a short correctness demonstration, not a SetA benchmark or two-period model batch. Its objective combines all 44 physical arc/time entries.
 """
 
 # ╔═╡ a1f95b24-c1c5-478c-936a-63b90b602562
@@ -3685,9 +3631,9 @@ orange_time01_demo_result=solve_time01_separate(orange_time01_demo_data;time_lim
 
 # ╔═╡ a8210754-6806-4466-a97f-c27323f6ac3d
 md"""
-# Demand decomposition: paired-route master and pricing
+### Demand decomposition: paired-route master and pricing
 
-Each column q=(p0,p1) belongs to one demand d and contains a valid segment sequence in each period. Its coefficients are calculated from the original Data, not new routing assumptions:
+Each column ``q=(p_0,p_1)`` belongs to one demand d and contains a valid segment sequence in each period. Its coefficients are calculated from the original Data, not new routing assumptions:
 
 ```math
 \ell_{dq,a,t}=\frac{v_{d,t}}{c_a}\sum_{(i,j)\in S(p_t)}r[i,j,a,t],\qquad
@@ -3704,7 +3650,7 @@ The complete integer master is equivalent to selecting one original route per de
 
 Unlike separate-period incidence relaxation, the LP pays the expected actual change of each route pair. Jensen's inequality gives |E[x1]-E[x0]| <= E[|x1-x0|]; hence paired columns can tighten the Budget relaxation. The restricted pool still needs pricing. No original capacity, traffic, MaxSeg, ECMP or Budget value is changed.
 
-At stage k, the master minimizes the same top-k function F_k of the joint sorted arc/time vector, retaining all earlier globally certified locks. Pricing reads the physical-load duals w, Budget price mu, and demand equality dual alpha:
+At stage ``k``, the master minimizes the same top-k function ``F_k`` of the joint sorted arc/time vector, retaining all earlier globally certified locks. Pricing reads the physical-load duals ``w``, Budget price ``\mu``, and demand equality dual ``\alpha``:
 
 ```math
 \bar c_d(q)=\sum_{a,t}w_{a,t}\ell_{dq,a,t}+\mu b_{dq}-\alpha_d.
@@ -3726,9 +3672,9 @@ References: [Dantzig and Wolfe (1960)](https://doi.org/10.1287/opre.8.1.101), [C
 
 # ╔═╡ bfa1a8c7-e37e-4959-ad89-d12eed9a827b
 md"""
-### `time01_pair_route` and `add_time01_pair!` — store one demand's two routes
+#### Pair construction
 
-The first function validates one sequence and computes its physical coefficients. The second stores a unique pair, its sparse 2|A| load vector and exact segment-set change. A pair costing more than the entire Budget is excluded safely because all other demand costs are nonnegative. Vertex revisits remain allowed; repeated ordered segments remain forbidden by binary segment incidence.
+Validates both routes and stores their sparse load vectors and exact change cost. Vertex revisits are allowed; repeated ordered segments are not.
 """
 
 # ╔═╡ 89e8fe74-8770-4a9f-a26c-abe0f33a940f
@@ -3770,9 +3716,9 @@ end
 
 # ╔═╡ ecd1fc1a-8f22-47a7-bd14-f42ac885c3d2
 md"""
-### `build_time01_pair_master` — coordinate demand columns
+#### `build_time01_pair_master`
 
-Creates an LP for pricing or a binary master for feasible solutions. One equality per demand replaces separate period equalities; the single Budget row uses precomputed actual change costs. Physical rows and existing top-k epigraphs/locks retain the original objective. A variable-count guard rejects excessive allocations before construction.
+Builds the LP or integer master: one pair per demand, physical-load rows, shared Budget, and top-k locks.
 """
 
 # ╔═╡ ecb40588-559b-45c1-a321-c17fa002f441
@@ -3809,7 +3755,7 @@ end
 
 # ╔═╡ 078626be-dbe4-46d9-85cc-b3746fdab7bc
 md"""
-### `build_time01_pair_pricer` — one exact, hop-indexed demand subproblem
+#### `build_time01_pair_pricer` — one exact, hop-indexed demand subproblem
 
 Binary u[t,h,e] selects a segment transition at layer h. Layer flow carries one unit from the source at layer 0 to the target at layer K. A target-to-itself waiting transition pads shorter routes; it has zero cost, is removed when exporting and is not counted as a segment. Real ordered segments can occur at most once, while revisited vertices are retained.
 
@@ -3820,7 +3766,7 @@ h_{ij}\le x_{ij,0}+x_{ij,1},\quad
 h_{ij}\le2-x_{ij,0}-x_{ij,1}.
 ```
 
-The last two inequalities make h the exact XOR even for tiny signed numerical duals. The objective is sum(w*ell)+mu*sum(h); alpha is subtracted afterwards. The per-demand restriction sum(h)<=Budget safely removes globally impossible pairs. No global Budget is allocated permanently to a particular demand. Existing-pair exclusion cuts are used only for diversification, never for claiming the unrestricted pricing bound. Excessive pricing size is guarded explicitly.
+The last two inequalities make ``h`` the exact XOR even for tiny signed numerical duals. The objective is ``\sum w\ell+\mu\sum h``; ``\alpha`` is subtracted afterwards. The per-demand restriction ``\sum h\le\kappa_1`` safely removes globally impossible pairs. No global Budget is allocated permanently to a particular demand. Existing-pair exclusion cuts are used only for diversification, never for claiming the unrestricted pricing bound. Excessive pricing size is guarded explicitly.
 """
 
 # ╔═╡ 5ad94785-6cdf-47df-aa5c-32f620439eae
@@ -3881,9 +3827,9 @@ end
 
 # ╔═╡ 1e8b54ae-325c-4e54-a2cc-057ee34c0ac9
 md"""
-### `price_time01_demand` — solve, reconstruct and bound one route pair
+#### `price_time01_demand`
 
-Every optimize call, including pricing MIPs, counts toward the shared budget. A feasible pricing incumbent generates a validated pair, but is an upper bound on the pricing minimum. Only a solver lower bound (or the conservative analytical floor) is used for the master correction. A time limit never turns a heuristic price into an exact pricing certificate. The native log is optional; all model instances are released after use.
+Solves pair pricing and validates candidates. Native lower bounds, not candidate costs, support global certification. All pricing solver calls count toward the shared allowance.
 """
 
 # ╔═╡ 2fdaf07d-a848-4cb3-ba89-b73e572c1e82
@@ -3927,20 +3873,20 @@ end
 
 # ╔═╡ 23f76f06-9035-477c-9478-69808a03c56c
 md"""
-### `time01_pair_duals` and `time01_pair_bound` — retain a full-domain lower bound
+#### `time01_pair_duals` and `time01_pair_bound` — retain a full-domain lower bound
 
-The missing-column correction uses the lower bound l_d on each pricing minimum:
+The missing-column correction uses the lower bound ``l_d`` on each pricing minimum:
 
 ```math
 LB=D_R+\sum_d\min(0,l_d-\alpha_d).
 ```
 
-Before pricing, a safe floor is K times the most negative segment cost in each period plus min(0,2K*mu). It relaxes connectivity and Budget and is therefore a lower bound even for unvisited demands. A completed pricing solve tightens that floor. Consequently a partial sweep can still supply a conservative global bound. Signed tiny load duals are priced directly, without an uncompensated projection. A numerical safety buffer is subtracted. This bound applies only to this LP stage and its inherited locks, not to an unrelated lexicographic stage.
+Before pricing, a safe floor is ``K`` times the most negative segment cost in each period plus ``\min(0,2K\mu)``. It relaxes connectivity and Budget and is therefore a lower bound even for unvisited demands. A completed pricing solve tightens that floor. Consequently a partial sweep can still supply a conservative global bound. Signed tiny load duals are priced directly, without an uncompensated projection. A numerical safety buffer is subtracted. This bound applies only to this LP stage and its inherited locks, not to an unrelated lexicographic stage.
 """
 
 # ╔═╡ 6182b0cb-c9dd-4d99-b81f-a83b853fa6a3
 md"""
-### Fast pair pricing: shared dynamic programs and a valid Budget bound
+#### Fast pair pricing: shared dynamic programs and a valid Budget bound
 
 The large-instance default avoids building millions of hop-indexed binaries for every demand. `time01_hop_prices` computes a hop-bounded minimum walk for all sources sharing a destination. Repeated segment walks form a relaxation for the bound; only routes with no repeated ordered segments enter the master. All original MILP constraints and the exact pricing routine remain available.
 
@@ -4056,9 +4002,9 @@ end
 
 # ╔═╡ ddbf4545-1840-4180-9b66-2ca16b16a2ac
 md"""
-### `validate_time01_pairs` and `start_time01_pair_master!` — independent feasibility
+#### Pair validation and warm starts
 
-Rebuilds the two period selections and invokes the original validator, which recomputes r*v/c loads and symmetric-difference Budget from the paths. Pool costs and solver auxiliaries are not trusted. The master warm start uses that validated incumbent. It does not freeze any demand permanently.
+Reconstructs both routes, recomputes loads and Budget, and initializes the master from the validated selection.
 """
 
 # ╔═╡ 70dd1245-04b7-4d27-8cd5-83a4f69c2bb4
@@ -4087,7 +4033,7 @@ end
 
 # ╔═╡ a0f3d2ae-3024-4988-abe7-575e81bc9f47
 md"""
-### `solve_time01_pairs` — root master–pricing, then a restricted integer solve
+#### `solve_time01_pairs` — root master–pricing, then a restricted integer solve
 
 Starts with one feasible direct/direct pair per demand. `seed_time01_pairs!` can also load saved time-0 routes as identical pairs in both periods (Budget cost zero), revalidate their reachability and physical loads, and use the better feasible start. These routes are only optional candidates; they impose no route restriction. Each cycle solves a restricted LP, prices pairs independently by demand, adds negative-reduced-cost columns, and solves a restricted binary master for an incumbent. If no improving column is generated while a global gap remains, a diversification pass excludes existing pair incidences to discover additional integer-useful columns; its restricted pricing bounds never enter the global bound.
 
@@ -4315,9 +4261,9 @@ end
 
 # ╔═╡ e4bdc34f-6047-4a4f-88ca-d8700bc8a48b
 md"""
-### `solve_time01` — select the paired implementation explicitly or by default
+#### `solve_time01`
 
-The default is now `:paired`. `:separate` retains the former implementation for regression checks. Both use identical Data, Budget and joint lexicographic objectives. Result metadata distinguishes the formulations; completed-run checkpoints must not be mixed.
+Uses paired routes by default; `formulation=:separate` selects the reference model.
 """
 
 # ╔═╡ ed7fcf70-99f8-480a-b3c0-c5a11617d741
@@ -4329,7 +4275,7 @@ end
 
 # ╔═╡ 51a413b5-7a55-410a-b287-12f5e5d52343
 md"""
-## Execute paired demand decomposition on the official example
+### Execute paired demand decomposition on the official example
 
 The following short local demonstration reports the actual generated pool, global bound, Budget, pricing calls and certified prefix. Unlike the separate-pool exhaustive reference demonstration, it need not certify all 44 stages within its short budget. An integer optimum on a restricted pool is never reported as a full optimum unless a global bound certifies every stage.
 """
@@ -4347,9 +4293,9 @@ orange_paired_demo_result=solve_time01(orange_time01_demo_data;time_limit=3.)
 
 # ╔═╡ 81255cde-5365-4998-843c-7160bf4dbfb4
 md"""
-## Two-period experiment runner — disabled unless explicitly invoked
+### Two-period experiments
 
-`run_time01_experiments` uses original SetA JSONs, both periods and the scenario's actual Budget. Defaults match the extended experiment's 3600-second shared optimize budget. Each result records the joint MLU and global bound, actual Budget usage, full lexicographic progress, dimensions, seeds, solver, time and checkpoint paths. It does not replace Step 6 or silently shorten repetitions. Completed runs resume only under identical configuration. Errors and allocation guards remain unexecuted/Not Optimal, not proofs of infeasibility.
+`run_time01_experiments` records joint MLU, global bound, Budget, certified prefix, timing, and logs. It runs only when explicitly invoked.
 """
 
 # ╔═╡ d07eddbd-9325-4260-9d60-8aacafe1a82a
@@ -5142,8 +5088,136 @@ url = "https://github.com/JuliaRegistries/General.git"
 uuid = "23338594-aafe-5451-b93e-139f81909106"
 """
 
+# ╔═╡ 319e1252-3c17-41e8-8f52-4179e01853cd
+md"""
+## Contents
+
+1. [Problem](#b147968b-dcb2-4866-91d7-f55eb9a728b7)
+2. [Input and Routing Data](#3fe367df-656f-4d9b-ae2c-be434b72ba56)
+3. [Mathematical Models](#7f612ca7-1d31-488f-a8da-92bd7eb3ab91)
+4. [Lexicographic Objective](#a55c6915-d1d6-4202-81fc-70448c02790d)
+5. [Solver and Compact Formulation](#484bcde2-bfbb-4824-84ea-4069da52ab75)
+6. [Single-Period Route Generation](#dc3ea145-8ac5-497f-aacf-a36d1ed8ba87)
+7. [Two-Period Route Generation](#6b1773a3-ff16-4ff0-b47e-9daccffda627)
+8. [Validation Examples](#cfb27d1f-a119-4ab9-988d-0c1e523dbb94)
+9. [Experiments and Results](#1b3d1b6a-bb41-4d14-950c-03bec51de96b)
+
+[Appendix: Reference Formulation](#feaff909-dbfc-411d-ab8c-92350e246ee4)
+"""
+
+# ╔═╡ b147968b-dcb2-4866-91d7-f55eb9a728b7
+md"""
+## 1. Problem
+
+Choose a segment sequence for each traffic demand. Each segment follows shortest paths with next-hop ECMP and may use several physical links.
+
+Minimize the sorted link-utilization vector lexicographically: first the largest load, then the second largest, and so on. Utilization above 1 represents congestion and is allowed.
+
+| Symbol | Meaning |
+|---|---|
+| ``V,A,D`` | Nodes, directed physical arcs, demands |
+| ``K`` | Maximum segments per route |
+| ``c(a),\nu(d,t)`` | Arc capacity and demand volume |
+| ``r(i,j,a,t)`` | Fraction of segment traffic using arc ``a`` |
+| ``x_{ij}^{d,t}`` | Binary segment choice |
+| ``\lambda(a,t)`` | Link utilization |
+
+The single-period model routes the nominal network. The two-period model chooses both configurations jointly, accounting for failed links and a limit on segment changes.
+"""
+
+# ╔═╡ 3fe367df-656f-4d9b-ae2c-be434b72ba56
+md"""
+## 2. Input and Routing Data
+
+| File | Data |
+|---|---|
+| `*-net.json` | Nodes, directed links, metrics, capacities |
+| `*-tm.json` | Demand endpoints and volumes by period |
+| `*-scenario.json` | Segment limit, failed links, reconfiguration Budget |
+
+Metrics determine shortest paths; capacities determine utilization. JSON IDs are mapped to Julia indices.
+
+The default is next-hop ECMP. Optional `uniform_paths` splitting follows the calculation handout. Routing fractions are recomputed after removing each period's failed directed links.
+"""
+
+# ╔═╡ 7f612ca7-1d31-488f-a8da-92bd7eb3ab91
+md"""
+## 3. Mathematical Models
+
+Both models enforce flow conservation, a segment limit, and physical-link load constraints. The two-period model also limits segment additions and removals between configurations.
+
+The compact single-period model uses degree limits and MTZ constraints to remove cycles. This reduction is not imposed on the two-period model: removing a cycle can increase reconfiguration cost.
+"""
+
+# ╔═╡ a55c6915-d1d6-4202-81fc-70448c02790d
+md"""
+## 4. Lexicographic Objective
+
+``F_k`` is the sum of the ``k`` largest loads across the modeled periods. Minimize it, certify the optimum, lock its value, and increase ``k``.
+
+Threshold and excess variables give a linear formulation. Locks preserve objective values while allowing routes to change. MLU gap measures only the first criterion.
+"""
+
+# ╔═╡ 484bcde2-bfbb-4824-84ea-4069da52ab75
+md"""
+## 5. Solver and Compact Formulation
+
+HiGHS solves LP and MILP subproblems. Julia manages objectives, bounds, validation, and checkpoints.
+
+The compact model uses binary segment variables directly. Large instances use route columns to reduce allocation.
+"""
+
+# ╔═╡ dc3ea145-8ac5-497f-aacf-a36d1ed8ba87
+md"""
+## 6. Single-Period Route Generation
+
+Each column is a complete route for one demand. Solve a restricted master, price additional routes, and update a global lower bound. Advance the lexicographic stage only when the incumbent matches that bound.
+"""
+
+# ╔═╡ 6b1773a3-ff16-4ff0-b47e-9daccffda627
+md"""
+## 7. Two-Period Route Generation
+
+Each column contains one demand's two routes, their link loads, and their segment-change cost. The master selects one pair per demand under the shared Budget.
+
+LP duals guide pricing. The method uses root column generation and restricted integer masters, not full branch-and-price.
+"""
+
+# ╔═╡ cfb27d1f-a119-4ab9-988d-0c1e523dbb94
+md"""
+## 8. Validation Examples
+
+The examples compare formulations and verify endpoints, segment counts, ECMP loads, Budget, and lexicographic progress.
+"""
+
+# ╔═╡ 1b3d1b6a-bb41-4d14-950c-03bec51de96b
+md"""
+## 9. Experiments and Results
+
+| Model | Instances × repetitions | Solver-call allowance per run |
+|---|---:|---:|
+| Single-period | 20 × 10 | 1800 s |
+| Two-period | 20 × 10 | 3600 s |
+
+Four VMs, each with 8 vCPUs and 64 GiB RAM, ran independent jobs. Memory limits and concurrency varied during recovery.
+
+The original campaign returned 400 results. Global MLU gap was at most 10% in 180/200 single-period runs and 170/200 two-period runs. No run certified the full lexicographic vector. Tables and logs: `reports/cloud_final_20261024/`.
+
+Report solver-call time separately from wall time. Historical revisions and resource conditions differ between runs. Full batches remain opt-in.
+"""
+
+# ╔═╡ feaff909-dbfc-411d-ab8c-92350e246ee4
+md"""
+## Appendix. Reference Formulation
+
+Separate route columns for each period, linked by auxiliary segment-change variables. Used for small-instance comparisons.
+"""
+
 # ╔═╡ Cell order:
 # ╟─2cdaf3dd-0a25-4ce2-9da9-4ee017ca9a1b
+# ╟─319e1252-3c17-41e8-8f52-4179e01853cd
+# ╟─b147968b-dcb2-4866-91d7-f55eb9a728b7
+# ╟─3fe367df-656f-4d9b-ae2c-be434b72ba56
 # ╠═7fdb9545-2175-4cf3-862c-ccc4ebd1d627
 # ╟─705b5e90-5ef4-4285-a46a-4ef4fb0dff01
 # ╠═7e06044c-4f17-4753-8d29-54fea385e727
@@ -5210,8 +5284,18 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─f72ae162-d95f-493b-9b6f-6df649fd1c7b
 # ╠═80be73dd-dbbc-4e1f-abdd-990290d138e7
 # ╠═7e724cb5-ebfd-46eb-96db-c3338fd9682c
+# ╟─bc2aa034-eec5-4be9-8e67-f42e53274e97
+# ╠═0b8dc725-5f9e-4bb8-b28f-39ea4d795bec
+# ╟─2b4d01b6-060a-4a1f-a746-b11e7600a3c9
+# ╠═32f0ec3c-773f-4935-9c7c-c6efa67af057
+# ╟─15eb46ca-9e71-4253-88f5-1a27e44cbf30
+# ╠═77d88db4-3a6d-43ec-bd57-89a3ce8a614b
+# ╟─7f612ca7-1d31-488f-a8da-92bd7eb3ab91
 # ╟─01d94b4b-9344-40bc-a6d5-9a606214527a
+# ╟─bd9a019c-a5f2-49d6-9866-ffe672b17684
+# ╟─a55c6915-d1d6-4202-81fc-70448c02790d
 # ╟─1dbfe41e-f2c5-48e9-ba14-0d3dfbac8953
+# ╟─484bcde2-bfbb-4824-84ea-4069da52ab75
 # ╟─7fa918df-698f-4109-a3f1-f3610ff0089d
 # ╟─3a0b9ef2-b4da-4d67-9774-a7f6dd0be497
 # ╠═6a30c8cc-722c-4d0e-8f52-708b285aa477
@@ -5242,42 +5326,7 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╠═ff5ffe39-dfc4-4ccf-9c44-f9d16548f205
 # ╠═18d27926-6238-4933-a5f1-63b02bc39d1b
 # ╠═79524299-953d-4ea5-99ea-c5f555c2c73f
-# ╟─4ad642fe-2c86-4d74-979a-b48d657f2917
-# ╟─78a0ae6d-a64b-4f25-abb2-40bd06ab6e26
-# ╠═07d9e8b5-b949-4581-b3ca-a13eac2f28f4
-# ╠═43a769d5-c2db-451a-a2b1-dc3852794675
-# ╟─c77ef705-5cf7-4fda-ac94-508bf8193134
-# ╠═534fb5b2-9055-42ea-ac95-68d7919bd7fc
-# ╠═8b667b30-fffd-4231-97c4-a300612c4ffd
-# ╠═1cbf9a85-1cb6-4d46-80cc-fecdd47e0ddf
-# ╠═183437f5-305b-4b4d-abea-3fe485de65d5
-# ╟─ae31ff5d-31d1-4080-bd5e-a1ad45d11609
-# ╟─c0816744-3cf8-4925-a207-e993582610b8
-# ╠═a48c15c8-a4b1-4d69-982f-81ffbb19ac45
-# ╟─065dba25-0a7a-4aeb-9197-d26db9c9a5a8
-# ╠═e15dae4c-6fd7-4423-9b4c-307a0f9fe300
-# ╟─b45ba371-ec46-460d-8ab7-982ce5e4d2a7
-# ╠═8ddca20c-9671-45d8-b147-8cb1d55e1b25
-# ╟─eaa7dc15-b400-42a2-8260-d1a19ebdf54f
-# ╠═eedc2106-b9c7-46fc-9baf-75eec4ca5b5e
-# ╟─b46c8f86-0c41-465a-93cf-ad5eaf2df9cc
-# ╠═557949d4-6725-42ac-a286-14bb31703e54
-# ╟─a6127bd7-6dee-4aba-a02a-c5d884b92e76
-# ╟─470d4950-7398-46a8-998e-c8ca22eeca08
-# ╠═d292ba9d-c6ac-48cf-a45d-1c18a8c2adb7
-# ╟─71c8035c-d61c-411e-8414-2a24724ca8c7
-# ╠═52d0d4be-c70c-4967-965b-b7072c90a6c3
-# ╠═def88c7f-a905-4f08-9cca-b7793b61c045
-# ╠═d4e261ad-a0f6-4cd4-9c30-d351c3bdcf93
-# ╟─920564d7-f90e-4001-989c-3b134e4d9978
-# ╠═93368143-57e3-49f6-b335-bd7ed2def16c
-# ╠═049ca407-1a66-47e0-9c17-374454364ef3
-# ╠═d0b98a0a-fbfe-4fe0-b4d4-a9e81971c11d
-# ╟─9857c7d8-057c-45fa-aa32-4a8306052ec7
-# ╟─51d7e27f-cac3-4a78-953f-1f2152174673
-# ╠═7a3fa790-8a45-4ef3-9634-22990d4b691c
-# ╠═f4415922-4ed1-4d62-b970-3d5cddff3a71
-# ╟─7c4e16b6-a893-48da-98af-6e1fa7d2c271
+# ╟─dc3ea145-8ac5-497f-aacf-a36d1ed8ba87
 # ╟─469bf80a-c389-4ea0-8187-1a8fc6e8037a
 # ╟─c3ed0cf3-8514-47da-9930-6c719844eb6a
 # ╠═426ef93a-1177-4113-85be-a2013131b5e4
@@ -5318,34 +5367,7 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─79b800a9-48e4-45a8-b597-9b8076728465
 # ╠═b3659101-8e23-406c-96ca-a80b36579c7c
 # ╠═f1b17671-4b54-4b2b-9231-20300509c373
-# ╟─bc2aa034-eec5-4be9-8e67-f42e53274e97
-# ╠═0b8dc725-5f9e-4bb8-b28f-39ea4d795bec
-# ╟─2b4d01b6-060a-4a1f-a746-b11e7600a3c9
-# ╠═32f0ec3c-773f-4935-9c7c-c6efa67af057
-# ╟─15eb46ca-9e71-4253-88f5-1a27e44cbf30
-# ╠═77d88db4-3a6d-43ec-bd57-89a3ce8a614b
-# ╟─bd9a019c-a5f2-49d6-9866-ffe672b17684
-# ╟─91725283-c491-4833-8761-f3392001721e
-# ╠═5cea359a-93dc-484a-b9fa-7506880410cf
-# ╟─f21f8c26-ef05-420d-9084-f9e19c57ef81
-# ╠═a7f93306-bc7c-45f6-a236-fc02a64a4dcd
-# ╟─58534b35-038a-4589-8911-c9266655d42c
-# ╠═e72379af-2de9-4b3b-bcc1-35b1cbaf32ee
-# ╟─7003ce69-5a05-4db5-b8ca-a71b15ab0061
-# ╠═c86c4c6c-6816-4b47-abe1-9d4f53ee102f
-# ╟─728107f3-38e8-49eb-82cd-ac3556a23c02
-# ╠═266dfd3f-b287-49d7-9a3a-65892b36c770
-# ╟─824855af-6248-4b15-9578-ba9b06881abe
-# ╠═1958d2c4-f17f-4dfc-8905-a4ea32570430
-# ╟─77eb45a4-a033-4906-afac-c5eedf0618bf
-# ╠═8c2c269f-ae46-4281-a5de-7aacde226a8e
-# ╟─73bd06cb-46f4-4575-bf95-df966b1249dc
-# ╠═24e03d85-549e-4048-a07b-c76c927c239f
-# ╟─12515315-5f71-4eb4-b405-5ca901ebffcb
-# ╠═a1f95b24-c1c5-478c-936a-63b90b602562
-# ╠═ca0e6c98-d6ee-47a4-b9b6-dbe3caabb914
-# ╠═447f38c1-525b-46e8-ac64-d13624aad031
-# ╠═35b21d5d-99f6-443f-87f4-2a4a16c8a081
+# ╟─6b1773a3-ff16-4ff0-b47e-9daccffda627
 # ╟─a8210754-6806-4466-a97f-c27323f6ac3d
 # ╟─bfa1a8c7-e37e-4959-ad89-d12eed9a827b
 # ╠═89e8fe74-8770-4a9f-a26c-abe0f33a940f
@@ -5370,10 +5392,70 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╠═48ad4fbb-0400-4764-ab7f-1b56a5144cbf
 # ╟─e4bdc34f-6047-4a4f-88ca-d8700bc8a48b
 # ╠═ed7fcf70-99f8-480a-b3c0-c5a11617d741
+# ╟─cfb27d1f-a119-4ab9-988d-0c1e523dbb94
+# ╟─4ad642fe-2c86-4d74-979a-b48d657f2917
+# ╟─78a0ae6d-a64b-4f25-abb2-40bd06ab6e26
+# ╠═07d9e8b5-b949-4581-b3ca-a13eac2f28f4
+# ╠═43a769d5-c2db-451a-a2b1-dc3852794675
+# ╟─c77ef705-5cf7-4fda-ac94-508bf8193134
+# ╠═534fb5b2-9055-42ea-ac95-68d7919bd7fc
+# ╠═8b667b30-fffd-4231-97c4-a300612c4ffd
+# ╠═1cbf9a85-1cb6-4d46-80cc-fecdd47e0ddf
+# ╠═183437f5-305b-4b4d-abea-3fe485de65d5
+# ╟─12515315-5f71-4eb4-b405-5ca901ebffcb
+# ╠═a1f95b24-c1c5-478c-936a-63b90b602562
+# ╠═ca0e6c98-d6ee-47a4-b9b6-dbe3caabb914
+# ╠═447f38c1-525b-46e8-ac64-d13624aad031
+# ╠═35b21d5d-99f6-443f-87f4-2a4a16c8a081
 # ╟─51a413b5-7a55-410a-b287-12f5e5d52343
 # ╠═bbf62fd6-91f6-4402-8228-a2f2f57ffb0a
 # ╠═07729ea6-f15e-4c4f-82b1-0a059a969226
+# ╟─71c8035c-d61c-411e-8414-2a24724ca8c7
+# ╠═52d0d4be-c70c-4967-965b-b7072c90a6c3
+# ╠═def88c7f-a905-4f08-9cca-b7793b61c045
+# ╠═d4e261ad-a0f6-4cd4-9c30-d351c3bdcf93
+# ╟─1b3d1b6a-bb41-4d14-950c-03bec51de96b
+# ╟─ae31ff5d-31d1-4080-bd5e-a1ad45d11609
+# ╟─c0816744-3cf8-4925-a207-e993582610b8
+# ╠═a48c15c8-a4b1-4d69-982f-81ffbb19ac45
+# ╟─065dba25-0a7a-4aeb-9197-d26db9c9a5a8
+# ╠═e15dae4c-6fd7-4423-9b4c-307a0f9fe300
+# ╟─b45ba371-ec46-460d-8ab7-982ce5e4d2a7
+# ╠═8ddca20c-9671-45d8-b147-8cb1d55e1b25
+# ╟─eaa7dc15-b400-42a2-8260-d1a19ebdf54f
+# ╠═eedc2106-b9c7-46fc-9baf-75eec4ca5b5e
+# ╟─b46c8f86-0c41-465a-93cf-ad5eaf2df9cc
+# ╠═557949d4-6725-42ac-a286-14bb31703e54
+# ╟─a6127bd7-6dee-4aba-a02a-c5d884b92e76
+# ╟─470d4950-7398-46a8-998e-c8ca22eeca08
+# ╠═d292ba9d-c6ac-48cf-a45d-1c18a8c2adb7
+# ╟─920564d7-f90e-4001-989c-3b134e4d9978
+# ╠═93368143-57e3-49f6-b335-bd7ed2def16c
+# ╠═049ca407-1a66-47e0-9c17-374454364ef3
+# ╠═d0b98a0a-fbfe-4fe0-b4d4-a9e81971c11d
+# ╟─9857c7d8-057c-45fa-aa32-4a8306052ec7
+# ╟─51d7e27f-cac3-4a78-953f-1f2152174673
+# ╠═7a3fa790-8a45-4ef3-9634-22990d4b691c
+# ╠═f4415922-4ed1-4d62-b970-3d5cddff3a71
+# ╟─7c4e16b6-a893-48da-98af-6e1fa7d2c271
 # ╟─81255cde-5365-4998-843c-7160bf4dbfb4
 # ╠═d07eddbd-9325-4260-9d60-8aacafe1a82a
+# ╟─feaff909-dbfc-411d-ab8c-92350e246ee4
+# ╟─91725283-c491-4833-8761-f3392001721e
+# ╠═5cea359a-93dc-484a-b9fa-7506880410cf
+# ╟─f21f8c26-ef05-420d-9084-f9e19c57ef81
+# ╠═a7f93306-bc7c-45f6-a236-fc02a64a4dcd
+# ╟─58534b35-038a-4589-8911-c9266655d42c
+# ╠═e72379af-2de9-4b3b-bcc1-35b1cbaf32ee
+# ╟─7003ce69-5a05-4db5-b8ca-a71b15ab0061
+# ╠═c86c4c6c-6816-4b47-abe1-9d4f53ee102f
+# ╟─728107f3-38e8-49eb-82cd-ac3556a23c02
+# ╠═266dfd3f-b287-49d7-9a3a-65892b36c770
+# ╟─824855af-6248-4b15-9578-ba9b06881abe
+# ╠═1958d2c4-f17f-4dfc-8905-a4ea32570430
+# ╟─77eb45a4-a033-4906-afac-c5eedf0618bf
+# ╠═8c2c269f-ae46-4281-a5de-7aacde226a8e
+# ╟─73bd06cb-46f4-4575-bf95-df966b1249dc
+# ╠═24e03d85-549e-4048-a07b-c76c927c239f
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
